@@ -1,6 +1,6 @@
 {
-  "name": "suwatte-runners",
-  "version": "2.0.0",
+  "name": "dryad-runners",
+  "version": "1.0.0",
   "description": "content sources made by mantton :]",
   "main": "index.js",
   "scripts": {
@@ -16,9 +16,8 @@
     "suwatte"
   ],
   "author": {
-    "name": "Mantton",
-    "email": "mantton.official@gmail.com",
-    "url": "https://mantton.com"
+    "name": "Dryad",
+    "email": "chill.dryad@gmail.com"
   },
   "license": "MIT",
   "devDependencies": {
@@ -49,6 +48,6 @@
     "seedrandom": "^3.0.5"
   },
   "stt": {
-    "listName": "Mantton's List"
+    "listName": "Dryad's"
   }
 }
