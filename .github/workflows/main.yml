@@ -14,8 +14,8 @@ jobs:
         with:
           node-version: 16
           registry-url: https://registry.npmjs.org/
-      - run: npm ci
       - run: npm run build
+      - run: npm run serve
       - uses: JamesIves/github-pages-deploy-action@4.1.0
         with:
             branch: gh-pages
