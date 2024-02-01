@@ -556,9 +556,9 @@ const constants_1 = require("./constants");
 const controller_1 = require("./controller");
 class Target {
     info = {
-        id: "dryad.bato",
+        id: "to.bato",
         name: "Bato",
-        version: 0.1,
+        version: 0.5,
         website: "https://bato.to",
         supportedLanguages: [],
         thumbnail: "bato.png",
