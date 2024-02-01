@@ -417,6 +417,8 @@ class Controller {
     BASE = "https://bato.to";
     client = new NetworkClient();
     parser = new parser_1.Parser();
+    // private store = ObjectStore;
+    // private sensitveStore = SecureStore;
     async getSearchResults(query) {
         const params = {};
         // Keyword
@@ -557,7 +559,7 @@ const controller_1 = require("./controller");
 class Target {
     info = {
         id: "dryad.bato",
-        name: "Bato",
+        name: "Bato-d",
         version: 0.1,
         website: "https://bato.to",
         supportedLanguages: [],
