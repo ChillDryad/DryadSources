@@ -414,74 +414,36 @@ const daisuke_1 = require("@suwatte/daisuke");
 const constants_1 = require("./constants");
 const parser_1 = require("./parser");
 class Controller {
-    TAG_DIVIDER = ":";
     BASE = "https://bato.to";
     client = new NetworkClient();
     parser = new parser_1.Parser();
-    store = ObjectStore;
     async getSearchResults(query) {
         const params = {};
         // Keyword
-        if (query.query) {
+        if (query.query)
             params["word"] = query.query;
-        }
         // Page
-        if (query.page) {
+        if (query.page)
             params["page"] = query.page;
+        if (query.filters !== undefined) {
+            const includedTags = [];
+            const excludedTags = [];
+            for (const filter in query.filters) {
+                includedTags.push.apply(includedTags, query.filters[filter].included);
+                excludedTags.push.apply(excludedTags, query.filters[filter].excluded);
+            }
+            params.genres = `${includedTags}|${excludedTags}`;
+            if (query.filters.origin)
+                params.origs = query.filters.origin;
+            if (query.filters.translated)
+                params.langs = query.filters.translated;
         }
-        const includedTags = [];
-        const excludedTags = [];
-        // for (const filter of query.filters ?? []) {
-        //   switch (filter.id) {
-        //     case "creators":
-        //       if (!filter.included || !filter.included[0] || params.word) break;
-        //       params.word = filter.included[0];
-        //       break;
-        //     case "origin":
-        //       params.origs = this.prepareFilterString(
-        //         filter.included ?? [],
-        //         filter.excluded ?? []
-        //       );
-        //       break;
-        //     case "translated":
-        //       params.lang = this.prepareFilterString(
-        //         filter.included ?? [],
-        //         filter.excluded ?? []
-        //       );
-        //       if (!params.lang) {
-        //         const values = ((await this.store.get("content_search_langs")) as
-        //           | string[]
-        //           | null) ?? ["en"];
-        //         if (values) {
-        //           const langs = values;
-        //           params.lang = this.prepareFilterString(langs, []);
-        //         }
-        //       }
-        //       break;
-        //     case "status":
-        //       if (!filter.included) break;
-        //       params.release = this.prepareFilterString(filter.included, []);
-        //       break;
-        //     default:
-        //       if (filter.included) includedTags.push(...filter.included);
-        //       if (filter.excluded) excludedTags.push(...filter.excluded);
-        //       break;
-        //   }
-        // }
         params.sort = query.sort ?? "";
         const response = await this.client.get(`${this.BASE}/browse`, {
             params,
         });
         const results = this.parser.parsePagedResponse(response.data);
         return { results, isLastPage: results.length > 60 };
-    }
-    prepareFilterString(included, excluded) {
-        let str = included.join(",");
-        if (excluded.length !== 0) {
-            str += "|";
-            str += excluded.join(",");
-        }
-        return str;
     }
     getFilters() {
         return [
@@ -512,14 +474,14 @@ class Controller {
             {
                 id: "origin",
                 title: "Original Language",
-                type: daisuke_1.FilterType.SELECT,
+                type: daisuke_1.FilterType.MULTISELECT,
                 options: constants_1.ORIGIN_TAGS,
             },
             {
                 id: "translated",
                 title: "Translated Language",
                 subtitle: "NOTE: When Selected, This will override your language preferences",
-                type: daisuke_1.FilterType.SELECT,
+                type: daisuke_1.FilterType.MULTISELECT,
                 options: constants_1.LANG_TAGS,
             },
             {
@@ -594,9 +556,9 @@ const constants_1 = require("./constants");
 const controller_1 = require("./controller");
 class Target {
     info = {
-        id: "to.bato",
+        id: "dryad.bato",
         name: "Bato",
-        version: 0.4,
+        version: 0.1,
         website: "https://bato.to",
         supportedLanguages: [],
         thumbnail: "bato.png",
