@@ -402,6 +402,32 @@ export const SORTERS: Option[] = [
   { title: "Newest Added", id: "create" },
 ];
 
+export const CHAPTERS: Tag[] = [
+  { id: "", title: "All" },
+  { id: "1-9", title: "1-9" },
+  { id: "10-29", title: "10-29" },
+  { id: "30-99", title: "30-99" },
+  { id: "100-199", title: "100-199" },
+  { id: "200", title: "+200" },
+  { id: "100", title: "+100" },
+  { id: "50", title: "+50" },
+  { id: "10", title: "+10" },
+  { id: "1", title: "+1" },
+];
+
+// For future use with ObjectStore
+export const PREFERENCE_KEYS = {
+  language: "bato_language",
+  content: "bato_content",
+  genres: "bato_genres",
+  demographic: "bato_demographic",
+  mature: "bato_mature",
+  originalLanguage: "bato_origin",
+  translatedLanguage: "bato_translated",
+  status: "bato_status",
+  chapters: "bato_chapters",
+};
+
 export const getAllGenreTags = () => {
   return [
     ...GENERIC_TAGS,

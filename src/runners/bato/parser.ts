@@ -1,19 +1,26 @@
-import {
+import type {
   Chapter,
   ChapterPage,
   Content,
   Highlight,
+  PageSection,
+  PagedResult,
   Property,
   Provider,
+} from "@suwatte/daisuke";
+
+import moment from "moment";
+import {
   ProviderLinkType,
   PublicationStatus,
   ReadingMode,
 } from "@suwatte/daisuke";
-import { load, Element } from "cheerio";
+import { load, type Element } from "cheerio";
 import { decode, encode } from "he";
-import moment from "moment";
-import { getAllGenreTags } from "./constants";
 import { AES, enc } from "crypto-js";
+
+import { BTLanguages } from "./utils";
+import { getAllGenreTags } from "./constants";
 export class Parser {
   parsePagedResponse(html: string) {
     const ITEMS_SELECTOR = "div#series-list div.col";
@@ -22,12 +29,21 @@ export class Parser {
 
     const parseElement = (element: Element): Highlight => {
       const item = $("a.item-cover", element);
+
+      const languageCode = BTLanguages.getLangCode(
+        $("em", element).attr("data-lang") ?? ""
+      );
+
       const imgElem = $("img", item);
       const cover =
         imgElem.attr("abs:src") ??
         imgElem.attr("src") ??
         imgElem.attr("data-src");
-      const title = decode($("a.item-title", element).text().trim());
+
+      const title = `${languageCode || ""} ${decode(
+        $("a.item-title", element).text().trim()
+      )}`;
+
       const contentId = item
         .attr("href")
         ?.trim()
@@ -78,6 +94,7 @@ export class Parser {
     // TODO: Rank
 
     // Reading Mode
+    // BUG: read direction !== reader direction. Webtoon/Manhwa are top to bottom, Manga right to left, comics left to right.
     const direction = textFromInfo("Read direction");
     let recommendedReadingMode = ReadingMode.PAGED_MANGA;
     if (direction === "Top to Bottom")
@@ -259,5 +276,59 @@ export class Parser {
     const urls = imgHttpList.map((v, i) => `${v}?${imgAccList[i]}`);
 
     return urls.map((url) => ({ url }));
+  }
+  async parsePopular(html: string): Promise<PagedResult> {
+    const $ = load(html);
+    const popularItemsSelector = $("div.home-popular div.col").toArray();
+    const items: Highlight[] = [];
+    popularItemsSelector.forEach((element: Element) => {
+      const cover = $("a.item-cover img", element).attr("src") || "";
+      const title = $("div.item-text div.item-text-inner", element)
+        .text()
+        .trim()
+        .split("\n")[0];
+      const contentId = $("div.item-text div.item-text-inner a", element)
+        .attr("href")
+        ?.trim()
+        .match(/series\/(\d+)/)?.[1];
+
+      if (contentId) {
+        items.push({
+          cover,
+          title,
+          id: contentId,
+        });
+      }
+    });
+    return {
+      results: items,
+      isLastPage: true,
+    };
+  }
+
+  async parseLatest(html: string): Promise<PagedResult> {
+    const $ = load(html);
+    const latestItems = $("div#series-list div.col").toArray();
+    const items: Highlight[] = [];
+
+    latestItems.forEach((item: Element) => {
+      const cover = $("a.item-cover img", item).attr("src") || "";
+      const title = $("div.item-text a.item-title").text().trim();
+      const contentId = $("div.item-text div.item-text-inner a", item)
+        .attr("href")
+        ?.trim()
+        .match(/series\/(\d+)/)?.[1];
+      if (contentId) {
+        items.push({
+          cover,
+          title,
+          id: contentId,
+        });
+      }
+    });
+    return {
+      results: items,
+      isLastPage: true,
+    };
   }
 }

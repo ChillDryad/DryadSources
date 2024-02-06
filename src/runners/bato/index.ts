@@ -1,26 +1,33 @@
 import {
+  CatalogRating,
   Chapter,
   ChapterData,
   Content,
   ContentSource,
   DirectoryConfig,
   DirectoryRequest,
+  Form,
+  PageLink,
+  PageLinkResolver,
+  PageSection,
   PagedResult,
   Property,
   RunnerInfo,
+  SectionStyle,
 } from "@suwatte/daisuke";
-import { SORTERS } from "./constants";
+import { LANG_TAGS, SORTERS } from "./constants";
 import { Controller } from "./controller";
 
 export class Target implements ContentSource {
   info: RunnerInfo = {
-    id: "dryad.bato",
+    id: "to.bato",
     name: "Bato",
-    version: 0.1,
+    version: 0.5,
     website: "https://bato.to",
-    supportedLanguages: [],
+    supportedLanguages: LANG_TAGS.map((l) => l.id),
     thumbnail: "bato.png",
     minSupportedAppVersion: "5.0",
+    rating: CatalogRating.MIXED,
   };
 
   private controller = new Controller();
@@ -38,9 +45,54 @@ export class Target implements ContentSource {
     return this.controller.getProperties();
   }
 
+  async getPreferenceMenu(): Promise<Form> {
+    return this.controller.getPreferences();
+  }
+
   getDirectory(request: DirectoryRequest): Promise<PagedResult> {
+    if (!request.page && !request.query) {
+    }
     return this.controller.getSearchResults(request);
   }
+
+  PageLinkResolver: PageLinkResolver = {
+    // @ts-ignore: We _really_ don't need to promise this here.
+    getSectionsForPage: (page: PageLink): PageSection[] => {
+      if (page.id === "home") {
+        const sections: PageSection[] = [
+          {
+            id: "popular",
+            title: "Popular Titles",
+            style: SectionStyle.INFO,
+          },
+          {
+            id: "latest",
+            title: "latest Titles",
+            style: SectionStyle.DEFAULT,
+          },
+        ];
+        return sections;
+      }
+      throw new Error(`I don't know how you got here.`);
+    },
+
+    resolvePageSections: (link: PageLink, sectionId: string) => {
+      if (link.id === "home")
+        return this.controller.resolveHomeSections(link, sectionId);
+      else throw new Error(`Something bad happened when I loaded ${link.id}`);
+    },
+  };
+
+  // getSectionsForPage = (page: PageLink) => {
+  //   return this.controller.getHomeSections(page);
+  // };
+
+  // resolvePageSections = (link: PageLink, sectionId: string) => {
+  //   if (link.id === "home")
+  //     return this.controller.resolveHomeSections(link, sectionId);
+  //   else throw new Error(`Something bad happened when I loaded ${link.id}`);
+  // };
+
   async getDirectoryConfig(
     _configID?: string | undefined
   ): Promise<DirectoryConfig> {
@@ -52,33 +104,4 @@ export class Target implements ContentSource {
       },
     };
   }
-
-  // async getUserPreferences(): Promise<PreferenceGroup[]> {
-  //   const store = new ObjectStore();
-
-  //   return [
-  //     {
-  //       id: "language",
-  //       children: [
-  //         new MultiSelectPreference({
-  //           label: "Languages",
-  //           key: "n_content_search_langs",
-  //           options: LANG_TAGS.map((v) => ({ label: v.label, value: v.id })),
-  //           value: {
-  //             get: async () => {
-  //               return (
-  //                 ((await store.get("n_content_search_langs")) as
-  //                   | string[]
-  //                   | null) ?? ["en"]
-  //               );
-  //             },
-  //             set: async (v) => {
-  //               return await store.set("n_content_search_langs", v);
-  //             },
-  //           },
-  //         }),
-  //       ],
-  //     },
-  //   ];
-  // }
 }
