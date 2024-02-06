@@ -670,7 +670,6 @@ class Target {
         return this.controller.getPreferences();
     }
     getDirectory(request) {
-        console.log(request);
         if (!request.page && !request.query) {
         }
         return this.controller.getSearchResults(request);
