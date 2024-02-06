@@ -50,7 +50,6 @@ export class Target implements ContentSource {
   }
 
   getDirectory(request: DirectoryRequest): Promise<PagedResult> {
-    console.log(request);
     if (!request.page && !request.query) {
     }
     return this.controller.getSearchResults(request);
