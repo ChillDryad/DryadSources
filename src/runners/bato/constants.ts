@@ -1,4 +1,4 @@
-import { Option, Tag } from "@suwatte/daisuke";
+import { Option, Tag } from "@suwatte/daisuke"
 
 export const CONTENT_TYPE_TAGS: Tag[] = [
   { id: "artbook", title: "Artbook", nsfw: false },
@@ -11,7 +11,7 @@ export const CONTENT_TYPE_TAGS: Tag[] = [
   { id: "manhwa", title: "Manhwa", nsfw: false },
   { id: "webtoon", title: "Webtoon", nsfw: false },
   { id: "western", title: "Western", nsfw: false },
-];
+]
 
 export const DEMOGRAPHIC_TAGS: Tag[] = [
   { id: "shoujo", title: "Shoujo(G)", nsfw: false },
@@ -22,7 +22,7 @@ export const DEMOGRAPHIC_TAGS: Tag[] = [
   { id: "yaoi", title: "Yaoi(BL)", nsfw: false },
   { id: "futa", title: "Futa(WL)", nsfw: true },
   { id: "bara", title: "Bara(ML)", nsfw: true },
-];
+]
 
 export const ADULT_TAGS: Tag[] = [
   { id: "gore", title: "Gore", nsfw: true },
@@ -33,7 +33,7 @@ export const ADULT_TAGS: Tag[] = [
   { id: "mature", title: "Mature", nsfw: true },
   { id: "smut", title: "Smut", nsfw: true },
   { id: "hentai", title: "Hentai", nsfw: true },
-];
+]
 
 export const GENERIC_TAGS: Tag[] = [
   { id: "_4_koma", title: "4-Koma", nsfw: false },
@@ -164,7 +164,7 @@ export const GENERIC_TAGS: Tag[] = [
   { id: "xuanhuan", title: "Xuanhuan", nsfw: false },
   { id: "yakuzas", title: "Yakuzas", nsfw: false },
   { id: "zombies", title: "Zombies", nsfw: false },
-];
+]
 
 export const STATUS_TAGS: Tag[] = [
   { id: "pending", title: "Pending", nsfw: false },
@@ -172,7 +172,7 @@ export const STATUS_TAGS: Tag[] = [
   { id: "completed", title: "Completed", nsfw: false },
   { id: "hiatus", title: "Hiatus", nsfw: false },
   { id: "cancelled", title: "Cancelled", nsfw: false },
-];
+]
 
 export const ORIGIN_TAGS: Tag[] = [
   { id: "zh", title: "Chinese", nsfw: false },
@@ -282,7 +282,7 @@ export const ORIGIN_TAGS: Tag[] = [
   { id: "yo", title: "Yoruba", nsfw: false },
   { id: "zu", title: "Zulu", nsfw: false },
   { id: "_t", title: "Other", nsfw: false },
-];
+]
 
 export const LANG_TAGS: Tag[] = [
   { id: "en", title: "English", nsfw: false },
@@ -388,7 +388,7 @@ export const LANG_TAGS: Tag[] = [
   { id: "yo", title: "Yoruba", nsfw: false },
   { id: "zu", title: "Zulu", nsfw: false },
   { id: "_t", title: "Other", nsfw: false },
-];
+]
 
 export const SORTERS: Option[] = [
   { title: "Most Views Totally", id: "views_a" },
@@ -400,7 +400,7 @@ export const SORTERS: Option[] = [
   { title: "Z-A", id: "title" },
   { title: "Last Updated", id: "update" },
   { title: "Newest Added", id: "create" },
-];
+]
 
 export const CHAPTERS: Tag[] = [
   { id: "", title: "All" },
@@ -413,7 +413,7 @@ export const CHAPTERS: Tag[] = [
   { id: "50", title: "+50" },
   { id: "10", title: "+10" },
   { id: "1", title: "+1" },
-];
+]
 
 // For future use with ObjectStore
 export const PREFERENCE_KEYS = {
@@ -426,7 +426,7 @@ export const PREFERENCE_KEYS = {
   translatedLanguage: "bato_translated",
   status: "bato_status",
   chapters: "bato_chapters",
-};
+}
 
 export const getAllGenreTags = () => {
   return [
@@ -434,5 +434,5 @@ export const getAllGenreTags = () => {
     ...ADULT_TAGS,
     ...CONTENT_TYPE_TAGS,
     ...DEMOGRAPHIC_TAGS,
-  ];
-};
+  ]
+}

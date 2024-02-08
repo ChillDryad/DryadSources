@@ -1,15 +1,15 @@
-import { ChapterEventHandler, ContentEventHandler } from "@suwatte/daisuke";
-import { isSignedIn } from "../misc/md";
-import { POST } from "../network";
-import { MDStore } from "../store";
+import { ChapterEventHandler, ContentEventHandler } from "@suwatte/daisuke"
+import { isSignedIn } from "../misc/md"
+import { POST } from "../network"
+import { MDStore } from "../store"
 
 export const MDLibraryEventHandler: ChapterEventHandler & ContentEventHandler =
   {
     async onChapterRead(contentId: string, chapterId: string): Promise<void> {
-      await new MDStore().saveToMimasTargets(contentId);
-      const signedIn = await isSignedIn();
-      if (!signedIn) return;
-      await syncToMD(contentId, [chapterId]);
+      await new MDStore().saveToMimasTargets(contentId)
+      const signedIn = await isSignedIn()
+      if (!signedIn) return
+      await syncToMD(contentId, [chapterId])
     },
 
     async onChaptersMarked(
@@ -17,26 +17,26 @@ export const MDLibraryEventHandler: ChapterEventHandler & ContentEventHandler =
       chapterIds: string[],
       completed: boolean
     ): Promise<void> {
-      const signedIn = await isSignedIn();
-      if (!signedIn) return;
+      const signedIn = await isSignedIn()
+      if (!signedIn) return
 
       if (completed) {
-        await syncToMD(contentId, chapterIds);
+        await syncToMD(contentId, chapterIds)
       } else {
-        await syncToMD(contentId, [], chapterIds);
+        await syncToMD(contentId, [], chapterIds)
       }
     },
 
     async onContentsAddedToLibrary(ids: string[]): Promise<void> {
-      const signedIn = await isSignedIn();
-      if (!signedIn) return;
+      const signedIn = await isSignedIn()
+      if (!signedIn) return
 
       for (const id of ids) {
         await POST(`/manga/${id}/status`, {
           body: {
             status: "reading",
           },
-        });
+        })
       }
     },
 
@@ -47,7 +47,7 @@ export const MDLibraryEventHandler: ChapterEventHandler & ContentEventHandler =
     async onContentsRemovedFromLibrary(ids) {
       //
     },
-  };
+  }
 
 async function syncToMD(
   id: string,
@@ -60,8 +60,8 @@ async function syncToMD(
         chapterIdsUnread,
         chapterIdsRead,
       },
-    });
+    })
   } catch {
-    console.error("failed to sync to mangadex");
+    console.error("failed to sync to mangadex")
   }
 }

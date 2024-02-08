@@ -7,4 +7,4 @@ module.exports = {
   forceExit: true,
   verbose: true,
   clearMocks: true,
-};
+}

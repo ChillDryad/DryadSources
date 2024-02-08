@@ -536,32 +536,32 @@ class BTLanguagesClass {
       BTCode: "pt-PT",
       lang: "🇵🇹",
     },
-  ];
+  ]
   constructor() {
     // Sorts the languages based on name
-    this.Languages = this.Languages.sort((a, b) => (a.name > b.name ? 1 : -1));
+    this.Languages = this.Languages.sort((a, b) => (a.name > b.name ? 1 : -1))
   }
 
   getBTCodeList(): string[] {
-    return this.Languages.map((Language) => Language.BTCode);
+    return this.Languages.map((Language) => Language.BTCode)
   }
   getName(BTCode: string): string {
     return (
       this.Languages.filter((Language) => Language.BTCode == BTCode)[0]?.name ??
       "Unknown"
-    );
+    )
   }
   getLangCode(BTCode: string): string {
     return (
       this.Languages.filter((Language) => Language.BTCode == BTCode)[0]?.lang ??
       "🇬🇧"
-    );
+    )
   }
   getDefault(): string[] {
     return this.Languages.filter((Language) => Language.default).map(
       (Language) => Language.BTCode
-    );
+    )
   }
 }
 
-export const BTLanguages = new BTLanguagesClass();
+export const BTLanguages = new BTLanguagesClass()

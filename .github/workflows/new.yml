@@ -2,9 +2,8 @@ name: Bundle and Publish Sources
 on: 
   push:
     branches:
-      - '**'
-      - '!dev'
-      - '!main'
+      - 'test'
+
 jobs:
   build:
     name: Bundle and Publish Sources
