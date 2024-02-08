@@ -1,102 +1,119 @@
-import {
+import type {
   Chapter,
   ChapterPage,
   Content,
   Highlight,
+  PagedResult,
   Property,
   Provider,
+} from "@suwatte/daisuke"
+
+import moment from "moment"
+import {
   ProviderLinkType,
   PublicationStatus,
   ReadingMode,
-} from "@suwatte/daisuke";
-import { load, Element } from "cheerio";
-import { decode, encode } from "he";
-import moment from "moment";
-import { getAllGenreTags } from "./constants";
-import { AES, enc } from "crypto-js";
+} from "@suwatte/daisuke"
+import { load, type Element } from "cheerio"
+import { decode, encode } from "he"
+import { AES, enc } from "crypto-js"
+
+import { BTLanguages } from "./utils"
+import { getAllGenreTags } from "./constants"
+
 export class Parser {
   parsePagedResponse(html: string) {
-    const ITEMS_SELECTOR = "div#series-list div.col";
-    const $ = load(html);
-    const items = $(ITEMS_SELECTOR).toArray();
+    const ITEMS_SELECTOR = "div#series-list div.col"
+    const $ = load(html)
+    const items = $(ITEMS_SELECTOR).toArray()
 
     const parseElement = (element: Element): Highlight => {
-      const item = $("a.item-cover", element);
-      const imgElem = $("img", item);
+      const item = $("a.item-cover", element)
+
+      const languageCode = BTLanguages.getLangCode(
+        $("em", element).attr("data-lang") ?? ""
+      )
+
+      const imgElem = $("img", item)
       const cover =
         imgElem.attr("abs:src") ??
         imgElem.attr("src") ??
-        imgElem.attr("data-src");
-      const title = decode($("a.item-title", element).text().trim());
+        imgElem.attr("data-src")
+
+      const title = `${languageCode || ""} ${decode(
+        $("a.item-title", element).text().trim()
+      )}`
+
       const contentId = item
         .attr("href")
         ?.trim()
-        .match(/series\/(\d+)/)?.[1];
-      if (!title || !cover || !contentId) throw "Failed to Parse";
-      return { id: contentId, cover, title };
-    };
-    const highlights = items.map(parseElement);
-    return highlights;
+        .match(/series\/(\d+)/)?.[1]
+      if (!title || !cover || !contentId) throw "Failed to Parse"
+      return { id: contentId, cover, title }
+    }
+    const highlights = items.map(parseElement)
+    return highlights
   }
 
   parseContent(html: string, contentId: string): Content {
-    const $ = load(html);
-    const infoElement = $("div#mainer div.container-fluid");
+    const $ = load(html)
+    const infoElement = $("div#mainer div.container-fluid")
 
     const textFromInfo = (str: string) => {
       return $(`div.attr-item:contains(${str}) span`, infoElement)
         .text()
-        .trim();
-    };
-    const workStatus = textFromInfo("Original work");
+        .trim()
+    }
+    const workStatus = textFromInfo("Original work")
 
-    const uploadStatus = textFromInfo("Upload status");
-    const title = decode($("h3", infoElement).text().trim());
-    const author = textFromInfo("Authors:");
-    const artist = textFromInfo("Artists:");
+    const uploadStatus = textFromInfo("Upload status")
+    const title = decode($("h3", infoElement).text().trim())
+    const author = textFromInfo("Authors:")
+    const artist = textFromInfo("Artists:")
     const summary = (
       $("div.limit-html", infoElement).text() +
       "\n" +
       $(".episode-list > .alert-warning").text().trim()
-    ).trim();
-    const imgElem = $("div.attr-cover img");
-    const cover = imgElem.attr("abs:src") ?? imgElem.attr("src") ?? "";
-    let status: PublicationStatus | undefined;
+    ).trim()
+    const imgElem = $("div.attr-cover img")
+    const cover = imgElem.attr("abs:src") ?? imgElem.attr("src") ?? ""
+    let status: PublicationStatus | undefined
 
     if (workStatus) {
-      if (workStatus.includes("Ongoing")) status = PublicationStatus.ONGOING;
+      if (workStatus.includes("Ongoing")) status = PublicationStatus.ONGOING
       if (workStatus.includes("Cancelled"))
-        status = PublicationStatus.CANCELLED;
-      if (workStatus.includes("Hiatus")) status = PublicationStatus.HIATUS;
+        status = PublicationStatus.CANCELLED
+      if (workStatus.includes("Hiatus")) status = PublicationStatus.HIATUS
       if (workStatus.includes("Completed")) {
         if (uploadStatus?.includes("Ongoing"))
-          status = PublicationStatus.ONGOING;
-        else status = PublicationStatus.COMPLETED;
+          status = PublicationStatus.ONGOING
+        else status = PublicationStatus.COMPLETED
       }
     }
 
     // TODO: Rank
 
     // Reading Mode
-    const direction = textFromInfo("Read direction");
-    let recommendedReadingMode = ReadingMode.PAGED_MANGA;
+    // BUG: read direction !== reader direction. Webtoon/Manhwa are top to bottom, Manga right to left, comics left to right.
+    const direction = textFromInfo("Read direction")
+    let recommendedReadingMode = ReadingMode.PAGED_MANGA
     if (direction === "Top to Bottom")
-      recommendedReadingMode = ReadingMode.WEBTOON;
+      recommendedReadingMode = ReadingMode.WEBTOON
     else if (direction === "Left to Right")
-      recommendedReadingMode = ReadingMode.PAGED_COMIC;
+      recommendedReadingMode = ReadingMode.PAGED_COMIC
 
     // Genres
     const selected = textFromInfo("Genres:")
       ?.split(", ")
-      .map((v) => v.trim());
-    const tags = getAllGenreTags().filter((v) => selected.includes(v.title));
-    const adultContent = tags.some((v) => v.nsfw);
-    const properties: Property[] = [];
+      .map((v) => v.trim())
+    const tags = getAllGenreTags().filter((v) => selected.includes(v.title))
+    const adultContent = tags.some((v) => v.nsfw)
+    const properties: Property[] = []
     properties.push({
       id: "genres",
       title: "Genres",
       tags,
-    });
+    })
 
     // Creators
     properties.push({
@@ -107,9 +124,9 @@ export class Parser {
         title: v,
         nsfw: false,
       })),
-    });
+    })
 
-    const chapters = this.parseChapters(html);
+    const chapters = this.parseChapters(html)
 
     return {
       title,
@@ -122,57 +139,57 @@ export class Parser {
       isNSFW: adultContent,
       chapters,
       webUrl: `https://bato.to/series/${contentId}`,
-    };
+    }
   }
 
   parseChapters(html: string) {
-    const $ = load(html);
+    const $ = load(html)
 
-    const listSelector = $("div.main div.p-2").toArray();
-    const chapters: Chapter[] = [];
-    let index = 0;
+    const listSelector = $("div.main div.p-2").toArray()
+    const chapters: Chapter[] = []
+    let index = 0
     for (const element of listSelector) {
-      const urlElement = $("a.chapt", element);
-      const chapterId = $(urlElement).attr("href")?.trim().split("/").pop();
+      const urlElement = $("a.chapt", element)
+      const chapterId = $(urlElement).attr("href")?.trim().split("/").pop()
 
-      if (!chapterId) continue;
+      if (!chapterId) continue
 
-      const group = $("div.extra > a:not(.ps-3)", element).first();
-      const time = $("div.extra > i.ps-3", element).text().trim();
+      const group = $("div.extra > a:not(.ps-3)", element).first()
+      const time = $("div.extra > i.ps-3", element).text().trim()
       let title: string | undefined = $("span", urlElement)
         ?.text()
         .trim()
-        .replace(": ", "");
+        .replace(": ", "")
 
-      if (!title) title = undefined;
+      if (!title) title = undefined
       const chapterText = $("b", urlElement)
         .text()
         .trim()
-        .split(/Chapter|Episode|Ch\./);
+        .split(/Chapter|Episode|Ch\./)
 
-      let volume: number | undefined = undefined;
+      let volume: number | undefined = undefined
       if (chapterText[0] && chapterText[0].includes("Vol")) {
         const volStr = chapterText[0]
           .replace(/Volume|Vol\./, "")
           .trim()
-          .match(/\d+/)?.[0];
-        volume = Number(volStr);
-        if (!volume) volume = undefined;
+          .match(/\d+/)?.[0]
+        volume = Number(volStr)
+        if (!volume) volume = undefined
       }
       // TODO: Better Special Chapter Handling
-      let number = -1;
-      const strNum = chapterText[1]?.match(/(\d+)/)?.[1];
+      let number = -1
+      const strNum = chapterText[1]?.match(/(\d+)/)?.[1]
       if (strNum) {
-        number = Number(strNum) ?? -1;
-        if (!number) number = -1;
+        number = Number(strNum) ?? -1
+        if (!number) number = -1
       } else {
-        title = chapterText[0];
+        title = chapterText[0]
       }
 
-      const providers: Provider[] = [];
+      const providers: Provider[] = []
       if (group) {
-        const name = group.text().trim();
-        const link = group.attr("href");
+        const name = group.text().trim()
+        const link = group.attr("href")
         if (name) {
           providers.push({
             id: name,
@@ -183,12 +200,12 @@ export class Parser {
                 url: (link && `https://bato.to${link}`) ?? "",
               },
             ],
-          });
+          })
         }
       }
-      const flag = $(".item-flag").attr("data-lang");
-      const language = flag ? `${flag}_${flag.toUpperCase()}` : "en_GB";
-      const date = this.parseDate(time);
+      const flag = $(".item-flag").attr("data-lang")
+      const language = flag ? `${flag}_${flag.toUpperCase()}` : "en_GB"
+      const date = this.parseDate(time)
       chapters.push({
         chapterId,
         number,
@@ -198,66 +215,124 @@ export class Parser {
         providers,
         title,
         language,
-      });
-      index++;
+      })
+      index++
     }
 
-    return chapters;
+    return chapters
   }
 
   parseDate(str: string) {
-    const value = Number(str.split(" ")[0]);
-    const current = moment();
+    const value = Number(str.split(" ")[0])
+    const current = moment()
 
-    if (!value) return current.toDate();
+    if (!value) return current.toDate()
 
-    const low = str.toLowerCase();
-    if (low.includes("sec")) return current.subtract(value, "seconds").toDate();
+    const low = str.toLowerCase()
+    if (low.includes("sec")) return current.subtract(value, "seconds").toDate()
     else if (low.includes("min"))
-      return current.subtract(value, "minutes").toDate();
+      return current.subtract(value, "minutes").toDate()
     else if (low.includes("day"))
-      return current.subtract(value, "days").toDate();
+      return current.subtract(value, "days").toDate()
     else if (low.includes("week"))
-      return current.subtract(value, "weeks").toDate();
+      return current.subtract(value, "weeks").toDate()
     else if (low.includes("month"))
-      return current.subtract(value, "months").toDate();
+      return current.subtract(value, "months").toDate()
     else if (low.includes("year"))
-      return current.subtract(value, "years").toDate();
+      return current.subtract(value, "years").toDate()
 
-    return current.toDate();
+    return current.toDate()
   }
 
   parsePages(html: string): ChapterPage[] {
-    const $ = load(html);
-    const script = $("script:contains('const batoWord =')")?.html();
+    const $ = load(html)
+    const script = $("script:contains('const batoWord =')")?.html()
 
-    if (!script) throw new Error("Could not find script with image data.");
+    if (!script) throw new Error("Could not find script with image data.")
 
     const imgHttpLisString = script
       .split("const imgHttps = ")
       .pop()
       ?.split(";")?.[0]
-      .trim();
+      .trim()
 
-    if (!imgHttpLisString) throw new Error("Image List Not Found.");
+    if (!imgHttpLisString) throw new Error("Image List Not Found.")
 
-    const imgHttpList: string[] = JSON.parse(imgHttpLisString);
+    const imgHttpList: string[] = JSON.parse(imgHttpLisString)
     const batoWord = script
       .split("const batoWord = ")
       .pop()
       ?.split(";")?.[0]
-      .replace(/"/g, "");
-    const batoPass = script.split("const batoPass = ").pop()?.split(";")?.[0];
+      .replace(/"/g, "")
+    const batoPass = script.split("const batoPass = ").pop()?.split(";")?.[0]
     if (!batoWord || !batoPass || !imgHttpList || imgHttpList.length == 0)
-      throw new Error("Bad State");
+      throw new Error("Bad State")
 
-    const evaluatedPass = eval(batoPass).toString();
+    const evaluatedPass = eval(batoPass).toString()
     const imgAccListString = AES.decrypt(batoWord, evaluatedPass).toString(
       enc.Utf8
-    );
-    const imgAccList: string[] = JSON.parse(imgAccListString);
-    const urls = imgHttpList.map((v, i) => `${v}?${imgAccList[i]}`);
+    )
+    const imgAccList: string[] = JSON.parse(imgAccListString)
+    const urls = imgHttpList.map((v, i) => `${v}?${imgAccList[i]}`)
 
-    return urls.map((url) => ({ url }));
+    return urls.map((url) => ({ url }))
+  }
+  async parsePopular(html: string): Promise<PagedResult> {
+    const $ = load(html)
+    const popularItemsSelector = $("div.home-popular div.col").toArray()
+    const items: Highlight[] = []
+    popularItemsSelector.forEach((element: Element) => {
+      const cover = $("a.item-cover img", element).attr("src") || ""
+      const title = $("div.item-text div.item-text-inner", element)
+        .text()
+        .trim()
+        .split("\n")[0]
+      const contentId = $("div.item-text div.item-text-inner a", element)
+        .attr("href")
+        ?.trim()
+        .match(/series\/(\d+)/)?.[1]
+
+      if (contentId) {
+        items.push({
+          cover,
+          title,
+          id: contentId,
+        })
+      }
+    })
+    return {
+      results: items,
+      isLastPage: true,
+    }
+  }
+
+  async parseLatest(html: string): Promise<PagedResult> {
+    const $ = load(html)
+    const latestItems = $("div.series-list div.col").toArray()
+    const items: Highlight[] = []
+    
+    latestItems.forEach((item: Element) => {
+      const cover = $("a.item-cover img", item).attr("src") || ""
+      const title = $("div.item-text a.item-title", item).text().trim()
+      const languageCode = BTLanguages.getLangCode(
+        $("em", item).attr("data-lang") ?? ""
+      )
+      const contentId = $("div.item-text a.item-title", item)
+        .attr("href")
+        ?.trim()
+        .match(/series\/(\d+)/)?.[1]
+    
+      if (contentId) {
+        items.push({
+          cover,
+          title: `${languageCode} ${title}`,
+          id: contentId,
+        })
+      }
+    })
+    return {
+      results: items,
+      isLastPage: true,
+    }
   }
 }

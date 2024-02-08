@@ -1,4 +1,4 @@
-import { Option } from "@suwatte/daisuke";
+import { Option } from "@suwatte/daisuke"
 
 export async function getSearchSorters(): Promise<Option[]> {
   const data = {
@@ -10,10 +10,10 @@ export async function getSearchSorters(): Promise<Option[]> {
     year: "Yearly",
     updatedAt: "Last Updated",
     latestUploadedChapter: "Last Uploaded Chapter",
-  };
+  }
 
   return Object.entries(data).map(([id, title]) => ({
     id,
     title,
-  }));
+  }))
 }

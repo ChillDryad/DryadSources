@@ -1,4 +1,4 @@
-import { Option } from "@suwatte/daisuke";
+import { Option } from "@suwatte/daisuke"
 
 type Language = {
   label: string;
@@ -8,14 +8,14 @@ type Language = {
 
 export const getURLSuffixFor = (id: string) => {
   switch (id) {
-    case "medium":
-      return ".512.jpg";
-    case "low":
-      return ".256.jpg";
-    default:
-      return "";
+  case "medium":
+    return ".512.jpg"
+  case "low":
+    return ".256.jpg"
+  default:
+    return ""
   }
-};
+}
 
 export const languages: Language[] = [
   {
@@ -258,22 +258,22 @@ export const languages: Language[] = [
     languageCode: "zh-hk",
     regionCode: "hk",
   },
-];
+]
 
 export const languageLabel = (lang: string) => {
   return (
     languages.find((v) => v.languageCode === lang)?.label ?? lang.toUpperCase()
-  );
-};
+  )
+}
 
 export const languageCode = (lang: string) => {
-  const t = languages.find((v) => v.languageCode == lang);
-  if (!t) return "";
+  const t = languages.find((v) => v.languageCode == lang)
+  if (!t) return ""
 
   return t.languageCode.includes("-")
     ? t.languageCode
-    : t.languageCode + "-" + t.regionCode;
-};
+    : t.languageCode + "-" + t.regionCode
+}
 
 export type MimasRecommendation = {
   sourceId: string;
@@ -295,4 +295,4 @@ export const CoverQualityOptions: Option[] = [
     title: "Low",
     id: "low",
   },
-];
+]

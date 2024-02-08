@@ -1,6 +1,6 @@
-import { capitalize } from "lodash";
-import { PREF_KEYS } from "../store";
-import { CoverQualityOptions, languages } from "../utils";
+import { capitalize } from "lodash"
+import { PREF_KEYS } from "../store"
+import { CoverQualityOptions, languages } from "../utils"
 import {
   Form,
   RunnerPreferenceProvider,
@@ -9,22 +9,22 @@ import {
   UIPicker,
   UIStepper,
   UIToggle,
-} from "@suwatte/daisuke";
-import { GlobalStore } from "../constants";
+} from "@suwatte/daisuke"
+import { GlobalStore } from "../constants"
 
 export const MDPreferenceProvider: RunnerPreferenceProvider = {
   getPreferenceMenu: async function (): Promise<Form> {
     const languageOptions = languages.map((v) => ({
       id: v.languageCode,
       title: v.label,
-    }));
+    }))
 
     const ratingOptions = ["safe", "suggestive", "erotica", "pornographic"].map(
       (v) => ({
         title: capitalize(v),
         id: v,
       })
-    );
+    )
 
     return {
       sections: [
@@ -120,6 +120,6 @@ export const MDPreferenceProvider: RunnerPreferenceProvider = {
           ],
         },
       ],
-    };
+    }
   },
-};
+}

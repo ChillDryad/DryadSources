@@ -1,4 +1,4 @@
-import { CatalogRating, ContentSource, RunnerInfo } from "@suwatte/daisuke";
+import { CatalogRating, ContentSource, RunnerInfo } from "@suwatte/daisuke"
 import {
   MDBasicAuthProvider,
   MDContentSource,
@@ -8,9 +8,9 @@ import {
   MDLibraryEventHandler,
   MDContentSyncHandler,
   MDProgressStateHandler,
-} from "./impl";
-import { MDDirectoryHandler } from "./impl/directoryHandler";
-import { languages } from "./utils";
+} from "./impl"
+import { MDDirectoryHandler } from "./impl/directoryHandler"
+import { languages } from "./utils"
 
 export const info: RunnerInfo = {
   name: "MangaDex",
@@ -25,7 +25,7 @@ export const info: RunnerInfo = {
   thumbnail: "mangadex.png",
   minSupportedAppVersion: "6.0.0",
   rating: CatalogRating.MIXED,
-};
+}
 
 export const Target: ContentSource = {
   info,
@@ -38,4 +38,4 @@ export const Target: ContentSource = {
   ...MDLibraryEventHandler,
   ...MDContentSyncHandler,
   ...MDProgressStateHandler,
-};
+}

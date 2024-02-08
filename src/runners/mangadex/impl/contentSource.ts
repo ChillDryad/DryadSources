@@ -1,7 +1,7 @@
-import { Chapter, ChapterData, Content, ContentSource } from "@suwatte/daisuke";
-import { GET } from "../network";
-import { parseContent } from "../parser/content";
-import { getChapters, parseChapterData } from "../parser/chapter";
+import { Chapter, ChapterData, Content, ContentSource } from "@suwatte/daisuke"
+import { GET } from "../network"
+import { parseContent } from "../parser/content"
+import { getChapters, parseChapterData } from "../parser/chapter"
 
 type MethodOnlyContentSource = Omit<
   ContentSource,
@@ -9,23 +9,23 @@ type MethodOnlyContentSource = Omit<
 >;
 export const MDContentSource: MethodOnlyContentSource = {
   getContent: async function (contentId: string): Promise<Content> {
-    const path = `/manga/${contentId}`;
+    const path = `/manga/${contentId}`
     const params = {
       includes: ["artist", "author", "cover_art"],
-    };
+    }
 
-    const response = await GET(path, { params });
-    return parseContent(response, contentId);
+    const response = await GET(path, { params })
+    return parseContent(response, contentId)
   },
   getChapters: function (contentId: string): Promise<Chapter[]> {
-    return getChapters(contentId);
+    return getChapters(contentId)
   },
 
   getChapterData: async function (_, chapterId: string): Promise<ChapterData> {
-    const json = await GET(`/at-home/server/${chapterId}`);
+    const json = await GET(`/at-home/server/${chapterId}`)
     return {
       pages: await parseChapterData(json),
-    };
+    }
   },
 
   // async getIdentifierForURL(url: string): Promise<ContentIdentifier | null> {
@@ -63,4 +63,4 @@ export const MDContentSource: MethodOnlyContentSource = {
 
   //   return null;
   // },
-};
+}

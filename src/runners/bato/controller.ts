@@ -1,51 +1,70 @@
-import {
+import type {
   ChapterData,
-  DirectoryFilter,
   DirectoryRequest,
-  FilterType,
+  DirectoryFilter,
+  Form,
   PagedResult,
   Property,
-} from "@suwatte/daisuke";
+  ResolvedPageSection,
+  PageLink,
+  PageSection,
+} from "@suwatte/daisuke"
+
+import {
+  FilterType,
+  UIMultiPicker,
+  SectionStyle,
+} from "@suwatte/daisuke"
 import {
   ADULT_TAGS,
+  CHAPTERS,
   CONTENT_TYPE_TAGS,
   DEMOGRAPHIC_TAGS,
   GENERIC_TAGS,
   LANG_TAGS,
   ORIGIN_TAGS,
   STATUS_TAGS,
-} from "./constants";
-import { Parser } from "./parser";
+} from "./constants"
+
+import { Parser } from "./parser"
+
 export class Controller {
-  private BASE = "https://bato.to";
-  private client = new NetworkClient();
-  private parser = new Parser();
+  private BASE = "https://bato.to"
+  private client = new NetworkClient()
+  private parser = new Parser()
+  private store = ObjectStore
 
   async getSearchResults(query: DirectoryRequest): Promise<PagedResult> {
-    const params: Record<string, any> = {};
+    const params: Record<string, unknown> = {}
+    params.langs = (await this.store.get("lang")) || "en"
     // Keyword
-    if (query.query) params["word"] = query.query;
+    if (query.query) params["word"] = query.query
     // Page
-    if (query.page) params["page"] = query.page;
+    if (query.page) params["page"] = query.page
 
-    if (query.filters !== undefined) {
-      const includedTags: string[] = [];
-      const excludedTags: string[] = [];
+    if (query.filters) {
+      const includedTags: string[] = []
+      const excludedTags: string[] = []
       for (const filter in query.filters) {
-        includedTags.push.apply(includedTags, query.filters[filter].included);
-        excludedTags.push.apply(excludedTags, query.filters[filter].excluded);
+        includedTags.push(...query.filters[filter].included)
+        excludedTags.push(...query.filters[filter].excludedTags)
       }
-      params.genres = `${includedTags}|${excludedTags}`;
-      if (query.filters.origin) params.origs = query.filters.origin;
-      if (query.filters.translated) params.langs = query.filters.translated;
+      params.genres = `${includedTags}${
+        excludedTags.length > 0 ? `|${excludedTags}` : ""
+      }`
+      if (query.filters.origin) params.origs = query.filters.origin.toString()
+      if (query.filters.translated)
+        params.langs = query.filters.translated.toString()
+      if (!query.filters?.chapters) params.chapters = 1
+      if (query.filters?.status) params.release = query.filters.status
     }
 
-    params.sort = query.sort ?? "";
+    params.sort = query.sort ?? ""
     const response = await this.client.get(`${this.BASE}/browse`, {
       params,
-    });
-    const results = this.parser.parsePagedResponse(response.data);
-    return { results, isLastPage: results.length > 60 };
+    })
+    const results = this.parser.parsePagedResponse(response.data)
+    return { results, isLastPage: results.length > 60 }
   }
 
   getFilters(): DirectoryFilter[] {
@@ -94,7 +113,13 @@ export class Controller {
         type: FilterType.SELECT,
         options: STATUS_TAGS,
       },
-    ];
+      {
+        id: "chapters",
+        title: "Uploaded Chapters",
+        type: FilterType.SELECT,
+        options: CHAPTERS,
+      },
+    ]
   }
 
   getProperties(): Property[] {
@@ -134,23 +159,80 @@ export class Controller {
         title: "Content Status",
         tags: STATUS_TAGS,
       },
-    ];
+    ]
   }
 
   async getContent(id: string) {
-    const response = await this.client.get(`${this.BASE}/series/${id}`);
-    return this.parser.parseContent(response.data, id);
+    const response = await this.client.get(`${this.BASE}/series/${id}`)
+    return this.parser.parseContent(response.data, id)
   }
 
   async getChapters(id: string) {
-    const response = await this.client.get(`${this.BASE}/series/${id}`);
-    return this.parser.parseChapters(response.data);
+    const response = await this.client.get(`${this.BASE}/series/${id}`)
+    return this.parser.parseChapters(response.data)
   }
 
   async getChapterData(chapterId: string): Promise<ChapterData> {
-    const response = await this.client.get(`${this.BASE}/chapter/${chapterId}`);
+    const response = await this.client.get(`${this.BASE}/chapter/${chapterId}`)
     return {
       pages: this.parser.parsePages(response.data),
-    };
+    }
+  }
+
+  async getHomeSections({ id }: PageLink): Promise<PageSection[]> {
+    if (id === "home") {
+      return [
+        {
+          id: "popular",
+          title: "Popular Titles",
+          style: SectionStyle.INFO,
+        },
+        {
+          id: "latest",
+          title: "latest Titles",
+          style: SectionStyle.ITEM_LIST,
+        },
+      ]
+    }
+    throw new Error("I don't know how you got here.")
+  }
+  async resolveHomeSections(
+    _link: PageLink,
+    section: string
+  ): Promise<ResolvedPageSection> {
+    const response = await this.client.get(this.BASE)
+    switch (section) {
+    case "popular":
+      return {
+        items: (await this.parser.parsePopular(response.data)).results,
+      }
+    case "latest":
+      return {
+        items: (await this.parser.parseLatest(response.data)).results,
+      }
+    default:
+      throw new Error("Something went horribly wrong.")
+    }
+  }
+
+  async getPreferences(): Promise<Form> {
+    const languages = ORIGIN_TAGS.map((l) => ({ id: l.id, title: l.title }))
+    return {
+      sections: [
+        {
+          // LANGUAGE OPTIONS
+          header: "Language Options",
+          children: [
+            UIMultiPicker({
+              id: "language",
+              title: "Default Language",
+              options: languages,
+              value: (await this.store.stringArray("lang")) || ["en"],
+              didChange: (value) => this.store.set("lang", value),
+            }),
+          ],
+        },
+      ],
+    }
   }
 }

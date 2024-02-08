@@ -3,9 +3,9 @@ import {
   DeepLinkContext,
   RunnerInfo,
   SourceConfig,
-} from "@suwatte/daisuke";
-import { MadaraTemplate } from "../../templates/madara";
-import { DEFAULT_CONTEXT } from "../../templates/madara/constants";
+} from "@suwatte/daisuke"
+import { MadaraTemplate } from "../../templates/madara"
+import { DEFAULT_CONTEXT } from "../../templates/madara/constants"
 
 export class Target extends MadaraTemplate implements ContentSource {
   info: RunnerInfo = {
@@ -16,11 +16,11 @@ export class Target extends MadaraTemplate implements ContentSource {
     website: "https://toonily.com",
     supportedLanguages: ["EN_US"],
     minSupportedAppVersion: "6.0",
-  };
+  }
 
   config?: SourceConfig | undefined = {
     owningLinks: ["https://www.toonily.com", "https://toonily.com"],
-  };
+  }
 
   constructor() {
     super({
@@ -54,29 +54,29 @@ export class Target extends MadaraTemplate implements ContentSource {
                 value: "1",
               },
             ],
-          };
+          }
         },
       ],
-    });
+    })
 
-    this.info;
+    this.info
   }
 
   async handleURL(url: string): Promise<DeepLinkContext | null> {
-    const pattern = /https?:\/\/(www\.)?toonily\.com\/webtoon\/([\w-]+)/;
-    const match = url.match(pattern);
+    const pattern = /https?:\/\/(www\.)?toonily\.com\/webtoon\/([\w-]+)/
+    const match = url.match(pattern)
 
     if (match && match[2]) {
-      const id = match[2];
+      const id = match[2]
 
       return {
         content: {
           id,
           ...(await this.getContent(id)),
         },
-      };
+      }
     }
 
-    return null;
+    return null
   }
 }
