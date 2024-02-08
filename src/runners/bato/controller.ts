@@ -46,8 +46,8 @@ export class Controller {
       const includedTags: string[] = []
       const excludedTags: string[] = []
       for (const filter in query.filters) {
-        includedTags.push(...query.filters[filter].included)
-        excludedTags.push(...query.filters[filter].excludedTags)
+        includedTags.push(query.filters[filter].included)
+        excludedTags.push(query.filters[filter].excludedTags)
       }
       params.genres = `${includedTags}${
         excludedTags.length > 0 ? `|${excludedTags}` : ""
