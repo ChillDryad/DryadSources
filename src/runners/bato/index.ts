@@ -9,7 +9,6 @@ import type {
   PageLink,
   PageSection,
   PagedResult,
-  Property,
   RunnerInfo,
 } from "@suwatte/daisuke"
 
@@ -41,10 +40,6 @@ export class Target implements ContentSource {
   getChapterData(_contentId: string, chapterId: string): Promise<ChapterData> {
     return this.controller.getChapterData(chapterId)
   }
-
-  // async getTags?(): Promise<Property[]> {
-  //   return this.controller.getProperties()
-  // }
 
   async getPreferenceMenu(): Promise<Form> {
     return this.controller.getPreferences()
@@ -80,7 +75,7 @@ export class Target implements ContentSource {
   }
 
   async getDirectoryConfig(
-  _configID?: string | undefined
+    _configID?: string | undefined
   ): Promise<DirectoryConfig> {
     return {
       filters: this.controller.getFilters(),

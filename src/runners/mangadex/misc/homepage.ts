@@ -130,25 +130,25 @@ export const resolveHomepageSection = async (
   section: string
 ): Promise<ResolvedPageSection> => {
   switch (section) {
-    case "popular_new":
-      return {
-        items: (await getPopularNewTitles()).results,
-      }
-    case "seasonal": {
-      const { highlights: items, title: updatedTitle } =
+  case "popular_new":
+    return {
+      items: (await getPopularNewTitles()).results,
+    }
+  case "seasonal": {
+    const { highlights: items, title: updatedTitle } =
           await getCollectionForList(SEASONAL_LIST_ID)
-      return { items, updatedTitle }
-    }
+    return { items, updatedTitle }
+  }
 
-    case "prev_seasonal": {
-      const { highlights: items, title: updatedTitle } =
+  case "prev_seasonal": {
+    const { highlights: items, title: updatedTitle } =
           await getCollectionForList(LAST_SEASONAL_LIST_ID)
-      return { items, updatedTitle }
-    }
-    case "staff_picks": {
-      const { highlights: items, title: updatedTitle } =
+    return { items, updatedTitle }
+  }
+  case "staff_picks": {
+    const { highlights: items, title: updatedTitle } =
           await getCollectionForList(STAFF_PICKS_LIST_ID)
-      return { items, updatedTitle }
+    return { items, updatedTitle }
   }
   // Get
   case "recentlyUpdated":

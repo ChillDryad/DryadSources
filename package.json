@@ -10,7 +10,7 @@
     "build": "daisuke build",
     "serve": "daisuke serve",
     "lint": "eslint",
-    "lint:fix": "eslint --fix /src/runners",
+    "lint:fix": "eslint --fix ./src/runners",
     "prepare": "husky"
   },
   "private": true,
