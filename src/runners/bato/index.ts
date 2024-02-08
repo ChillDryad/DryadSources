@@ -20,7 +20,7 @@ import { Controller } from "./controller"
 export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "to.bato",
-    name: "Dev - Bato",
+    name: "Bato",
     version: 0.5,
     website: "https://bato.to",
     supportedLanguages: LANG_TAGS.map((l) => l.id),
