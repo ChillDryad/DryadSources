@@ -455,8 +455,8 @@ class Controller {
             const includedTags = [];
             const excludedTags = [];
             for (const filter in query.filters) {
-                includedTags.push(...query.filters[filter].included);
-                excludedTags.push(...query.filters[filter].excludedTags);
+                includedTags.push(query.filters[filter].included);
+                excludedTags.push(query.filters[filter].excludedTags);
             }
             params.genres = `${includedTags}${excludedTags.length > 0 ? `|${excludedTags}` : ""}`;
             if (query.filters.origin)
