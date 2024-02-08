@@ -60,7 +60,6 @@ export class Controller {
     }
 
     params.sort = query.sort?.id ?? ""
-    console.log(params)
     const response = await this.client.get(`${this.BASE}/browse`, {
       params,
     })
