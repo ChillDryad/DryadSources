@@ -55,7 +55,7 @@ exports.MDBasicAuthProvider = {
         if (!token) {
             return null;
         }
-        const { data } = await (0, network_1.GET)(`/user/me`);
+        const { data } = await (0, network_1.GET)("/user/me");
         const user = {
             handle: data.attributes.username,
             avatar: "https://mangadex.org/avatar.png",
@@ -64,7 +64,7 @@ exports.MDBasicAuthProvider = {
     },
     async handleUserSignOut() {
         try {
-            await (0, network_1.GET)(`/auth/logout`);
+            await (0, network_1.GET)("/auth/logout");
         }
         catch (err) {
             console.log(err);
@@ -181,7 +181,7 @@ async function fetchUserLibrary() {
     let offset = 0;
     // eslint-disable-next-line no-constant-condition
     while (true) {
-        const response = await (0, network_1.GET)(`/user/follows/manga`, {
+        const response = await (0, network_1.GET)("/user/follows/manga", {
             params: {
                 limit,
                 offset,
@@ -508,7 +508,7 @@ exports.MDProgressStateHandler = {
     },
 };
 async function getReadChapterMarkers(contentId) {
-    const response = await (0, network_1.GET)(`/manga/read`, {
+    const response = await (0, network_1.GET)("/manga/read", {
         params: { ids: [contentId], grouped: true },
     });
     const data = JSON.parse(response.data);
@@ -803,7 +803,7 @@ async function getMDList(listId, pageNumber = 1) {
         .filter((x) => x.type == "manga")
         .map((x) => x.id);
     const listName = data.attributes.name ?? "Seasonal";
-    const page = await (0, network_1.GET)(`/manga`, {
+    const page = await (0, network_1.GET)("/manga", {
         params: {
             includes: ["cover_art"],
             ids: contentIds,
@@ -821,7 +821,7 @@ exports.getMDList = getMDList;
 async function getMDUpdates(page) {
     const contentRating = await constants_1.GlobalStore.getContentRatings();
     const langs = await constants_1.GlobalStore.getLanguages();
-    let response = await (0, network_1.GET)(`/chapter`, {
+    let response = await (0, network_1.GET)("/chapter", {
         params: {
             limit: 50,
             offset: 50 * (page - 1),
@@ -834,7 +834,7 @@ async function getMDUpdates(page) {
     const chapterListJSON = { ...response };
     const base = chapterListJSON.data.map((x) => x.relationships.find((y) => y.type == "manga").id);
     const ids = Array.from(new Set(base));
-    response = await (0, network_1.GET)(`/manga`, {
+    response = await (0, network_1.GET)("/manga", {
         params: {
             ids,
             limit: ids.length,
@@ -917,7 +917,7 @@ async function getMDSearchResults(query, overrides = {}) {
 exports.getMDSearchResults = getMDSearchResults;
 async function buildFilters() {
     const filters = [];
-    const { data } = await (0, network_1.GET)(`/manga/tag`);
+    const { data } = await (0, network_1.GET)("/manga/tag");
     const grouped = (0, lodash_1.groupBy)(data, (v) => v.attributes.group);
     for (const group in grouped) {
         const title = (0, lodash_1.capitalize)(group);
@@ -1058,7 +1058,7 @@ function getMDReadingStatus(str) {
 exports.getMDReadingStatus = getMDReadingStatus;
 async function getMDUserStatuses() {
     try {
-        const response = await (0, network_1.GET)(`$/manga/status`);
+        const response = await (0, network_1.GET)("$/manga/status");
         return response.statuses;
     }
     catch (err) {
@@ -1143,7 +1143,7 @@ const refreshTokens = async () => {
     // Refresh
     try {
         const client = new NetworkClient();
-        const refreshResponse = await client.post(`https://api.mangadex.org/auth/refresh`, {
+        const refreshResponse = await client.post("https://api.mangadex.org/auth/refresh", {
             body: {
                 token,
             },
