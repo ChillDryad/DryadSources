@@ -175,7 +175,7 @@ export class Controller {
   async getChapterData(chapterId: string): Promise<ChapterData> {
     const response = await this.client.get(`${this.BASE}/chapter/${chapterId}`)
     return {
-      pages: this.parser.parsePages(response.data),
+      pages: this.parser.parsePages(response.data)
     }
   }
 

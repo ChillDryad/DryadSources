@@ -277,6 +277,7 @@ export class Parser {
 
     return urls.map((url) => ({ url }))
   }
+  
   async parsePopular(html: string): Promise<PagedResult> {
     const $ = load(html)
     const popularItemsSelector = $("div.home-popular div.col").toArray()
