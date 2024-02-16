@@ -3,7 +3,6 @@ import { Target } from "../runners/toonily"
 import {
   ChapterDataSchema,
   ChapterSchema,
-  ContentSchema,
   PagedResultSchema,
 } from "@suwatte/validate"
 describe("Toonily Tests", () => {
