@@ -3,9 +3,6 @@ import {
   type DirectoryRequest,
   type DirectoryFilter,
   type PagedResult,
-  type ResolvedPageSection,
-  type PageLink,
-  type PageSection,
   FilterType,
   NetworkResponse,
   NetworkClientBuilder,
@@ -43,7 +40,6 @@ export default class Controller {
       }
     ]
   }
-
   async getSearchResults(query: DirectoryRequest): Promise<PagedResult> {
     const params: Record<string,any> = {}  
     const page = query.page
@@ -65,7 +61,6 @@ export default class Controller {
       isLastPage: results.length > 18
     }
   }
-  
   async getContent(id:string){
     const response = await this.client.get(`${this.BASE}/webtoon/${id}`)
     return this.parser.parseContent(response.data, id)
@@ -74,14 +69,9 @@ export default class Controller {
     const response = await this.client.post(`${this.BASE}/webtoon/${id}/ajax/chapters`)
     return this.parser.parseChapters(response.data)
   }
-
   async getChapterData(chapterId:string): Promise<ChapterData>{
     const response = await this.client.get(`${this.BASE}/webtoon/${chapterId}`)
     const pages = this.parser.parsePages(response.data)
     return { pages }
   }
-  // @ts-expect-error still building
-  async getPageSections({id}: PageLink): Promise<PageSection[]>{}
-  // @ts-expect-error still building
-  async resolvePageSections(_link: PageLink, section: string): Promise<ResolvedPageSection> {}
 }

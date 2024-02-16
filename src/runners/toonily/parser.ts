@@ -13,7 +13,6 @@ export default class Parser {
     const selector = "div.page-listing-item div.row div.col-6"
     const $ = load(html)
     const items = $(selector).toArray()
-
     const parseElement = (element: Element): Highlight => {
       const item = $("div div", element)
       const id = $("a", element)
@@ -32,7 +31,6 @@ export default class Parser {
     const highlights = items.map(parseElement)
     return highlights
   }
-  
   parseContent(html: string, contentId: string): Content {
     const $ = load(html)
     const info = $("div.site-content div.tab-summary")
@@ -59,7 +57,7 @@ export default class Parser {
       const response = {
         chapterId: $("a", chapter).attr("href")?.split("webtoon/")[1] ?? "",
         number: ++i,
-        index: ++i,
+        index: i,
         language: "EN",
         date: new Date($("i", chapter).text())
       }
@@ -77,7 +75,6 @@ export default class Parser {
           $(image).attr("data-src")?.trim()
       }
     })
-    
     return pages
   }
 }
