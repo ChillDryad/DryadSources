@@ -57,7 +57,7 @@ export default class Parser {
       const response = {
         chapterId: $("a", chapter).attr("href")?.split("webtoon/")[1] ?? "",
         number: ++i,
-        index: ++i,
+        index: i,
         language: "EN",
         date: new Date($("i", chapter).text())
       }

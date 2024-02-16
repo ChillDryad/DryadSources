@@ -7,7 +7,6 @@ import {
 } from "@suwatte/validate"
 describe("Toonily Tests", () => {
   const source = emulate(Target)
-
   test("Search Landing", async () => {
     const data = await source.getDirectory({
       page: 1,
@@ -15,7 +14,20 @@ describe("Toonily Tests", () => {
     expect(PagedResultSchema.parse(data)).toEqual(expect.any(Object))
     expect(data.results.length).toBe(18)
   })
-  //https://toonily.com/webtoon/springtime-blossom-003/
+  test("Search with query", async () => {
+    const data = await source.getDirectory({
+      page:1,
+      query: "spring"
+    })
+    expect(PagedResultSchema.parse(data)).toEqual(expect.any(Object))
+    expect(data.results.length).toBeGreaterThan(1)
+  })
+  test("Search with Tags", async () => {
+    const data = await source.getDirectory({
+      page:1,
+      filters: ["josei"]
+    })
+  })
   test("Chapters", async () => {
     const chapters = await source.getChapters("springtime-blossom-003")
     expect(ChapterSchema.array().parse(chapters)).toEqual(expect.any(Array))
