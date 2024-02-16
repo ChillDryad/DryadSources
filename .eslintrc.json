@@ -21,6 +21,11 @@
     "rules": {
         // Don't use this when you've gone through each source.
         "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-unused-vars": [
+            "warn", {
+                "argsIgnorePattern": "^_"
+            }
+        ],
         "indent": [
             "error",
             2

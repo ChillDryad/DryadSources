@@ -40,11 +40,11 @@ export const MDLibraryEventHandler: ChapterEventHandler & ContentEventHandler =
       }
     },
 
-    async onContentsReadingFlagChanged(ids, flag) {
+    async onContentsReadingFlagChanged(_ids, _flag) {
       //
     },
 
-    async onContentsRemovedFromLibrary(ids) {
+    async onContentsRemovedFromLibrary(_ids) {
       //
     },
   }

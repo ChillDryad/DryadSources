@@ -46,8 +46,8 @@ export class Controller {
       const includedTags: string[] = []
       const excludedTags: string[] = []
       for (const filter in query.filters) {
-        includedTags.push(query.filters[filter].included)
-        excludedTags.push(query.filters[filter].excludedTags)
+        includedTags.push(...query.filters[filter].included || [])
+        excludedTags.push(...query.filters[filter].excludedTags || [])
       }
       params.genres = `${includedTags}${
         excludedTags.length > 0 ? `|${excludedTags}` : ""
@@ -59,7 +59,7 @@ export class Controller {
       if (query.filters?.status) params.release = query.filters.status
     }
 
-    params.sort = query.sort ?? ""
+    params.sort = query.sort?.id ?? ""
     const response = await this.client.get(`${this.BASE}/browse`, {
       params,
     })
@@ -175,7 +175,7 @@ export class Controller {
   async getChapterData(chapterId: string): Promise<ChapterData> {
     const response = await this.client.get(`${this.BASE}/chapter/${chapterId}`)
     return {
-      pages: this.parser.parsePages(response.data),
+      pages: this.parser.parsePages(response.data)
     }
   }
 
