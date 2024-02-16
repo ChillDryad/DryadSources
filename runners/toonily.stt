@@ -124,10 +124,6 @@ class Controller {
         const pages = this.parser.parsePages(response.data);
         return { pages };
     }
-    // @ts-expect-error still building
-    async getPageSections({ id }) { }
-    // @ts-expect-error still building
-    async resolvePageSections(_link, section) { }
 }
 exports.default = Controller;
 
@@ -191,11 +187,6 @@ class Target {
         }
         throw new Error("I don't know how you got here.");
     }
-    // async resolvePageSection(link: PageLink, sectionId: string) {
-    //   if (link.id === "home")
-    //     return this.controller.resolveHomeSections(link, sectionId)
-    //   else throw new Error(`Something bad happened when I loaded ${link.id}`)
-    // }
     async getDirectoryConfig(_configID) {
         return {
             filters: this.controller.getFilters(),
@@ -292,7 +283,7 @@ class Parser {
             const response = {
                 chapterId: $("a", chapter).attr("href")?.split("webtoon/")[1] ?? "",
                 number: ++i,
-                index: ++i,
+                index: i,
                 language: "EN",
                 date: new Date($("i", chapter).text())
             };
