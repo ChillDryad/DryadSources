@@ -455,8 +455,8 @@ class Controller {
             const includedTags = [];
             const excludedTags = [];
             for (const filter in query.filters) {
-                includedTags.push(query.filters[filter].included);
-                excludedTags.push(query.filters[filter].excludedTags);
+                includedTags.push(...query.filters[filter].included || []);
+                excludedTags.push(...query.filters[filter].excludedTags || []);
             }
             params.genres = `${includedTags}${excludedTags.length > 0 ? `|${excludedTags}` : ""}`;
             if (query.filters.origin)
@@ -468,7 +468,7 @@ class Controller {
             if (query.filters?.status)
                 params.release = query.filters.status;
         }
-        params.sort = query.sort ?? "";
+        params.sort = query.sort?.id ?? "";
         const response = await this.client.get(`${this.BASE}/browse`, {
             params,
         });
@@ -578,7 +578,7 @@ class Controller {
     async getChapterData(chapterId) {
         const response = await this.client.get(`${this.BASE}/chapter/${chapterId}`);
         return {
-            pages: this.parser.parsePages(response.data),
+            pages: this.parser.parsePages(response.data)
         };
     }
     async getHomeSections({ id }) {
@@ -646,7 +646,7 @@ const controller_1 = require("./controller");
 class Target {
     info = {
         id: "to.bato",
-        name: "Dev - Bato",
+        name: "Bato",
         version: 0.5,
         website: "https://bato.to",
         supportedLanguages: constants_1.LANG_TAGS.map((l) => l.id),
@@ -664,9 +664,6 @@ class Target {
     getChapterData(_contentId, chapterId) {
         return this.controller.getChapterData(chapterId);
     }
-    // async getTags?(): Promise<Property[]> {
-    //   return this.controller.getProperties()
-    // }
     async getPreferenceMenu() {
         return this.controller.getPreferences();
     }
