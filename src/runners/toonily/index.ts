@@ -73,12 +73,6 @@ export class Target implements ContentSource {
     throw new Error("I don't know how you got here.")
   }
 
-  // async resolvePageSection(link: PageLink, sectionId: string) {
-  //   if (link.id === "home")
-  //     return this.controller.resolveHomeSections(link, sectionId)
-  //   else throw new Error(`Something bad happened when I loaded ${link.id}`)
-  // }
-
   async getDirectoryConfig(
     _configID?: string | undefined
   ): Promise<DirectoryConfig> {

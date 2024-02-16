@@ -9,7 +9,6 @@ export const GENRES: Tag[] = [
   {id: "crime", title: "crime", nsfw: false},
   {id: "drama", title: "drama", nsfw: false},
   {id: "fantasy", title: "fantasy", nsfw: false},
-
   {id: "gossip", title: "gossip", nsfw: false},
   {id: "historical", title: "historical", nsfw: false},
   {id: "horror", title: "horror", nsfw: false},
