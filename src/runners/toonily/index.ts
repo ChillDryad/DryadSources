@@ -1,4 +1,4 @@
-import type {  
+import type {
   Chapter,
   ChapterData,
   Content,
@@ -54,7 +54,7 @@ export class Target implements ContentSource {
     }
   }
 
-  async getSectionsForPage(page: PageLink): Promise<PageSection[]>  {
+  async getSectionsForPage(page: PageLink): Promise<PageSection[]> {
     if (page.id === "home") {
       const sections: PageSection[] = [
         {
@@ -83,7 +83,7 @@ export class Target implements ContentSource {
         canChangeOrder: false,
         default: {
           id: "trending",
-        }
+        },
       },
     }
   }
