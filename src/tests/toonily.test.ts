@@ -27,6 +27,8 @@ describe("Toonily Tests", () => {
       page:1,
       filters: ["josei"]
     })
+    expect(PagedResultSchema.parse(data)).toEqual(expect.any(Object))
+    expect(data.results.length).toBeGreaterThan(1)
   })
   test("Chapters", async () => {
     const chapters = await source.getChapters("springtime-blossom-003")

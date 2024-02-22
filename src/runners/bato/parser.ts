@@ -31,7 +31,7 @@ export class Parser {
       const item = $("a.item-cover", element)
 
       const languageCode = BTLanguages.getLangCode(
-        $("em", element).attr("data-lang") ?? ""
+        $("em", element).attr("data-lang") ?? "",
       )
 
       const imgElem = $("img", item)
@@ -41,7 +41,7 @@ export class Parser {
         imgElem.attr("data-src")
 
       const title = `${languageCode || ""} ${decode(
-        $("a.item-title", element).text().trim()
+        $("a.item-title", element).text().trim(),
       )}`
 
       const contentId = item
@@ -60,9 +60,7 @@ export class Parser {
     const infoElement = $("div#mainer div.container-fluid")
 
     const textFromInfo = (str: string) => {
-      return $(`div.attr-item:contains(${str}) span`, infoElement)
-        .text()
-        .trim()
+      return $(`div.attr-item:contains(${str}) span`, infoElement).text().trim()
     }
     const workStatus = textFromInfo("Original work")
 
@@ -81,8 +79,7 @@ export class Parser {
 
     if (workStatus) {
       if (workStatus.includes("Ongoing")) status = PublicationStatus.ONGOING
-      if (workStatus.includes("Cancelled"))
-        status = PublicationStatus.CANCELLED
+      if (workStatus.includes("Cancelled")) status = PublicationStatus.CANCELLED
       if (workStatus.includes("Hiatus")) status = PublicationStatus.HIATUS
       if (workStatus.includes("Completed")) {
         if (uploadStatus?.includes("Ongoing"))
@@ -90,9 +87,6 @@ export class Parser {
         else status = PublicationStatus.COMPLETED
       }
     }
-
-    // TODO: Rank
-
     // Reading Mode
     // BUG: read direction !== reader direction. Webtoon/Manhwa are top to bottom, Manga right to left, comics left to right.
     const direction = textFromInfo("Read direction")
@@ -270,14 +264,14 @@ export class Parser {
 
     const evaluatedPass = eval(batoPass).toString()
     const imgAccListString = AES.decrypt(batoWord, evaluatedPass).toString(
-      enc.Utf8
+      enc.Utf8,
     )
     const imgAccList: string[] = JSON.parse(imgAccListString)
     const urls = imgHttpList.map((v, i) => `${v}?${imgAccList[i]}`)
 
     return urls.map((url) => ({ url }))
   }
-  
+
   async parsePopular(html: string): Promise<PagedResult> {
     const $ = load(html)
     const popularItemsSelector = $("div.home-popular div.col").toArray()
@@ -311,18 +305,18 @@ export class Parser {
     const $ = load(html)
     const latestItems = $("div.series-list div.col").toArray()
     const items: Highlight[] = []
-    
+
     latestItems.forEach((item: Element) => {
       const cover = $("a.item-cover img", item).attr("src") || ""
       const title = $("div.item-text a.item-title", item).text().trim()
       const languageCode = BTLanguages.getLangCode(
-        $("em", item).attr("data-lang") ?? ""
+        $("em", item).attr("data-lang") ?? "",
       )
       const contentId = $("div.item-text a.item-title", item)
         .attr("href")
         ?.trim()
         .match(/series\/(\d+)/)?.[1]
-    
+
       if (contentId) {
         items.push({
           cover,
