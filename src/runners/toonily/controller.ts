@@ -48,7 +48,8 @@ export default class Controller {
   async getSearchResults(query: DirectoryRequest): Promise<PagedResult> {
     const params: Record<string, unknown> = {}
     const page = query.page
-    const search = query?.query !== undefined ? `/${query.query}` : ""
+    const search =
+      query?.query !== undefined ? `/${query.query.replaceAll(" ", "-")}` : ""
 
     if (query.filters?.genres)
       query.filters.genres.map((genre: string, i: number) => {
