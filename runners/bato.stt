@@ -748,9 +748,7 @@ class Parser {
         const $ = (0, cheerio_1.load)(html);
         const infoElement = $("div#mainer div.container-fluid");
         const textFromInfo = (str) => {
-            return $(`div.attr-item:contains(${str}) span`, infoElement)
-                .text()
-                .trim();
+            return $(`div.attr-item:contains(${str}) span`, infoElement).text().trim();
         };
         const workStatus = textFromInfo("Original work");
         const uploadStatus = textFromInfo("Upload status");
@@ -777,7 +775,6 @@ class Parser {
                     status = daisuke_1.PublicationStatus.COMPLETED;
             }
         }
-        // TODO: Rank
         // Reading Mode
         // BUG: read direction !== reader direction. Webtoon/Manhwa are top to bottom, Manga right to left, comics left to right.
         const direction = textFromInfo("Read direction");

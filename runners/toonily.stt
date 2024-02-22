@@ -15,7 +15,7 @@ exports.GENRES = [
     { id: "horror", title: "horror", nsfw: false },
     { id: "josei", title: "josei", nsfw: false },
     { id: "magic", title: "magic", nsfw: false },
-    { id: "mature", title: "mature", nsfw: false },
+    { id: "mature", title: "mature", nsfw: true },
     { id: "mystery", title: "mystery", nsfw: false },
     { id: "psychological", title: "psychological", nsfw: false },
     { id: "romance", title: "romance", nsfw: false },
@@ -65,38 +65,45 @@ const parser_1 = __importDefault(require("./parser"));
 const interceptor_1 = require("./interceptor");
 class Controller {
     BASE = constants_1.BASE_URL;
-    parser = new parser_1.default;
-    client = new daisuke_1.NetworkClientBuilder().addRequestInterceptor(interceptor_1.interceptor).build();
+    parser = new parser_1.default();
+    client = new daisuke_1.NetworkClientBuilder()
+        .addRequestInterceptor(interceptor_1.interceptor)
+        .build();
     getFilters() {
         return [
             {
                 id: "genres",
                 title: "Genres",
                 type: daisuke_1.FilterType.MULTISELECT,
-                options: constants_1.GENRES
-            }, {
+                options: constants_1.GENRES,
+            },
+            {
                 id: "matchAll",
                 title: "All Genre's?",
-                type: daisuke_1.FilterType.TOGGLE
-            }, {
+                type: daisuke_1.FilterType.TOGGLE,
+            },
+            {
                 id: "adult",
                 title: "Adult",
                 type: daisuke_1.FilterType.SELECT,
-                options: constants_1.ADULT_TAGS
-            }, {
+                options: constants_1.ADULT_TAGS,
+            },
+            {
                 id: "status",
                 title: "Upload Status",
                 type: daisuke_1.FilterType.SELECT,
-                options: constants_1.STATUS_TAGS
-            }
+                options: constants_1.STATUS_TAGS,
+            },
         ];
     }
     async getSearchResults(query) {
         const params = {};
         const page = query.page;
-        const search = query?.query !== undefined ? `/${query.query}` : "";
+        const search = query?.query !== undefined ? `/${query.query.replaceAll(" ", "-")}` : "";
         if (query.filters?.genres)
-            query.filters.genres.map((genre, i) => { params[`genre[${i}]`] = genre; });
+            query.filters.genres.map((genre, i) => {
+                params[`genre[${i}]`] = genre;
+            });
         if (query.filters?.matchAll)
             params.op = 1;
         if (query.filters?.adult)
@@ -108,7 +115,7 @@ class Controller {
         const results = this.parser.parsePagedResponse(response.data);
         return {
             results,
-            isLastPage: results.length > 18
+            isLastPage: results.length > 18,
         };
     }
     async getContent(id) {
@@ -195,7 +202,7 @@ class Target {
                 canChangeOrder: false,
                 default: {
                     id: "trending",
-                }
+                },
             },
         };
     }
@@ -231,6 +238,7 @@ exports.interceptor = interceptor;
 },{"./constants":1}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const daisuke_1 = require("@suwatte/daisuke");
 const cheerio_1 = require("cheerio");
 const constants_1 = require("./constants");
 class Parser {
@@ -244,14 +252,16 @@ class Parser {
                 .attr("href")
                 ?.trim()
                 .match(/(?:webtoon)\/(.+)\//)?.[1];
-            const cover = $("a img", item).attr("data-src")?.replace(/-\d+x\d+/g, "");
+            const cover = $("a img", item)
+                .attr("data-src")
+                ?.replace(/-\d+x\d+/g, "");
             const title = $("div.item-summary a", element).text();
             if (!id || !cover || !title)
                 throw "Failed to Parse";
             return {
                 id,
                 cover,
-                title
+                title,
             };
         };
         const highlights = items.map(parseElement);
@@ -262,30 +272,84 @@ class Parser {
         const info = $("div.site-content div.tab-summary");
         const title = $("div.post-content h1", info).html()?.split(" <sp")[0];
         const cover = $("div.summary_image img").attr("data-src");
-        const creators = $("div.author-content a").toArray().map(author => $(author).text());
+        const creators = [];
         const summary = $("div.site-content div.summary__content p").text();
         const chapters = this.parseChapters(html);
+        const properties = [];
+        const additionalTitles = [];
+        let isNSFW = false;
+        let status;
+        for (const element of $("div.post-content_item").toArray()) {
+            const title = $("h5", element).text();
+            if (title.match(/genre/gi)?.[0] !== undefined) {
+                const genres = $("div.genres-content a", element).toArray();
+                properties.push({
+                    id: "genres",
+                    title: "Genres",
+                    tags: genres.map((genre) => {
+                        if ($(genre).text().toLowerCase() === "mature")
+                            isNSFW = true;
+                        return {
+                            id: $(genre).text().toLowerCase(),
+                            title: $(genre).text(),
+                            nsfw: false,
+                        };
+                    }),
+                });
+            }
+            else if (title.match(/status/gi)?.[0] !== undefined) {
+                status = $("div.summary-content", element)
+                    .text()
+                    .match(/ongoing/gi)
+                    ? daisuke_1.PublicationStatus.ONGOING
+                    : daisuke_1.PublicationStatus.COMPLETED;
+            }
+            else if (title.match(/(author\(s\)|artist\(s\))/gi)?.[0] !== undefined) {
+                creators.push($("div.summary-content a", element).text());
+            }
+            else if (title.match(/alt name/gi)?.[0] !== undefined) {
+                additionalTitles.push(...$("div.summary-content", element).text().trim().split(","));
+            }
+        }
+        if (creators.length > 0)
+            properties.push({
+                id: "creators",
+                title: "Credits",
+                tags: creators.map((c) => ({
+                    id: c.toLowerCase(),
+                    title: c,
+                    nsfw: false,
+                    noninteractive: true,
+                })),
+            });
         if (!title || !cover)
             throw "Couldn't parse";
         return {
             title,
             cover,
             summary,
-            creators: creators,
+            creators,
+            status,
+            isNSFW,
             chapters,
+            properties,
             webUrl: `${constants_1.BASE_URL}/webtoon/${contentId}`,
         };
     }
     parseChapters(html) {
         const $ = (0, cheerio_1.load)(html);
-        const chapterSelector = $("ul.main li").toArray().reverse();
+        const chapterSelector = $("ul.main li").toArray();
         const chapters = chapterSelector.map((chapter, i) => {
+            const chapterNumber = Number($("a", chapter)
+                .text()
+                .match(/(\d|\.)+/g)?.[0]);
             const response = {
-                chapterId: $("a", chapter).attr("href")?.split("webtoon/")[1] ?? "",
-                number: ++i,
+                chapterId: `${$("a", chapter).attr("href")?.split("webtoon/")[1]}` ?? "",
+                title: $("a", chapter).text().trim() || undefined,
+                number: chapterNumber,
                 index: i,
                 language: "EN",
-                date: new Date($("i", chapter).text())
+                date: new Date($("i", chapter).text()),
             };
             return response;
         });
@@ -296,8 +360,7 @@ class Parser {
         const images = $("div.reading-content img").toArray();
         const pages = images.map((image) => {
             return {
-                url: $(image).attr("src")?.trim() ??
-                    $(image).attr("data-src")?.trim()
+                url: $(image).attr("src")?.trim() ?? $(image).attr("data-src")?.trim(),
             };
         });
         return pages;
@@ -305,7 +368,7 @@ class Parser {
 }
 exports.default = Parser;
 
-},{"./constants":1,"cheerio":undefined}],6:[function(require,module,exports){
+},{"./constants":1,"@suwatte/daisuke":6,"cheerio":undefined}],6:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
