@@ -16,16 +16,24 @@ describe("Toonily Tests", () => {
   })
   test("Search with query", async () => {
     const data = await source.getDirectory({
-      page:1,
-      query: "spring"
+      page: 1,
+      query: "spring",
+    })
+    expect(PagedResultSchema.parse(data)).toEqual(expect.any(Object))
+    expect(data.results.length).toBeGreaterThan(1)
+  })
+  test("Search with multi-word query", async () => {
+    const data = await source.getDirectory({
+      page: 1,
+      query: "second life",
     })
     expect(PagedResultSchema.parse(data)).toEqual(expect.any(Object))
     expect(data.results.length).toBeGreaterThan(1)
   })
   test("Search with Tags", async () => {
     const data = await source.getDirectory({
-      page:1,
-      filters: ["josei"]
+      page: 1,
+      filters: ["josei"],
     })
     expect(PagedResultSchema.parse(data)).toEqual(expect.any(Object))
     expect(data.results.length).toBeGreaterThan(1)
@@ -36,7 +44,10 @@ describe("Toonily Tests", () => {
     expect(chapters.length).toBeGreaterThan(1)
   })
   test("Reader", async () => {
-    const data = await source.getChapterData("foo", "springtime-blossom-003/chapter-1/")
+    const data = await source.getChapterData(
+      "foo",
+      "springtime-blossom-003/chapter-1/",
+    )
     expect(ChapterDataSchema.parse(data)).toEqual(expect.any(Object))
   })
 })
