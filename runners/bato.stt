@@ -455,8 +455,8 @@ class Controller {
             const includedTags = [];
             const excludedTags = [];
             for (const filter in query.filters) {
-                includedTags.push(...query.filters[filter].included || []);
-                excludedTags.push(...query.filters[filter].excludedTags || []);
+                includedTags.push(...(query.filters[filter].included || []));
+                excludedTags.push(...(query.filters[filter].excludedTags || []));
             }
             params.genres = `${includedTags}${excludedTags.length > 0 ? `|${excludedTags}` : ""}`;
             if (query.filters.origin)
@@ -467,8 +467,9 @@ class Controller {
                 params.chapters = 1;
             if (query.filters?.status)
                 params.release = query.filters.status;
+            if (query?.sort)
+                params.sort = query.sort.id;
         }
-        params.sort = query.sort?.id ?? "";
         const response = await this.client.get(`${this.BASE}/browse`, {
             params,
         });
@@ -477,6 +478,12 @@ class Controller {
     }
     getFilters() {
         return [
+            {
+                id: "sort",
+                title: "Sort By",
+                type: daisuke_1.FilterType.SELECT,
+                options: constants_1.SORTERS,
+            },
             {
                 id: "content_type",
                 title: "Content Type",
@@ -530,6 +537,11 @@ class Controller {
     }
     getProperties() {
         return [
+            // {
+            //   id: "sort",
+            //   title: "Sort By",
+            //   tags: SORTERS,
+            // },
             {
                 id: "content_type",
                 title: "Content Type",
@@ -578,7 +590,7 @@ class Controller {
     async getChapterData(chapterId) {
         const response = await this.client.get(`${this.BASE}/chapter/${chapterId}`);
         return {
-            pages: this.parser.parsePages(response.data)
+            pages: this.parser.parsePages(response.data),
         };
     }
     async getHomeSections({ id }) {
@@ -699,7 +711,7 @@ class Target {
             filters: this.controller.getFilters(),
             sort: {
                 options: constants_1.SORTERS,
-                canChangeOrder: false,
+                canChangeOrder: true,
             },
         };
     }
