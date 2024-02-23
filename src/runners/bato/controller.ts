@@ -56,7 +56,6 @@ export class Controller {
       if (query.filters?.status) params.release = query.filters.status
       if (query.filters?.sort) params.sort = query.filters.sort
     }
-    console.log(params)
     const response = await this.client.get(`${this.BASE}/browse`, {
       params,
     })
