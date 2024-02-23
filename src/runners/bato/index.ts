@@ -1,4 +1,4 @@
-import type {  
+import type {
   Chapter,
   ChapterData,
   Content,
@@ -49,7 +49,7 @@ export class Target implements ContentSource {
     return this.controller.getSearchResults(request)
   }
 
-  async getSectionsForPage(page: PageLink): Promise<PageSection[]>  {
+  async getSectionsForPage(page: PageLink): Promise<PageSection[]> {
     if (page.id === "home") {
       const sections: PageSection[] = [
         {
@@ -75,13 +75,13 @@ export class Target implements ContentSource {
   }
 
   async getDirectoryConfig(
-    _configID?: string | undefined
+    _configID?: string | undefined,
   ): Promise<DirectoryConfig> {
     return {
       filters: this.controller.getFilters(),
       sort: {
         options: SORTERS,
-        canChangeOrder: false,
+        canChangeOrder: true,
       },
     }
   }

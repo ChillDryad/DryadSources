@@ -10,11 +10,7 @@ import type {
   PageSection,
 } from "@suwatte/daisuke"
 
-import {
-  FilterType,
-  UIMultiPicker,
-  SectionStyle,
-} from "@suwatte/daisuke"
+import { FilterType, UIMultiPicker, SectionStyle } from "@suwatte/daisuke"
 import {
   ADULT_TAGS,
   CHAPTERS,
@@ -23,6 +19,7 @@ import {
   GENERIC_TAGS,
   LANG_TAGS,
   ORIGIN_TAGS,
+  SORTERS,
   STATUS_TAGS,
 } from "./constants"
 
@@ -46,8 +43,8 @@ export class Controller {
       const includedTags: string[] = []
       const excludedTags: string[] = []
       for (const filter in query.filters) {
-        includedTags.push(...query.filters[filter].included || [])
-        excludedTags.push(...query.filters[filter].excludedTags || [])
+        includedTags.push(...(query.filters[filter].included || []))
+        excludedTags.push(...(query.filters[filter].excludedTags || []))
       }
       params.genres = `${includedTags}${
         excludedTags.length > 0 ? `|${excludedTags}` : ""
@@ -57,9 +54,9 @@ export class Controller {
         params.langs = query.filters.translated.toString()
       if (!query.filters?.chapters) params.chapters = 1
       if (query.filters?.status) params.release = query.filters.status
+      if (query?.sort) params.sort = query.sort.id
     }
 
-    params.sort = query.sort?.id ?? ""
     const response = await this.client.get(`${this.BASE}/browse`, {
       params,
     })
@@ -69,6 +66,12 @@ export class Controller {
 
   getFilters(): DirectoryFilter[] {
     return [
+      {
+        id: "sort",
+        title: "Sort By",
+        type: FilterType.SELECT,
+        options: SORTERS,
+      },
       {
         id: "content_type",
         title: "Content Type",
@@ -124,6 +127,11 @@ export class Controller {
 
   getProperties(): Property[] {
     return [
+      // {
+      //   id: "sort",
+      //   title: "Sort By",
+      //   tags: SORTERS,
+      // },
       {
         id: "content_type",
         title: "Content Type",
@@ -175,7 +183,7 @@ export class Controller {
   async getChapterData(chapterId: string): Promise<ChapterData> {
     const response = await this.client.get(`${this.BASE}/chapter/${chapterId}`)
     return {
-      pages: this.parser.parsePages(response.data)
+      pages: this.parser.parsePages(response.data),
     }
   }
 
@@ -198,20 +206,20 @@ export class Controller {
   }
   async resolveHomeSections(
     _link: PageLink,
-    section: string
+    section: string,
   ): Promise<ResolvedPageSection> {
     const response = await this.client.get(this.BASE)
     switch (section) {
-    case "popular":
-      return {
-        items: (await this.parser.parsePopular(response.data)).results,
-      }
-    case "latest":
-      return {
-        items: (await this.parser.parseLatest(response.data)).results,
-      }
-    default:
-      throw new Error("Something went horribly wrong.")
+      case "popular":
+        return {
+          items: (await this.parser.parsePopular(response.data)).results,
+        }
+      case "latest":
+        return {
+          items: (await this.parser.parseLatest(response.data)).results,
+        }
+      default:
+        throw new Error("Something went horribly wrong.")
     }
   }
 
