@@ -46,7 +46,6 @@ export class Controller {
         includedTags.push(...(query.filters[filter].included || []))
         excludedTags.push(...(query.filters[filter].excluded || []))
       }
-      console.log(includedTags, excludedTags)
       params.genres = `${includedTags}${
         excludedTags.length > 0 ? `|${excludedTags}` : ""
       }`
@@ -55,7 +54,7 @@ export class Controller {
         params.langs = query.filters.translated.toString()
       if (!query.filters?.chapters) params.chapters = 1
       if (query.filters?.status) params.release = query.filters.status
-      if (query?.sort) params.sort = query.sort.id
+      if (query.filters?.sort) params.sort = query.filters.sort
     }
     const response = await this.client.get(`${this.BASE}/browse`, {
       params,
