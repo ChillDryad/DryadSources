@@ -44,8 +44,9 @@ export class Controller {
       const excludedTags: string[] = []
       for (const filter in query.filters) {
         includedTags.push(...(query.filters[filter].included || []))
-        excludedTags.push(...(query.filters[filter].excludedTags || []))
+        excludedTags.push(...(query.filters[filter].excluded || []))
       }
+      console.log(includedTags, excludedTags)
       params.genres = `${includedTags}${
         excludedTags.length > 0 ? `|${excludedTags}` : ""
       }`
@@ -56,7 +57,7 @@ export class Controller {
       if (query.filters?.status) params.release = query.filters.status
       if (query?.sort) params.sort = query.sort.id
     }
-
+    console.log(params)
     const response = await this.client.get(`${this.BASE}/browse`, {
       params,
     })
