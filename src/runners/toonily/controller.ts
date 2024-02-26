@@ -9,14 +9,11 @@ import {
 } from "@suwatte/daisuke"
 import { ADULT_TAGS, BASE_URL, GENRES, STATUS_TAGS } from "./constants"
 import Parser from "./parser"
-import { interceptor } from "./interceptor"
 
 export default class Controller {
   private BASE = BASE_URL
   private parser = new Parser()
-  private client = new NetworkClientBuilder()
-    .addRequestInterceptor(interceptor)
-    .build()
+  private client = new NetworkClientBuilder().build()
 
   getFilters(): DirectoryFilter[] {
     return [

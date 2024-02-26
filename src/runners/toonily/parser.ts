@@ -116,6 +116,10 @@ export default class Parser {
           .text()
           .match(/(\d|\.)+/g)?.[0],
       )
+      const dateElement = $("i", chapter).text()
+      const datePosted = dateElement.includes(",")
+        ? new Date(dateElement)
+        : new Date()
       const response = {
         chapterId:
           `${$("a", chapter).attr("href")?.split("webtoon/")[1]}` ?? "",
@@ -123,7 +127,7 @@ export default class Parser {
         number: chapterNumber,
         index: i,
         language: "EN",
-        date: new Date($("i", chapter).text()),
+        date: datePosted,
       }
       return response
     })
