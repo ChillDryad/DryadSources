@@ -51,6 +51,7 @@ export class Target implements ContentSource {
     return {
       url,
       headers: { Referer: `${BASE_URL}/` },
+      cookies: [{ name: "toonily-lazyload", value: "off" }],
     }
   }
 
@@ -74,7 +75,7 @@ export class Target implements ContentSource {
   }
 
   async getDirectoryConfig(
-    _configID?: string | undefined
+    _configID?: string | undefined,
   ): Promise<DirectoryConfig> {
     return {
       filters: this.controller.getFilters(),
