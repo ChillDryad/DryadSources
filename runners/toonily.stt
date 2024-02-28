@@ -171,6 +171,7 @@ class Target {
         return {
             url,
             headers: { Referer: `${constants_1.BASE_URL}/` },
+            cookies: [{ name: "toonily-lazyload", value: "off" }],
         };
     }
     async getSectionsForPage(page) {
