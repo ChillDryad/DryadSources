@@ -19,9 +19,9 @@ export class Parser {
     return highlights
   }
 
-  parseContent(html: string, contentId: string): Content {
+  parseContent(html: string, _contentId: string): Content {
     const $ = load(html)
-    const containers = $("div.tag-container").toArray()
+    // const containers = $("div.tag-container").toArray()
 
     // const properties = containers.map((container) => {
     //   if ($(container).text().trim().toLowerCase() === "tags") {
