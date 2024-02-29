@@ -676,11 +676,11 @@ class Target {
     getChapterData(_contentId, chapterId) {
         return this.controller.getChapterData(chapterId);
     }
-    async getPreferenceMenu() {
-        return this.controller.getPreferences();
-    }
     getDirectory(request) {
         return this.controller.getSearchResults(request);
+    }
+    async getPreferenceMenu() {
+        return this.controller.getPreferences();
     }
     async getSectionsForPage(page) {
         if (page.id === "home") {
