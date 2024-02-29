@@ -1,4 +1,4 @@
-import type { ChapterPage, Content } from "@suwatte/daisuke"
+import type { ChapterPage, Content, Property } from "@suwatte/daisuke"
 import { load } from "cheerio"
 export class Parser {
   parsePagedResponse(html: string) {
@@ -21,30 +21,24 @@ export class Parser {
 
   parseContent(html: string, _contentId: string): Content {
     const $ = load(html)
-    // const containers = $("div.tag-container").toArray()
+    const containers = $("div.tag-container").toArray()
 
-    // const properties = containers.map((container) => {
-    //   if ($(container).text().trim().toLowerCase() === "tags") {
-    //     return {
-    //       id: $(container).text().trim().toLowerCase(),
-    //       title: $(container).text().trim(),
-    //       tags: $(container)
-    //         .children()
-    //         .toArray()
-    //         .map((tag) => {
-    //           const id = $("span.name", tag).html()
-    //           const title = $("span.name", tag).html()
-    //           console.log(id, title)
-    //           if (id && title)
-    //             return {
-    //               id,
-    //               title,
-    //               nsfw: true,
-    //             }
-    //         }),
-    //     }
-    //   }
-    // })
+    const properties: Property[] = []
+    containers.map((container) => {
+      const name = $(container).text().trim()
+      if (name.includes("Tags:")) {
+        const genres = $("span.tags a span.name", container).toArray()
+        const res = genres.map((genre) => ({
+          id: $(genre).text().replace(" ", "-"),
+          title: $(genre).text(),
+        }))
+        properties.push({
+          id: name.toLowerCase(),
+          title: name,
+          tags: res,
+        })
+      }
+    })
 
     const title = $("div#info h1.title").text()
     const cover = $("div#cover a img").attr("data-src")
@@ -52,6 +46,7 @@ export class Parser {
     return {
       title,
       cover,
+      properties,
     }
   }
   parsePages(html: string): ChapterPage[] {

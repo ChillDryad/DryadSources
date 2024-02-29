@@ -35,6 +35,7 @@ export class Controller {
     let url = this.BASE
     if (query.filters?.tags !== undefined)
       url = `${url}/tag/${query.filters.tags.replaceAll(" ", "-")}`
+    if (query?.tag) url = `${url}/tag/${query.tag.tagId}`
     const response = await this.client.get(url, {
       params,
     })
