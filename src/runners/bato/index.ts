@@ -40,15 +40,13 @@ export class Target implements ContentSource {
   getChapterData(_contentId: string, chapterId: string): Promise<ChapterData> {
     return this.controller.getChapterData(chapterId)
   }
-
-  async getPreferenceMenu(): Promise<Form> {
-    return this.controller.getPreferences()
-  }
-
   getDirectory(request: DirectoryRequest): Promise<PagedResult> {
     return this.controller.getSearchResults(request)
   }
 
+  async getPreferenceMenu(): Promise<Form> {
+    return this.controller.getPreferences()
+  }
   async getSectionsForPage(page: PageLink): Promise<PageSection[]> {
     if (page.id === "home") {
       const sections: PageSection[] = [
@@ -67,13 +65,11 @@ export class Target implements ContentSource {
     }
     throw new Error("I don't know how you got here.")
   }
-
   async resolvePageSection(link: PageLink, sectionId: string) {
     if (link.id === "home")
       return this.controller.resolveHomeSections(link, sectionId)
     else throw new Error(`Something bad happened when I loaded ${link.id}`)
   }
-
   async getDirectoryConfig(
     _configID?: string | undefined,
   ): Promise<DirectoryConfig> {
