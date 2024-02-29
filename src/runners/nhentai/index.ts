@@ -16,7 +16,7 @@ export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "net.nhentai",
     name: "nHentai",
-    version: 0.1,
+    version: 0.2,
     website: "https://nhentai.net",
     supportedLanguages: ["EN"], // TODO: add supported languages
     thumbnail: "nhentai.png",
@@ -36,17 +36,7 @@ export class Target implements ContentSource {
   getDirectory(request: DirectoryRequest): Promise<PagedResult> {
     return this.controller.getSearchResults(request)
   }
-
-  // getTags?(): Promise<Property[]> {
-  //   throw new Error("Method not implemented.")
-  // }
-  // config?: SourceConfig | undefined
-  // onEnvironmentLoaded?(): Promise<void> {
-  //   throw new Error("Method not implemented.")
-  // }
-  async getDirectoryConfig(
-    configID?: string | undefined,
-  ): Promise<DirectoryConfig> {
+  async getDirectoryConfig(): Promise<DirectoryConfig> {
     return {
       filters: this.controller.getFilters(),
     }
