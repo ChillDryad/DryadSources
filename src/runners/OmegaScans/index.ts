@@ -4,15 +4,12 @@ import {
   ChapterData,
   Content,
   ContentSource,
-  DeepLinkContext,
   DirectoryConfig,
   DirectoryRequest,
   FilterType,
   PagedResult,
-  Property,
   PublicationStatus,
   RunnerInfo,
-  SourceConfig,
 } from "@suwatte/daisuke"
 import { load } from "cheerio"
 
