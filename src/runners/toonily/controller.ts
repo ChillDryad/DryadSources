@@ -6,6 +6,7 @@ import {
   FilterType,
   NetworkResponse,
   NetworkClientBuilder,
+  type NetworkRequest,
 } from "@suwatte/daisuke"
 import { ADULT_TAGS, BASE_URL, GENRES, STATUS_TAGS } from "./constants"
 import Parser from "./parser"
@@ -13,7 +14,28 @@ import Parser from "./parser"
 export default class Controller {
   private BASE = BASE_URL
   private parser = new Parser()
-  private client = new NetworkClientBuilder().build()
+  private client = new NetworkClientBuilder()
+    .addRequestInterceptor(async (req: NetworkRequest) => {
+      return {
+        ...req,
+        headers: {
+          ...req.headers,
+          Referer: `${BASE_URL}/`,
+        },
+        cookies: [
+          ...(req.cookies || []),
+          {
+            name: "toonily-lazyload",
+            value: "off",
+          },
+          {
+            name: "toonily-mature",
+            value: "1",
+          },
+        ],
+      }
+    })
+    .build()
 
   getFilters(): DirectoryFilter[] {
     return [

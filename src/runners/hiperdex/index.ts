@@ -6,7 +6,7 @@ const info: RunnerInfo = {
   id: "hiperdex",
   name: "Hiperdex",
   thumbnail: "hiperdex.png",
-  version: 0.1,
+  version: 0.2,
   website: "https://hiperdex.com",
 }
 
