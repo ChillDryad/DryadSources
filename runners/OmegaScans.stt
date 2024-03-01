@@ -21,7 +21,7 @@ class Target {
         const genres = [];
         if (request?.filters?.genres)
             genres.push(request.filters.genres.map((g) => Number(g)));
-        const url = `${this.apiUrl}/query?query_string&series_status=All&order=desc&orderBy=${request.sort?.id ?? "latest"}&series_type=Comic&page=${request.page}&perPage=12&tags_ids=[${genres}]`;
+        const url = `${this.apiUrl}/query?query_string=${request.query ?? ""}&series_status=All&order=desc&orderBy=${request.sort?.id ?? "latest"}&series_type=Comic&page=${request.page}&perPage=12&tags_ids=[${genres}]`;
         console.log(url);
         const response = await this.client.get(url);
         const jsonResponse = JSON.parse(response.data);
@@ -119,7 +119,7 @@ class Target {
         console.log(pages);
         return { pages };
     }
-    async getDirectoryConfig(configID) {
+    async getDirectoryConfig() {
         return {
             filters: [
                 {
