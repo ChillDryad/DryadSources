@@ -6,13 +6,11 @@ import type {
   DirectoryConfig,
   DirectoryRequest,
   NetworkRequest,
-  PageLink,
-  PageSection,
   PagedResult,
   RunnerInfo,
 } from "@suwatte/daisuke"
 
-import { CatalogRating, SectionStyle } from "@suwatte/daisuke"
+import { CatalogRating } from "@suwatte/daisuke"
 
 import Controller from "./controller"
 import { BASE_URL, SORT } from "./constants"
@@ -51,27 +49,7 @@ export class Target implements ContentSource {
     return {
       url,
       headers: { Referer: `${BASE_URL}/` },
-      cookies: [{ name: "toonily-lazyload", value: "off" }],
     }
-  }
-
-  async getSectionsForPage(page: PageLink): Promise<PageSection[]> {
-    if (page.id === "home") {
-      const sections: PageSection[] = [
-        {
-          id: "popular",
-          title: "Popular Titles",
-          style: SectionStyle.GALLERY,
-        },
-        {
-          id: "latest",
-          title: "Latest Titles",
-          style: SectionStyle.PADDED_LIST,
-        },
-      ]
-      return sections
-    }
-    throw new Error("I don't know how you got here.")
   }
 
   async getDirectoryConfig(
