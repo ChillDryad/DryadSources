@@ -39,7 +39,6 @@ export class Target implements ContentSource {
     }&series_status=All&order=desc&orderBy=${
       request.sort?.id ?? "latest"
     }&series_type=Comic&page=${request.page}&perPage=12&tags_ids=[${genres}]`
-    console.log(url)
 
     const response = await this.client.get(url)
 
@@ -99,7 +98,6 @@ export class Target implements ContentSource {
         title: tag.title,
       })),
     })
-    console.log(chapters.reverse())
     return {
       title,
       cover,
@@ -147,11 +145,15 @@ export class Target implements ContentSource {
     const $ = load(response.data)
     const parsedPages = $("p.flex img").toArray()
     const pages = parsedPages.map((page) => {
+      const url =
+        // @ts-expect-error this will exist
+        $(page).attr("data-src")?.trim().length > 1
+          ? $(page).attr("data-src")?.trim()
+          : $(page).attr("src")?.trim()
       return {
-        url: $(page).attr("src")?.trim() ?? $(page).attr("data-src")?.trim(),
+        url,
       }
     })
-    console.log(pages)
     return { pages }
   }
   async getDirectoryConfig(): Promise<DirectoryConfig> {
