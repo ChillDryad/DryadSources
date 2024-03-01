@@ -34,9 +34,9 @@ export class Target implements ContentSource {
     if (request?.filters?.genres)
       genres.push(request.filters.genres.map((g: string) => Number(g)))
 
-    const url = `${
-      this.apiUrl
-    }/query?query_string&series_status=All&order=desc&orderBy=${
+    const url = `${this.apiUrl}/query?query_string=${
+      request.query ?? ""
+    }&series_status=All&order=desc&orderBy=${
       request.sort?.id ?? "latest"
     }&series_type=Comic&page=${request.page}&perPage=12&tags_ids=[${genres}]`
     console.log(url)
@@ -154,9 +154,7 @@ export class Target implements ContentSource {
     console.log(pages)
     return { pages }
   }
-  async getDirectoryConfig(
-    configID?: string | undefined,
-  ): Promise<DirectoryConfig> {
+  async getDirectoryConfig(): Promise<DirectoryConfig> {
     return {
       filters: [
         {
