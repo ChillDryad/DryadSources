@@ -21,7 +21,7 @@ export class Target implements ContentSource {
     id: "org.omegascans",
     name: "OmegaScans",
     thumbnail: "omega.png",
-    version: 0.1,
+    version: 0.2,
     website: this.baseUrl,
     supportedLanguages: ["EN_US"],
     rating: CatalogRating.NSFW,
