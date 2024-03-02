@@ -5,10 +5,10 @@ exports.Target = void 0;
 const tachiyomi_1 = require("../../templates/tachiyomi");
 const tachidara_1 = require("../../templates/tachidara");
 const info = {
-    id: "hiperdex",
+    id: "kusa.hiperdex",
     name: "Hiperdex",
     thumbnail: "hiperdex.png",
-    version: 0.2,
+    version: 0.3,
     website: "https://hiperdex.com",
 };
 class Hiperdex extends tachidara_1.TachiDaraTemplate {

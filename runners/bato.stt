@@ -657,9 +657,9 @@ const constants_1 = require("./constants");
 const controller_1 = require("./controller");
 class Target {
     info = {
-        id: "to.bato",
+        id: "kusa.bato",
         name: "Bato",
-        version: 0.5,
+        version: 0.6,
         website: "https://bato.to",
         supportedLanguages: constants_1.LANG_TAGS.map((l) => l.id),
         thumbnail: "bato.png",

@@ -1033,7 +1033,7 @@ class Target {
     info = {
         id: "net.nhentai",
         name: "nHentai",
-        version: 0.3,
+        version: 0.4,
         website: "https://nhentai.net",
         supportedLanguages: ["EN"],
         thumbnail: "nhentai.png",

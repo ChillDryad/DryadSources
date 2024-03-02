@@ -164,10 +164,10 @@ const controller_1 = __importDefault(require("./controller"));
 const constants_1 = require("./constants");
 class Target {
     info = {
-        id: "com.toonily",
+        id: "kusa.toonily",
         name: "Toonily",
         thumbnail: "toonily.png",
-        version: 1.6,
+        version: 1.7,
         website: constants_1.BASE_URL,
         supportedLanguages: ["EN_US"],
         rating: daisuke_1.CatalogRating.MIXED,
