@@ -3,10 +3,10 @@ import { TachiBuilder } from "../../templates/tachiyomi"
 import { TachiDaraTemplate } from "../../templates/tachidara"
 
 const info: RunnerInfo = {
-  id: "hiperdex",
+  id: "kusa.hiperdex",
   name: "Hiperdex",
   thumbnail: "hiperdex.png",
-  version: 0.2,
+  version: 0.3,
   website: "https://hiperdex.com",
 }
 

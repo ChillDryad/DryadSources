@@ -17,10 +17,10 @@ import { BASE_URL, SORT } from "./constants"
 
 export class Target implements ContentSource {
   info: RunnerInfo = {
-    id: "com.toonily",
+    id: "kusa.toonily",
     name: "Toonily",
     thumbnail: "toonily.png",
-    version: 1.6,
+    version: 1.7,
     website: BASE_URL,
     supportedLanguages: ["EN_US"],
     rating: CatalogRating.MIXED,
