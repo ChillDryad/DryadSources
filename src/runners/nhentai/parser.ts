@@ -58,7 +58,8 @@ export class Parser {
       const type = $("img", img).attr("data-src")?.split(".")
       const id = $("img", img)
         .attr("data-src")
-        ?.match(/(?<=galleries\/)(\d+)/g)
+        ?.split("galleries/")[1]
+        .split("/")[0]
 
       if (!type) throw "Couldn't parse"
       return {
@@ -67,10 +68,6 @@ export class Parser {
         }`,
       }
     })
-    // .map((image) => {
-    //   const url = $(image).attr("data-src")
-    //   if (url) return { url }
-    // })
     return pages
   }
 }

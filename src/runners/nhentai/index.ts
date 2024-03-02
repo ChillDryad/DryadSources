@@ -16,11 +16,11 @@ export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "net.nhentai",
     name: "nHentai",
-    version: 0.2,
+    version: 0.3,
     website: "https://nhentai.net",
     supportedLanguages: ["EN"], // TODO: add supported languages
     thumbnail: "nhentai.png",
-    rating: CatalogRating.MIXED,
+    rating: CatalogRating.NSFW,
   }
 
   private controller = new Controller()
