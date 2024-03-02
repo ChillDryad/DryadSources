@@ -16,7 +16,7 @@ export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "net.nhentai",
     name: "nHentai",
-    version: 0.3,
+    version: 0.4,
     website: "https://nhentai.net",
     supportedLanguages: ["EN"], // TODO: add supported languages
     thumbnail: "nhentai.png",

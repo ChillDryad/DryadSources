@@ -18,10 +18,10 @@ export class Target implements ContentSource {
   apiUrl = this.baseUrl.replace("//", "//api.")
 
   info: RunnerInfo = {
-    id: "org.omegascans",
+    id: "kusa.omegascans",
     name: "OmegaScans",
     thumbnail: "omega.png",
-    version: 0.2,
+    version: 0.3,
     website: this.baseUrl,
     supportedLanguages: ["EN_US"],
     rating: CatalogRating.NSFW,
@@ -117,14 +117,14 @@ export class Target implements ContentSource {
     jsonResponse.seasons.forEach(
       (season: Record<string, Record<string, string>[]>) => {
         const seasonChapters: Chapter[] = []
-        // TODO: fix
         season.chapters.forEach((chapter: any) => {
           if (chapter.price === 0)
             seasonChapters.push({
               chapterId: chapter.chapter_slug,
               title: chapter.chapter_name,
               number: Number(chapter.index.split(".")[0]),
-              index: Number(chapter.index.split(".")[0]),
+              index:
+                season.chapters.length - Number(chapter.index.split(".")[0]),
               language: "EN_US",
               date: new Date(chapter.created_at),
             })
