@@ -1033,11 +1033,11 @@ class Target {
     info = {
         id: "net.nhentai",
         name: "nHentai",
-        version: 0.2,
+        version: 0.3,
         website: "https://nhentai.net",
         supportedLanguages: ["EN"],
         thumbnail: "nhentai.png",
-        rating: daisuke_1.CatalogRating.MIXED,
+        rating: daisuke_1.CatalogRating.NSFW,
     };
     controller = new controller_1.Controller();
     getContent(contentId) {
@@ -1120,17 +1120,14 @@ class Parser {
             const type = $("img", img).attr("data-src")?.split(".");
             const id = $("img", img)
                 .attr("data-src")
-                ?.match(/(?<=galleries\/)(\d+)/g);
+                ?.split("galleries/")[1]
+                .split("/")[0];
             if (!type)
                 throw "Couldn't parse";
             return {
                 url: `https://i.nhentai.net/galleries/${id}/${i + 1}.${type[type.length - 1]}`,
             };
         });
-        // .map((image) => {
-        //   const url = $(image).attr("data-src")
-        //   if (url) return { url }
-        // })
         return pages;
     }
 }
