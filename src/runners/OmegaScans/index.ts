@@ -1,22 +1,21 @@
+// TODO: remove below when types are better defined
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   CatalogRating,
-  Chapter,
-  ChapterData,
-  Content,
-  ContentSource,
-  DeepLinkContext,
-  DirectoryConfig,
-  DirectoryRequest,
+  type Chapter,
+  type ChapterData,
+  type Content,
+  type ContentSource,
+  type DirectoryConfig,
+  type DirectoryRequest,
   FilterType,
-  PageLink,
-  PageSection,
-  PagedResult,
-  Property,
+  type PageLink,
+  type PageSection,
+  type PagedResult,
   PublicationStatus,
-  ResolvedPageSection,
-  RunnerInfo,
+  type ResolvedPageSection,
+  type RunnerInfo,
   SectionStyle,
-  SourceConfig,
 } from "@suwatte/daisuke"
 import { load } from "cheerio"
 
