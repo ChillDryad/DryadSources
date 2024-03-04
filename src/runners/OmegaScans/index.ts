@@ -4,12 +4,19 @@ import {
   ChapterData,
   Content,
   ContentSource,
+  DeepLinkContext,
   DirectoryConfig,
   DirectoryRequest,
   FilterType,
+  PageLink,
+  PageSection,
   PagedResult,
+  Property,
   PublicationStatus,
+  ResolvedPageSection,
   RunnerInfo,
+  SectionStyle,
+  SourceConfig,
 } from "@suwatte/daisuke"
 import { load } from "cheerio"
 
@@ -27,6 +34,61 @@ export class Target implements ContentSource {
     rating: CatalogRating.NSFW,
   }
   client = new NetworkClient()
+
+  async getSectionsForPage(page: PageLink): Promise<PageSection[]> {
+    if (page.id === "home")
+      return [
+        {
+          id: "featured",
+          title: "Featured",
+          style: SectionStyle.GALLERY,
+        },
+        {
+          id: "top",
+          title: "Most Popular",
+          style: SectionStyle.DEFAULT,
+        },
+        {
+          id: "new",
+          title: "Newest",
+          style: SectionStyle.PADDED_LIST,
+        },
+      ]
+    else throw new Error("You see nothing here.")
+  }
+
+  async resolvePageSection(
+    link: PageLink,
+    section: string,
+  ): Promise<ResolvedPageSection> {
+    if (link.id === "home") {
+      let url = this.apiUrl
+      switch (section) {
+        case "featured":
+          url = `${this.apiUrl}/series/banners`
+          break
+        case "top":
+          url = `${this.apiUrl}/query?visibility%3DPublic&series_type%3DAll&order%3Ddesc&orderBy%3Dtotal_views&page%3D1&perPage%3D10`
+          break
+        case "new":
+          url = `${this.apiUrl}/query?query_string%3D&series_status%3DAll&order%3Ddesc&orderBy%3Dlatest&series_type%3DComic&page%3D1&perPage%3D12&tags_ids%3D%5B%5D`
+          break
+      }
+      const response = await this.client.get(url)
+      const jsonResponse =
+        section === "featured"
+          ? JSON.parse(response.data)
+          : JSON.parse(response.data).data
+      const highlights = jsonResponse.map((item: Record<string, string>) => ({
+        id: item.series_slug,
+        title: item.title,
+        cover: item.thumbnail,
+      }))
+      return {
+        items: highlights,
+      }
+    } else throw new Error(`Unable to create sections for ${link.id}`)
+  }
 
   async getDirectory(request: DirectoryRequest): Promise<PagedResult> {
     const genres = []
