@@ -1,3 +1,3 @@
-# Development Suwatte Sources
+# Kusahime/ChillDryad's Non-Generic Runners
 
-Sources used during internal testing of Suwatte.
+These are runners that I support. 
