@@ -28,7 +28,7 @@ export class Target implements ContentSource {
     id: "kusa.omegascans",
     name: "OmegaScans",
     thumbnail: "omega.png",
-    version: 0.4,
+    version: 1.0,
     website: this.baseUrl,
     supportedLanguages: ["EN_US"],
     rating: CatalogRating.NSFW,
