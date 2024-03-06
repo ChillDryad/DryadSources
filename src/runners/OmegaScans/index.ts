@@ -16,6 +16,7 @@ import {
   type ResolvedPageSection,
   type RunnerInfo,
   SectionStyle,
+  ReadingMode,
 } from "@suwatte/daisuke"
 import { load } from "cheerio"
 
@@ -27,7 +28,7 @@ export class Target implements ContentSource {
     id: "kusa.omegascans",
     name: "OmegaScans",
     thumbnail: "omega.png",
-    version: 0.3,
+    version: 0.4,
     website: this.baseUrl,
     supportedLanguages: ["EN_US"],
     rating: CatalogRating.NSFW,
@@ -47,11 +48,11 @@ export class Target implements ContentSource {
           title: "Most Popular",
           style: SectionStyle.DEFAULT,
         },
-        {
-          id: "new",
-          title: "Newest",
-          style: SectionStyle.PADDED_LIST,
-        },
+        // { // API doesn't seem to want to return the newest entries.
+        //   id: "new",
+        //   title: "Newest",
+        //   style: SectionStyle.PADDED_LIST,
+        // },
       ]
     else throw new Error("You see nothing here.")
   }
@@ -69,9 +70,9 @@ export class Target implements ContentSource {
         case "top":
           url = `${this.apiUrl}/query?visibility%3DPublic&series_type%3DAll&order%3Ddesc&orderBy%3Dtotal_views&page%3D1&perPage%3D10`
           break
-        case "new":
-          url = `${this.apiUrl}/query?query_string%3D&series_status%3DAll&order%3Ddesc&orderBy%3Dlatest&series_type%3DComic&page%3D1&perPage%3D12&tags_ids%3D%5B%5D`
-          break
+        // case "new":
+        //   url = `${this.apiUrl}/query?query_string%3D&series_status%3DAll&order%3Dasc&orderBy%3Dcreated_at&series_type%3DComic&page%3D1&perPage%3D12&tags_ids%3D%5B%5D`
+        //   break
       }
       const response = await this.client.get(url)
       const jsonResponse =
@@ -97,7 +98,7 @@ export class Target implements ContentSource {
 
     const url = `${this.apiUrl}/query?query_string=${
       request.query ?? ""
-    }&series_status=All&order=desc&orderBy=${
+    }&series_status=${request.filters?.status ?? "All"}&order=desc&orderBy=${
       request.sort?.id ?? "latest"
     }&series_type=Comic&page=${request.page}&perPage=12&tags_ids=[${genres}]`
 
@@ -122,43 +123,51 @@ export class Target implements ContentSource {
     const jsonResponse = JSON.parse(response.data)
     const title = jsonResponse.title
     const cover = jsonResponse.thumbnail
-    const summary = jsonResponse.description
+    const $ = load(jsonResponse.description)
+    const summary = $("p").text()
     const creators = [jsonResponse.author, jsonResponse.studio]
     const status =
-      jsonResponse.status === "ongoing"
-        ? PublicationStatus.COMPLETED
-        : PublicationStatus.ONGOING
+      Number(PublicationStatus[jsonResponse.status.toUpperCase()]) ||
+      PublicationStatus.ONGOING
     const isNSFW = jsonResponse.adult
     const chapters: Chapter[] = []
-    jsonResponse.seasons.forEach(
-      (season: Record<string, Record<string, string>[]>) => {
-        const seasonChapters: Chapter[] = []
-        // TODO: fix
-        season.chapters.forEach((chapter: any) => {
-          if (chapter.price === 0)
-            seasonChapters.push({
-              chapterId: chapter.chapter_slug,
-              title: chapter.chapter_name,
-              number: Number(chapter.index.split(".")[0]),
-              index:
-                season.chapters.length - Number(chapter.index.split(".")[0]),
-              language: "EN_US",
-              date: new Date(chapter.created_at),
-            })
-        })
-        chapters.push(...seasonChapters)
-      },
-    )
+    const seasons = jsonResponse.seasons
+      .map((season: any) => season.chapters)
+      .flat()
+    let i = 0
+    while (i < seasons.length) {
+      const chapter = {
+        chapterId: seasons[i].chapter_slug,
+        title: seasons[i].chapter_title || seasons[i].chapter_name,
+        number: seasons.length - i + 1,
+        index: i,
+        language: "EN_US",
+        date: new Date(seasons[i].created_at),
+      }
+      chapters.push(chapter)
+      i++
+    }
     const properties = []
-    // TODO: some tag is giving a nil val
-    properties.push({
-      id: "genres",
-      title: "Genres",
-      tags: jsonResponse.tags.map((tag: Record<string, string>) => ({
-        id: tag.id.toString(),
-        title: tag.title,
-      })),
-    })
+    if (jsonResponse.tags.length > 0)
+      properties.push({
+        id: "genres",
+        title: "Genres",
+        tags: jsonResponse.tags.map((tag: Record<string, string>) => ({
+          id: tag.id.toString(),
+          title: tag.name,
+        })),
+      })
+    if (creators.length > 0)
+      properties.push({
+        id: "creators",
+        title: "Credits",
+        tags: creators.map((c, i) => ({
+          id: i.toString(),
+          title: c,
+          nsfw: false,
+          noninteractive: false,
+        })),
+      })
     return {
       title,
       cover,
@@ -167,7 +176,9 @@ export class Target implements ContentSource {
       status,
       isNSFW,
       chapters,
-      // properties,
+      properties,
+      recommendedPanelMode: ReadingMode.WEBTOON,
+      webUrl: `${this.baseUrl}/series/${contentId}`,
     }
   }
   async getChapters(contentId: string): Promise<Chapter[]> {
@@ -175,24 +186,22 @@ export class Target implements ContentSource {
 
     const jsonResponse = JSON.parse(response.data)
     const chapters: Chapter[] = []
-    jsonResponse.seasons.forEach(
-      (season: Record<string, Record<string, string>[]>) => {
-        const seasonChapters: Chapter[] = []
-        season.chapters.forEach((chapter: any) => {
-          if (chapter.price === 0)
-            seasonChapters.push({
-              chapterId: chapter.chapter_slug,
-              title: chapter.chapter_name,
-              number: Number(chapter.index.split(".")[0]),
-              index:
-                season.chapters.length - Number(chapter.index.split(".")[0]),
-              language: "EN_US",
-              date: new Date(chapter.created_at),
-            })
-        })
-        chapters.push(...seasonChapters)
-      },
-    )
+    const seasons = jsonResponse.seasons
+      .map((season: any) => season.chapters)
+      .flat()
+    let i = seasons.length - 1
+    while (i >= 0) {
+      const chapter = {
+        chapterId: seasons[i].chapter_slug,
+        title: seasons[i].chapter_name,
+        number: i + 1,
+        index: i,
+        language: "EN_US",
+        date: new Date(seasons[i].created_at),
+      }
+      chapters.push(chapter)
+      i--
+    }
 
     return chapters
   }
@@ -250,6 +259,19 @@ export class Target implements ContentSource {
             { id: "26", title: "Ability" },
             { id: "27", title: "Cohabitation" },
             { id: "28", title: "Training" },
+          ],
+        },
+        {
+          id: "status",
+          title: "Status",
+          type: FilterType.SELECT,
+          options: [
+            { id: "All", title: "All" },
+            { id: "Ongoing", title: "Ongoing" },
+            { id: "Completed", title: "Completed" },
+            { id: "Hiatus", title: "Hiatus" },
+            { id: "Canceled", title: "Canceled" },
+            { id: "Dropped", title: "Dropped" },
           ],
         },
       ],
