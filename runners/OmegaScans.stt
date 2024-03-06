@@ -13,7 +13,7 @@ class Target {
         id: "kusa.omegascans",
         name: "OmegaScans",
         thumbnail: "omega.png",
-        version: 0.3,
+        version: 1.0,
         website: this.baseUrl,
         supportedLanguages: ["EN_US"],
         rating: daisuke_1.CatalogRating.NSFW,
@@ -32,11 +32,11 @@ class Target {
                     title: "Most Popular",
                     style: daisuke_1.SectionStyle.DEFAULT,
                 },
-                {
-                    id: "new",
-                    title: "Newest",
-                    style: daisuke_1.SectionStyle.PADDED_LIST,
-                },
+                // { // API doesn't seem to want to return the newest entries.
+                //   id: "new",
+                //   title: "Newest",
+                //   style: SectionStyle.PADDED_LIST,
+                // },
             ];
         else
             throw new Error("You see nothing here.");
@@ -51,9 +51,9 @@ class Target {
                 case "top":
                     url = `${this.apiUrl}/query?visibility%3DPublic&series_type%3DAll&order%3Ddesc&orderBy%3Dtotal_views&page%3D1&perPage%3D10`;
                     break;
-                case "new":
-                    url = `${this.apiUrl}/query?query_string%3D&series_status%3DAll&order%3Ddesc&orderBy%3Dlatest&series_type%3DComic&page%3D1&perPage%3D12&tags_ids%3D%5B%5D`;
-                    break;
+                // case "new":
+                //   url = `${this.apiUrl}/query?query_string%3D&series_status%3DAll&order%3Dasc&orderBy%3Dcreated_at&series_type%3DComic&page%3D1&perPage%3D12&tags_ids%3D%5B%5D`
+                //   break
             }
             const response = await this.client.get(url);
             const jsonResponse = section === "featured"
@@ -75,7 +75,7 @@ class Target {
         const genres = [];
         if (request?.filters?.genres)
             genres.push(request.filters.genres.map((g) => Number(g)));
-        const url = `${this.apiUrl}/query?query_string=${request.query ?? ""}&series_status=All&order=desc&orderBy=${request.sort?.id ?? "latest"}&series_type=Comic&page=${request.page}&perPage=12&tags_ids=[${genres}]`;
+        const url = `${this.apiUrl}/query?query_string=${request.query ?? ""}&series_status=${request.filters?.status ?? "All"}&order=desc&orderBy=${request.sort?.id ?? "latest"}&series_type=Comic&page=${request.page}&perPage=12&tags_ids=[${genres}]`;
         const response = await this.client.get(url);
         const jsonResponse = JSON.parse(response.data);
         const highlights = jsonResponse.data.map((item) => ({
@@ -93,39 +93,50 @@ class Target {
         const jsonResponse = JSON.parse(response.data);
         const title = jsonResponse.title;
         const cover = jsonResponse.thumbnail;
-        const summary = jsonResponse.description;
+        const $ = (0, cheerio_1.load)(jsonResponse.description);
+        const summary = $("p").text();
         const creators = [jsonResponse.author, jsonResponse.studio];
-        const status = jsonResponse.status === "ongoing"
-            ? daisuke_1.PublicationStatus.COMPLETED
-            : daisuke_1.PublicationStatus.ONGOING;
+        const status = Number(daisuke_1.PublicationStatus[jsonResponse.status.toUpperCase()]) ||
+            daisuke_1.PublicationStatus.ONGOING;
         const isNSFW = jsonResponse.adult;
         const chapters = [];
-        jsonResponse.seasons.forEach((season) => {
-            const seasonChapters = [];
-            // TODO: fix
-            season.chapters.forEach((chapter) => {
-                if (chapter.price === 0)
-                    seasonChapters.push({
-                        chapterId: chapter.chapter_slug,
-                        title: chapter.chapter_name,
-                        number: Number(chapter.index.split(".")[0]),
-                        index: season.chapters.length - Number(chapter.index.split(".")[0]),
-                        language: "EN_US",
-                        date: new Date(chapter.created_at),
-                    });
-            });
-            chapters.push(...seasonChapters);
-        });
+        const seasons = jsonResponse.seasons
+            .map((season) => season.chapters)
+            .flat();
+        let i = 0;
+        while (i < seasons.length) {
+            const chapter = {
+                chapterId: seasons[i].chapter_slug,
+                title: seasons[i].chapter_title || seasons[i].chapter_name,
+                number: seasons.length - i + 1,
+                index: i,
+                language: "EN_US",
+                date: new Date(seasons[i].created_at),
+            };
+            chapters.push(chapter);
+            i++;
+        }
         const properties = [];
-        // TODO: some tag is giving a nil val
-        properties.push({
-            id: "genres",
-            title: "Genres",
-            tags: jsonResponse.tags.map((tag) => ({
-                id: tag.id.toString(),
-                title: tag.title,
-            })),
-        });
+        if (jsonResponse.tags.length > 0)
+            properties.push({
+                id: "genres",
+                title: "Genres",
+                tags: jsonResponse.tags.map((tag) => ({
+                    id: tag.id.toString(),
+                    title: tag.name,
+                })),
+            });
+        if (creators.length > 0)
+            properties.push({
+                id: "creators",
+                title: "Credits",
+                tags: creators.map((c, i) => ({
+                    id: i.toString(),
+                    title: c,
+                    nsfw: false,
+                    noninteractive: false,
+                })),
+            });
         return {
             title,
             cover,
@@ -134,28 +145,31 @@ class Target {
             status,
             isNSFW,
             chapters,
-            // properties,
+            properties,
+            recommendedPanelMode: daisuke_1.ReadingMode.WEBTOON,
+            webUrl: `${this.baseUrl}/series/${contentId}`,
         };
     }
     async getChapters(contentId) {
         const response = await this.client.get(`${this.apiUrl}/series/${contentId}`);
         const jsonResponse = JSON.parse(response.data);
         const chapters = [];
-        jsonResponse.seasons.forEach((season) => {
-            const seasonChapters = [];
-            season.chapters.forEach((chapter) => {
-                if (chapter.price === 0)
-                    seasonChapters.push({
-                        chapterId: chapter.chapter_slug,
-                        title: chapter.chapter_name,
-                        number: Number(chapter.index.split(".")[0]),
-                        index: season.chapters.length - Number(chapter.index.split(".")[0]),
-                        language: "EN_US",
-                        date: new Date(chapter.created_at),
-                    });
-            });
-            chapters.push(...seasonChapters);
-        });
+        const seasons = jsonResponse.seasons
+            .map((season) => season.chapters)
+            .flat();
+        let i = seasons.length - 1;
+        while (i >= 0) {
+            const chapter = {
+                chapterId: seasons[i].chapter_slug,
+                title: seasons[i].chapter_name,
+                number: i + 1,
+                index: i,
+                language: "EN_US",
+                date: new Date(seasons[i].created_at),
+            };
+            chapters.push(chapter);
+            i--;
+        }
         return chapters;
     }
     async getChapterData(contentId, chapterId) {
@@ -207,6 +221,19 @@ class Target {
                         { id: "26", title: "Ability" },
                         { id: "27", title: "Cohabitation" },
                         { id: "28", title: "Training" },
+                    ],
+                },
+                {
+                    id: "status",
+                    title: "Status",
+                    type: daisuke_1.FilterType.SELECT,
+                    options: [
+                        { id: "All", title: "All" },
+                        { id: "Ongoing", title: "Ongoing" },
+                        { id: "Completed", title: "Completed" },
+                        { id: "Hiatus", title: "Hiatus" },
+                        { id: "Canceled", title: "Canceled" },
+                        { id: "Dropped", title: "Dropped" },
                     ],
                 },
             ],
