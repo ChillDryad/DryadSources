@@ -46,13 +46,8 @@ export class Target implements ContentSource {
         {
           id: "top",
           title: "Most Popular",
-          style: SectionStyle.DEFAULT,
+          style: SectionStyle.GALLERY,
         },
-        // { // API doesn't seem to want to return the newest entries.
-        //   id: "new",
-        //   title: "Newest",
-        //   style: SectionStyle.PADDED_LIST,
-        // },
       ]
     else throw new Error("You see nothing here.")
   }
@@ -70,9 +65,6 @@ export class Target implements ContentSource {
         case "top":
           url = `${this.apiUrl}/query?visibility%3DPublic&series_type%3DAll&order%3Ddesc&orderBy%3Dtotal_views&page%3D1&perPage%3D10`
           break
-        // case "new":
-        //   url = `${this.apiUrl}/query?query_string%3D&series_status%3DAll&order%3Dasc&orderBy%3Dcreated_at&series_type%3DComic&page%3D1&perPage%3D12&tags_ids%3D%5B%5D`
-        //   break
       }
       const response = await this.client.get(url)
       const jsonResponse =
@@ -144,7 +136,7 @@ export class Target implements ContentSource {
         language: "EN_US",
         date: new Date(seasons[i].created_at),
       }
-      chapters.push(chapter)
+      if (seasons[i].price === 0) chapters.push(chapter)
       i++
     }
     const properties = []
