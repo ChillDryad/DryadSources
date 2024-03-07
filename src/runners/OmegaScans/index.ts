@@ -144,7 +144,8 @@ export class Target implements ContentSource {
         language: "EN_US",
         date: new Date(seasons[i].created_at),
       }
-      chapters.push(chapter)
+      if (seasons[i].price === 0) chapters.push(chapter)
+
       i++
     }
     const properties = []
