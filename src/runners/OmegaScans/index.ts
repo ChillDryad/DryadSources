@@ -139,7 +139,7 @@ export class Target implements ContentSource {
       const chapter = {
         chapterId: seasons[i].chapter_slug,
         title: seasons[i].chapter_title || seasons[i].chapter_name,
-        number: seasons.length - i + 1,
+        number: seasons.length - i,
         index: i,
         language: "EN_US",
         date: new Date(seasons[i].created_at),
@@ -199,7 +199,7 @@ export class Target implements ContentSource {
         language: "EN_US",
         date: new Date(seasons[i].created_at),
       }
-      chapters.push(chapter)
+      if (seasons[i].price === 0) chapters.push(chapter)
       i--
     }
 
