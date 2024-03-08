@@ -657,7 +657,7 @@ const constants_1 = require("./constants");
 const controller_1 = require("./controller");
 class Target {
     info = {
-        id: "to.bato",
+        id: "kusa.bato",
         name: "Bato",
         version: 0.6,
         website: "https://bato.to",
