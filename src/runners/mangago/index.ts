@@ -11,6 +11,7 @@ import {
   type RunnerInfo,
 } from "@suwatte/daisuke"
 import { Parser } from "./parser"
+import { ADULT, SORT, STATUS, TAGS } from "./constants"
 
 export class Target implements ContentSource {
   baseURL = "https://www.mangago.me"
@@ -22,7 +23,7 @@ export class Target implements ContentSource {
     id: "kusa.mangago",
     name: "Mangago",
     thumbnail: "mangago.png",
-    version: 0.1,
+    version: 0.2,
     website: this.baseURL,
     supportedLanguages: ["EN_US"],
     rating: CatalogRating.MIXED,
@@ -93,69 +94,29 @@ export class Target implements ContentSource {
           id: "genres",
           title: "Genres",
           type: FilterType.EXCLUDABLE_MULTISELECT,
-          options: [
-            { id: "Yaoi", title: "Yaoi" },
-            { id: "Comedy", title: "Comedy" },
-            { id: "Shounen Ai", title: "Shounen Ai" },
-            { id: "Shoujo", title: "Shoujo" },
-            { id: "Yuri", title: "Yuri" },
-            { id: "Josei", title: "Josei" },
-            { id: "Fantasy", title: "Fantasy" },
-            { id: "School Life", title: "School Life" },
-            { id: "Romance", title: "Romance" },
-            { id: "Doujinshi", title: "Doujinshi" },
-            { id: "Mystery", title: "Mystery" },
-            { id: "One Shot", title: "One Shot" },
-            { id: "Shounen", title: "Shounen" },
-            { id: "Martial Arts", title: "Martial Arts" },
-            { id: "Shoujo Ai", title: "Shoujo Ai" },
-            { id: "Supernatural", title: "Supernatural" },
-            { id: "Drama", title: "Drama" },
-            { id: "Action", title: "Action" },
-            { id: "Adventure", title: "Adventure" },
-            { id: "Harem", title: "Harem" },
-            { id: "Historical", title: "Historical" },
-            { id: "Mecha", title: "Mecha" },
-            { id: "Psychological", title: "Psychological" },
-            { id: "Sci-fi", title: "Sci-fi" },
-            { id: "Seinen", title: "Seinen" },
-            { id: "Slice Of Life", title: "Slice Of Life" },
-            { id: "Sports", title: "Sports" },
-            { id: "Gender Bender", title: "Gender Bender" },
-            { id: "Tragedy", title: "Tragedy" },
-            { id: "Bara", title: "Bara" },
-            { id: "Webtoons", title: "Webtoons" },
-            { id: "Horror", title: "Horror" },
-          ].sort(),
+          options: TAGS.sort((a, b) =>
+            a.title.toLowerCase() > b.title.toLowerCase() ? 1 : -1,
+          ),
         },
         {
           id: "status",
           title: "Upload Status",
           type: FilterType.MULTISELECT,
-          options: [
-            { id: "completed", title: "completed" },
-            { id: "ongoing", title: "ongoing" },
-          ],
+          options: STATUS.sort((a, b) =>
+            a.title.toLowerCase() > b.title.toLowerCase() ? 1 : -1,
+          ),
         },
         {
           id: "adult",
           title: "Adult Genres",
           type: FilterType.EXCLUDABLE_MULTISELECT,
-          options: [
-            { id: "Smut", title: "Smut" },
-            { id: "Adult", title: "Adult" },
-            { id: "Ecchi", title: "Ecchi" },
-            { id: "Mature", title: "Mature" },
-          ].sort(),
+          options: ADULT.sort((a, b) =>
+            a.title.toLowerCase() > b.title.toLowerCase() ? 1 : -1,
+          ),
         },
       ],
       sort: {
-        options: [
-          { id: "title", title: "Title" },
-          { id: "comment_count", title: "Most Popular" },
-          { id: "create_date", title: "Created" },
-          { id: "update_date", title: "Updated" },
-        ],
+        options: SORT,
         default: {
           id: "comment_count",
         },
