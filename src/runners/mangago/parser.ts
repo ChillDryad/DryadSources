@@ -1,4 +1,5 @@
 import {
+  type Tag,
   type Property,
   type Chapter,
   PublicationStatus,
@@ -6,6 +7,7 @@ import {
 import { type Element, load, type CheerioAPI } from "cheerio"
 
 import { AES, enc, pad } from "crypto-js"
+import { ADULT } from "./constants"
 
 export class Parser {
   parseSearch(html: string) {
@@ -48,6 +50,8 @@ export class Parser {
     return highlights
   }
   parseManga(html: string, contentId: string) {
+    let isNSFW: boolean = false
+
     const $ = load(html)
     const title = $("div.w-title h1").text().trim()
     const cover = $("div.cover img")
@@ -55,7 +59,6 @@ export class Parser {
       ?.trim()
       .replace(/i\d+/, "i9")
       .trim()
-
     const creators: string[] = []
     const properties: Property[] = []
     const information = $("table.left tbody tr").toArray()
@@ -63,20 +66,30 @@ export class Parser {
     let status = PublicationStatus.ONGOING
 
     information.forEach((property) => {
+      let tags: Tag[]
       const section = $("td label", property).text().trim()
+
       switch (section) {
         case "Genre(s):":
-          if ($("a", property).toArray().length > 1)
+          if ($("a", property).toArray().length > 1) {
+            tags = $("a", property)
+              .toArray()
+              .map((genre) => {
+                const title = $(genre).text()
+                if (!isNSFW) {
+                  isNSFW = ADULT.some((t) => t.id === title)
+                }
+                return {
+                  id: title,
+                  title,
+                }
+              })
             properties.push({
               id: "genres",
               title: "Genres",
-              tags: $("a", property)
-                .toArray()
-                .map((genre) => ({
-                  id: $(genre).text(),
-                  title: $(genre).text(),
-                })),
+              tags,
             })
+          }
           break
         case "Author:":
           creators.push($("a", property).text().trim())
@@ -109,6 +122,7 @@ export class Parser {
         chapters,
         properties,
         status,
+        isNSFW,
       }
     else throw `Failed to parse ${contentId}`
   }
@@ -156,6 +170,9 @@ export class Parser {
     }
     return chapters
   }
+  // If something breaks, it's probably here.
+  // If it breaks & MangaGo still uses SoJSONv4 see following message in Suwatte Disc
+  // https://discord.com/channels/1011425930897534997/1011426179892396134/1215402669221617754
   decodeImages(srcs: string) {
     const key = enc.Hex.parse("e11adc3949ba59abbe56e057f20f883e")
     const iv = enc.Hex.parse("1234567890abcdef1234567890abcdef")

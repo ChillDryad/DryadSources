@@ -19,7 +19,7 @@ import { Controller } from "./controller"
 
 export class Target implements ContentSource {
   info: RunnerInfo = {
-    id: "to.bato",
+    id: "kusa.bato",
     name: "Bato",
     version: 0.6,
     website: "https://bato.to",
