@@ -131,7 +131,7 @@ export class Target implements ContentSource {
       const chapter = {
         chapterId: seasons[i].chapter_slug,
         title: seasons[i].chapter_title || seasons[i].chapter_name,
-        number: seasons.length - i,
+        number: Number(seasons[i].index) ?? i,
         index: i,
         language: "EN_US",
         date: new Date(seasons[i].created_at),
