@@ -11,7 +11,6 @@ export const ADULT: Tag[] = [
   { id: "Smut", title: "Smut", nsfw: true },
   { id: "Adult", title: "Adult", nsfw: true },
   { id: "Ecchi", title: "Ecchi", nsfw: true },
-  // If anyone can confirm if Bara is usually adult or not I'd appreciate it.
   { id: "Bara", title: "Bara", nsfw: true },
   { id: "Mature", title: "Mature", nsfw: true },
 ]
