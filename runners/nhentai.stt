@@ -1,7 +1,7 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.STTPackage = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TAGS = void 0;
+exports.LANGUAGES = exports.TAGS = void 0;
 exports.TAGS = [
     {
         id: "big breasts",
@@ -964,6 +964,11 @@ exports.TAGS = [
         title: "waitress",
     },
 ];
+exports.LANGUAGES = [
+    { id: "12227", language: "english", code: "en-GB" },
+    { id: "6346", language: "japanese", code: "JA" },
+    { id: "29963", language: "chinese", code: "zh-zh" },
+];
 
 },{}],2:[function(require,module,exports){
 "use strict";
@@ -1033,9 +1038,9 @@ class Target {
     info = {
         id: "net.nhentai",
         name: "nHentai",
-        version: 0.4,
+        version: 0.5,
         website: "https://nhentai.net",
-        supportedLanguages: ["EN"],
+        supportedLanguages: ["EN_GB", "JA", "ZH"],
         thumbnail: "nhentai.png",
         rating: daisuke_1.CatalogRating.NSFW,
     };
@@ -1065,6 +1070,7 @@ exports.Target = Target;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Parser = void 0;
 const cheerio_1 = require("cheerio");
+const constants_1 = require("./constants");
 class Parser {
     parsePagedResponse(html) {
         const selector = "div.container div.gallery";
@@ -1074,17 +1080,22 @@ class Parser {
             const id = $("a", item).attr("href")?.split("/g/")[1];
             const cover = $("a img", item).attr("data-src");
             const title = $("a div.caption", item).text();
+            const language = constants_1.LANGUAGES.filter((l) => {
+                if ($(item).attr("data-tags")?.includes(l.id))
+                    return l.code;
+            })[0].code;
             if (!id || !cover || !title)
                 throw "Failed to parse";
             return {
                 id,
                 cover,
                 title,
+                language: language ?? "Unknown",
             };
         });
         return highlights;
     }
-    parseContent(html, _contentId) {
+    parseContent(html, contentId) {
         const $ = (0, cheerio_1.load)(html);
         const containers = $("div.tag-container").toArray();
         const properties = [];
@@ -1105,12 +1116,20 @@ class Parser {
         });
         const title = $("div#info h1.title").text();
         const cover = $("div#cover a img").attr("data-src");
+        const chapter = {
+            chapterId: contentId.split("/")[0],
+            number: 1,
+            index: 1,
+            date: new Date(),
+            language: "EN_GB",
+        };
         if (!title || !cover)
             throw "Could not parse";
         return {
             title,
             cover,
             properties,
+            chapters: [chapter],
         };
     }
     parsePages(html) {
@@ -1133,7 +1152,7 @@ class Parser {
 }
 exports.Parser = Parser;
 
-},{"cheerio":undefined}],5:[function(require,module,exports){
+},{"./constants":1,"cheerio":undefined}],5:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
