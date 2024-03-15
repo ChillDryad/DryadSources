@@ -1,5 +1,6 @@
 import type { ChapterPage, Content, Property } from "@suwatte/daisuke"
 import { load } from "cheerio"
+import { LANGUAGES } from "./constants"
 export class Parser {
   parsePagedResponse(html: string) {
     const selector = "div.container div.gallery"
@@ -9,17 +10,21 @@ export class Parser {
       const id = $("a", item).attr("href")?.split("/g/")[1]
       const cover = $("a img", item).attr("data-src")
       const title = $("a div.caption", item).text()
+      const language = LANGUAGES.filter((l) => {
+        if ($(item).attr("data-tags")?.includes(l.id)) return l.code
+      })[0].code
       if (!id || !cover || !title) throw "Failed to parse"
       return {
         id,
         cover,
         title,
+        language: language ?? "Unknown",
       }
     })
     return highlights
   }
 
-  parseContent(html: string, _contentId: string): Content {
+  parseContent(html: string, contentId: string): Content {
     const $ = load(html)
     const containers = $("div.tag-container").toArray()
 
@@ -42,11 +47,19 @@ export class Parser {
 
     const title = $("div#info h1.title").text()
     const cover = $("div#cover a img").attr("data-src")
+    const chapter = {
+      chapterId: contentId.split("/")[0],
+      number: 1,
+      index: 1,
+      date: new Date(),
+      language: "EN_GB",
+    }
     if (!title || !cover) throw "Could not parse"
     return {
       title,
       cover,
       properties,
+      chapters: [chapter],
     }
   }
   parsePages(html: string): ChapterPage[] {
