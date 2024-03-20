@@ -25,6 +25,7 @@ export class Target implements ContentSource {
     rating: CatalogRating.SAFE,
   }
 
+
   client = new NetworkClientBuilder().setRateLimit(5, 30).build()
   parser = new Parser()
 
@@ -66,6 +67,7 @@ export class Target implements ContentSource {
   ): Promise<ChapterData> {
     const response = await this.client.get(`${BASE}${chapterId}`)
     const pages = this.parser.parsePages(response.data)
+    console.log(pages)
     return { pages }
   }
   async getDirectoryConfig(): Promise<DirectoryConfig> {
