@@ -20,3 +20,7 @@ jobs:
         with:
           branch: gh-pages
           folder: stt
+      - uses: "finnp/create-file-action@master"
+        env:
+          FILE_NAME: "_config.yml"
+          FILE_DATA: "theme: jekyll-theme-merlot"
