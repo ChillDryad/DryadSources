@@ -962,3 +962,9 @@ export const TAGS: Tag[] = [
     title: "waitress",
   },
 ]
+
+export const LANGUAGES = [
+  { id: "12227", language: "english", code: "en-GB" },
+  { id: "6346", language: "japanese", code: "JA" },
+  { id: "29963", language: "chinese", code: "zh-zh" },
+]
