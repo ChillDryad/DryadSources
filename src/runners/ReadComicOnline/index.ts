@@ -9,6 +9,7 @@ import {
   type PagedResult,
   RunnerInfo,
   FilterType,
+  NetworkClientBuilder,
 } from "@suwatte/daisuke"
 import { BASE, GENRES, SORT } from "./constants"
 import { Parser } from "./parser"
@@ -19,12 +20,13 @@ export class Target implements ContentSource {
     name: "ReadComicOnline",
     thumbnail: "readcomiconline.png", // TODO: Get this.
     website: BASE,
-    version: 0.1,
+    version: 0.2,
     supportedLanguages: ["EN_US"],
     rating: CatalogRating.SAFE,
   }
 
-  client = new NetworkClient()
+
+  client = new NetworkClientBuilder().setRateLimit(5, 30).build()
   parser = new Parser()
 
   async getDirectory(request: DirectoryRequest): Promise<PagedResult> {
