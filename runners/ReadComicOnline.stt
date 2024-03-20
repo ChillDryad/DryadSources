@@ -225,11 +225,11 @@ class Target {
         name: "ReadComicOnline",
         thumbnail: "readcomiconline.png",
         website: constants_1.BASE,
-        version: 0.1,
+        version: 0.2,
         supportedLanguages: ["EN_US"],
         rating: daisuke_1.CatalogRating.SAFE,
     };
-    client = new NetworkClient();
+    client = new daisuke_1.NetworkClientBuilder().setRateLimit(5, 30).build();
     parser = new parser_1.Parser();
     async getDirectory(request) {
         let url;
