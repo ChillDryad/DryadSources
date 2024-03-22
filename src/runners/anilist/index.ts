@@ -10,9 +10,9 @@ import { LinkProvider, LinkResolver } from "./impl/pageLink"
 import { AdvancedTrackerImplementation } from "./impl/advancedTracker"
 
 const info: RunnerInfo = {
-  id: "co.anilist",
+  id: "kusa.anilist",
   name: "Anilist",
-  version: 1.4,
+  version: 1.5,
   website: "https://anilist.co",
   thumbnail: "anilist.png",
 }

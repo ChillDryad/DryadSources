@@ -6,23 +6,23 @@ import {
   UITextField,
   UIToggle,
   UIStepper,
-} from "@suwatte/daisuke";
-import { FormProps } from "../types";
-import { getMediaListEntry } from "./mediaList";
+} from "@suwatte/daisuke"
+import { FormProps } from "../types"
+import { getMediaListEntry } from "./mediaList"
 import {
   convertToFuzzyDate,
   getScoreFormat,
   parseFuzzyDate,
   parseID,
   request,
-} from ".";
-import { MediaListEntryMutation } from "../gql";
-import { Form, FormSection, Generate } from "@suwatte/daisuke";
+} from "."
+import { MediaListEntryMutation } from "../gql"
+import { Form, FormSection, Generate } from "@suwatte/daisuke"
 
 const StarSystem: Option[] = new Array(6).fill(0).map((_, idx) => ({
   id: `${idx * 20}`,
   title: idx !== 0 ? "⭐".repeat(idx) : "-",
-}));
+}))
 
 const FaceSystem: Option[] = [
   {
@@ -41,7 +41,7 @@ const FaceSystem: Option[] = [
     id: "85",
     title: "😃👍",
   },
-];
+]
 
 /**
  * Builds the Entry Edit Form for the given title using the media list entry
@@ -51,9 +51,9 @@ export const buildEntryForm = async (id: string) => {
     mediaListEntry: entry,
     chapters,
     volumes,
-  } = await getMediaListEntry(id);
+  } = await getMediaListEntry(id)
 
-  if (!entry) throw new Error(`Not Tracking ${id}`);
+  if (!entry) throw new Error(`Not Tracking ${id}`)
 
   return Generate<Form>({
     sections: [
@@ -150,35 +150,35 @@ export const buildEntryForm = async (id: string) => {
         ],
       },
     ],
-  });
-};
+  })
+}
 
 const ScoreComponent = async (score: number | undefined) => {
-  const title = "Score";
-  const scoreFormat = await getScoreFormat();
+  const title = "Score"
+  const scoreFormat = await getScoreFormat()
 
   const numSystemScore = (score: number) => {
-    if (score === 0) return 0;
+    if (score === 0) return 0
     switch (scoreFormat) {
       case "POINT_10_DECIMAL":
-        return Math.round(score / 10);
+        return Math.round(score / 10)
       case "POINT_10":
-        return Math.trunc(score / 10);
+        return Math.trunc(score / 10)
       default:
-        return score;
+        return score
     }
-  };
+  }
 
   switch (scoreFormat) {
     case "POINT_5":
     case "POINT_3": {
-      const options = scoreFormat === "POINT_3" ? FaceSystem : StarSystem;
+      const options = scoreFormat === "POINT_3" ? FaceSystem : StarSystem
       return UIPicker({
         id: "score",
         title,
         value: score ? getClosestKey(score, options) : options?.[0].id,
         options,
-      });
+      })
     }
     default: {
       return UIStepper({
@@ -187,16 +187,16 @@ const ScoreComponent = async (score: number | undefined) => {
         value: score ? numSystemScore(score) : 0,
         allowDecimal: scoreFormat === "POINT_10_DECIMAL" ? true : undefined,
         upperBound: scoreFormat === "POINT_100" ? 100 : 10,
-      });
+      })
     }
   }
-};
+}
 
 /**
  * Updates a media entry on anilist using the provided form
  */
 export const handleSubmitEntryForm = async (id: string, form: FormProps) => {
-  const mediaId = parseID(id);
+  const mediaId = parseID(id)
 
   // Dates
   const startedAt =
@@ -204,29 +204,29 @@ export const handleSubmitEntryForm = async (id: string, form: FormProps) => {
       ? null
       : form.startedAt
       ? convertToFuzzyDate(new Date(form.startedAt))
-      : undefined;
+      : undefined
   const completedAt =
     form.completedAt === null
       ? null
       : form.completedAt
       ? convertToFuzzyDate(new Date(form.completedAt))
-      : undefined;
+      : undefined
 
   // Score
-  const calc = (score: string) => Math.trunc(parseID(score));
-  const scoreFormat = await getScoreFormat();
+  const calc = (score: string) => Math.trunc(parseID(score))
+  const scoreFormat = await getScoreFormat()
   const calcNum = (score: number) => {
     if (scoreFormat !== "POINT_100") {
-      return Math.trunc(score * 10);
+      return Math.trunc(score * 10)
     }
-    return Math.trunc(score);
-  };
+    return Math.trunc(score)
+  }
 
   const score = form.score
     ? typeof form.score === "string"
       ? calc(form.score)
       : calcNum(form.score)
-    : undefined;
+    : undefined
 
   // Request
   const variables = {
@@ -238,21 +238,21 @@ export const handleSubmitEntryForm = async (id: string, form: FormProps) => {
 
     // Fix Score which can either be a string or a number depending on the user's scoring format
     score,
-  };
-  await request(MediaListEntryMutation, variables);
-};
+  }
+  await request(MediaListEntryMutation, variables)
+}
 
 const getClosestKey = (num: number, options: Option[]) => {
-  let closestKey = options[0].id;
-  let closestDiff = Math.abs(num - Number(options[0].id));
+  let closestKey = options[0].id
+  let closestDiff = Math.abs(num - Number(options[0].id))
 
   for (let i = 1; i < options.length; i++) {
-    let diff = Math.abs(num - Number(options[i].id));
+    const diff = Math.abs(num - Number(options[i].id))
     if (diff < closestDiff) {
-      closestDiff = diff;
-      closestKey = options[i].id;
+      closestDiff = diff
+      closestKey = options[i].id
     }
   }
 
-  return closestKey;
-};
+  return closestKey
+}

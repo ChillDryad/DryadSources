@@ -1,5 +1,6 @@
 import { authenticated, request } from "."
 import { CurrentViewerQuery } from "../gql"
+import { CurrentViewerResponse } from "../types"
 
 export const getNSFWSetting = async () => {
   const isAuthenticated = await authenticated()
@@ -7,7 +8,7 @@ export const getNSFWSetting = async () => {
 
   let user
   try {
-    const response = await request<any>(CurrentViewerQuery)
+    const response = await request<CurrentViewerResponse>(CurrentViewerQuery)
     user = response.data.Viewer
   } catch {
     return false

@@ -34,7 +34,7 @@ export const TrackerImplementation: Omit<ContentTracker, "info"> = {
   getEntryForm: async function (id: string): Promise<Form> {
     return buildEntryForm(id)
   },
-  didSubmitEntryForm: function (id: string, form: any): Promise<void> {
+  didSubmitEntryForm: function (id: string, form): Promise<void> {
     return handleSubmitEntryForm(id, form)
   },
   didUpdateStatus: async function (

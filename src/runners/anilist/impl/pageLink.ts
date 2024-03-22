@@ -5,38 +5,38 @@ import {
   PageLinkResolver,
   PageSection,
   ResolvedPageSection,
-} from "@suwatte/daisuke";
-import { authenticated, getViewer } from "../utils";
-import { getHomePage } from "../utils/media";
+} from "@suwatte/daisuke"
+import { authenticated, getViewer } from "../utils"
+import { getHomePage } from "../utils/media"
 
 export const LinkResolver: PageLinkResolver = {
   getSectionsForPage: function ({ id }: PageLink): Promise<PageSection[]> {
     switch (id) {
       case "home": {
-        return getHomePage();
+        return getHomePage()
       }
     }
 
-    throw new Error(`link not resolved [${id}]`);
+    throw new Error(`link not resolved [${id}]`)
   },
   resolvePageSection: function (
-    link: PageLink,
-    sectionID: string
+    _link: PageLink,
+    _sectionID: string,
   ): Promise<ResolvedPageSection> {
-    throw new Error("non resolving provider.");
+    throw new Error("non resolving provider.")
   },
-};
+}
 
 export const LinkProvider: PageLinkProvider = {
   getLibraryPageLinks: async function (): Promise<PageLinkLabel[]> {
-    const isAuthenticated = await authenticated();
-    if (!isAuthenticated) return [];
+    const isAuthenticated = await authenticated()
+    if (!isAuthenticated) return []
 
     const {
       mediaListOptions: {
         mangaList: { sectionOrder: lists },
       },
-    } = await getViewer();
+    } = await getViewer()
 
     return lists.map((list) => ({
       title: list,
@@ -49,7 +49,7 @@ export const LinkProvider: PageLinkProvider = {
           configKey: "userList",
         },
       },
-    }));
+    }))
   },
   getBrowsePageLinks: async function (): Promise<PageLinkLabel[]> {
     return [
@@ -65,6 +65,6 @@ export const LinkProvider: PageLinkProvider = {
           request: { page: 1 },
         },
       },
-    ];
+    ]
   },
-};
+}

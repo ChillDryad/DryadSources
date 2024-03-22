@@ -1,10 +1,10 @@
-import { Highlight, PagedResult } from "@suwatte/daisuke";
-import { parseID, parseWebUrl, request } from ".";
-import { MediaListCollectionQuery, MediaListEntryQuery } from "../gql";
+import { Highlight, PagedResult } from "@suwatte/daisuke"
+import { parseID, parseWebUrl, request } from "."
+import { MediaListCollectionQuery, MediaListEntryQuery } from "../gql"
 import {
   MediaListCollectionResponse,
   MediaListEntryQueryResponse,
-} from "../types";
+} from "../types"
 
 /**
  * Gets the media list entry for a given title
@@ -12,10 +12,10 @@ import {
 export const getMediaListEntry = async (id: string) => {
   const data = await request<MediaListEntryQueryResponse>(MediaListEntryQuery, {
     id: parseID(id),
-  });
+  })
 
-  return data.data.Media;
-};
+  return data.data.Media
+}
 
 export const parseTrackItem = async (id: string): Promise<Highlight> => {
   const {
@@ -23,7 +23,7 @@ export const parseTrackItem = async (id: string): Promise<Highlight> => {
     title: { userPreferred: title },
     coverImage: { large: cover },
     chapters,
-  } = await getMediaListEntry(id);
+  } = await getMediaListEntry(id)
 
   return {
     id,
@@ -40,25 +40,25 @@ export const parseTrackItem = async (id: string): Promise<Highlight> => {
         },
       },
     }),
-  };
-};
+  }
+}
 
 export const getMediaListCollection = async (
   name: string
 ): Promise<PagedResult> => {
-  const userName = await SecureStore.get("user");
-  if (!userName) throw new Error("failed to get username");
+  const userName = await SecureStore.get("user")
+  if (!userName) throw new Error("failed to get username")
   const {
     data: {
       MediaListCollection: { lists },
     },
   } = await request<MediaListCollectionResponse>(MediaListCollectionQuery, {
     userName,
-  });
+  })
 
-  const target = lists.find((v) => v.name === name);
+  const target = lists.find((v) => v.name === name)
 
-  if (!target) throw new Error("list not found.");
+  if (!target) throw new Error("list not found.")
 
   const results: Highlight[] = target.entries.map((v) => ({
     id: `${v.media.id}`,
@@ -72,9 +72,9 @@ export const getMediaListCollection = async (
         lastReadVolume: v.progressVolume,
       },
     },
-  }));
+  }))
   return {
     isLastPage: true,
     results,
-  };
-};
+  }
+}

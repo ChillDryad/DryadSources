@@ -1,13 +1,14 @@
 import { OAuthAuthenticatable, RunnerAuthenticatable } from "@suwatte/daisuke"
 import { authenticated, getParamFromURL, request } from "../utils"
 import { CurrentViewerQuery } from "../gql"
+import { CurrentViewerResponse } from "../types"
 
 export const AuthImplementation: RunnerAuthenticatable = {
   async getAuthenticatedUser() {
     const isAuthenticated = await authenticated()
     if (!isAuthenticated) return null
 
-    const response = await request<any>(CurrentViewerQuery)
+    const response = await request<CurrentViewerResponse>(CurrentViewerQuery)
     const {
       name: handle,
       avatar: { large: avatar },
