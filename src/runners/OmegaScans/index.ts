@@ -99,6 +99,7 @@ export class Target implements ContentSource {
     params.query_string = request?.query
     params.series_status = request?.filters?.status?.id ?? undefined
     params.tags_ids = genres ?? []
+    params.orderBy = request?.sort?.id ?? "latest"
 
     const response = await this.client.get(`${this.apiUrl}/query`, {
       params,

@@ -172,7 +172,9 @@ export class Parser {
       }
       // TODO: Better Special Chapter Handling
       let number = -1
-      const strNum = chapterText[1]?.match(/(\d+(\.\d+)?)/)?.[1]
+      const strNum =
+        chapterText[1]?.match(/(\d+(\.\d+)?)/)?.[1] ??
+        chapterText[0]?.match(/(\d+(\.\d+)?)/)?.[0]
       if (strNum) {
         number = Number(strNum) ?? -1
         if (!number) number = -1

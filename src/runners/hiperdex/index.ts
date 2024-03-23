@@ -1,4 +1,4 @@
-import { RunnerInfo } from "@suwatte/daisuke"
+import { CatalogRating, RunnerInfo } from "@suwatte/daisuke"
 import { TachiBuilder } from "../../templates/tachiyomi"
 import { TachiDaraTemplate } from "../../templates/tachidara"
 
@@ -7,6 +7,7 @@ const info: RunnerInfo = {
   name: "Hiperdex",
   thumbnail: "hiperdex.png",
   version: 0.3,
+  rating: CatalogRating.NSFW,
   website: "https://hiperdex.com",
 }
 
