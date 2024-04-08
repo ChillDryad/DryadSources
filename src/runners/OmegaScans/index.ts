@@ -29,29 +29,39 @@ export class Target implements ContentSource {
     id: "kusa.omegascans",
     name: "OmegaScans",
     thumbnail: "omega.png",
-    version: 1.0,
+    version: 1.1,
     website: this.baseUrl,
     supportedLanguages: ["EN_US"],
     rating: CatalogRating.NSFW,
   }
   client = new NetworkClient()
 
-  // async getSectionsForPage(page: PageLink): Promise<PageSection[]> {
-  //   if (page.id === "home")
-  //     return [
-  //       {
-  //         id: "featured",
-  //         title: "Featured",
-  //         style: SectionStyle.GALLERY,
-  //       },
-  //       {
-  //         id: "top",
-  //         title: "Most Popular",
-  //         style: SectionStyle.GALLERY,
-  //       },
-  //     ]
-  //   else throw new Error("You see nothing here.")
-  // }
+  async getSectionsForPage(page: PageLink): Promise<PageSection[]> {
+    if (page.id === "home")
+      return [
+        {
+          id: "top",
+          title: "Most Popular",
+          style: SectionStyle.GALLERY,
+        },
+        {
+          id: "latest",
+          title: "Latest Update",
+          style: SectionStyle.GALLERY,
+        },
+        {
+          id: "newest",
+          title: "Newest",
+          style: SectionStyle.GALLERY,
+        },
+        {
+          id: "completed",
+          title: "Completed",
+          style: SectionStyle.PADDED_LIST,
+        },
+      ]
+    else throw new Error("You see nothing here.")
+  }
 
   // TODO: update API urls
   async resolvePageSection(
@@ -59,22 +69,34 @@ export class Target implements ContentSource {
     section: string,
   ): Promise<ResolvedPageSection> {
     if (link.id === "home") {
-      let url = this.apiUrl
+      const params: Record<
+        string,
+        string | string[] | boolean | undefined | number
+      > = {
+        adult: true,
+      }
       switch (section) {
-        case "featured":
-          url = `${this.apiUrl}/series/banners`
-          break
         case "top":
-          url = `${this.apiUrl}/query?visibility%3DPublic&series_type%3DAll&order%3Ddesc&orderBy%3Dtotal_views&page%3D1&perPage%3D10`
+          params.orderBy = "total_views"
+          params.status = "All"
+          break
+        case "latest":
+          params.orderBy = "latest"
+          params.status = "All"
+          break
+        case "newest":
+          params.orderBy = "created_at"
+          params.status = "All"
+          break
+        case "completed":
+          params.orderBy = "latest"
+          params.status = "Completed"
           break
       }
-      const response = await this.client.get(url)
-      const jsonResponse =
-        section === "featured"
-          ? JSON.parse(response.data)
-          : JSON.parse(response.data).data
+      const response = await this.client.get(`${this.apiUrl}/query`, { params })
+      const jsonResponse = JSON.parse(response.data).data
       const highlights = jsonResponse.map((item: Record<string, string>) => ({
-        id: item.series_slug,
+        id: item.id.toString(),
         title: item.title,
         cover: item.thumbnail,
       }))
@@ -95,11 +117,11 @@ export class Target implements ContentSource {
       genres.push(request.filters.genres.map((g: string) => Number(g)))
 
     params.page = request.page
-    params.adult = true
     params.query_string = request?.query
-    params.series_status = request?.filters?.status?.id ?? undefined
-    params.tags_ids = genres ?? []
+    params.status = request?.filters?.status
+    params.tags_ids = `[${genres.join(",")}]`
     params.orderBy = request?.sort?.id ?? "latest"
+    params.adult = true
 
     const response = await this.client.get(`${this.apiUrl}/query`, {
       params,
