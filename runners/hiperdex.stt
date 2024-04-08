@@ -2,6 +2,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Target = void 0;
+const daisuke_1 = require("@suwatte/daisuke");
 const tachiyomi_1 = require("../../templates/tachiyomi");
 const tachidara_1 = require("../../templates/tachidara");
 const info = {
@@ -9,6 +10,7 @@ const info = {
     name: "Hiperdex",
     thumbnail: "hiperdex.png",
     version: 0.3,
+    rating: daisuke_1.CatalogRating.NSFW,
     website: "https://hiperdex.com",
 };
 class Hiperdex extends tachidara_1.TachiDaraTemplate {
@@ -22,7 +24,7 @@ class Hiperdex extends tachidara_1.TachiDaraTemplate {
 }
 exports.Target = new tachiyomi_1.TachiBuilder(info, Hiperdex);
 
-},{"../../templates/tachidara":3,"../../templates/tachiyomi":6}],2:[function(require,module,exports){
+},{"../../templates/tachidara":3,"../../templates/tachiyomi":6,"@suwatte/daisuke":12}],2:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.YEAR_DATE_LIST = exports.MONTH_DATE_LIST = exports.WEEK_DATE_LIST = exports.SECONDS_DATE_LIST = exports.MINUTE_DATE_LIST = exports.HOUR_DATE_LIST = exports.DAY_DATE_LIST = exports.CANCELLED_STATUS_LIST = exports.HIATUS_STATUS_LIST = exports.ONGOING_STATUS_LIST = exports.COMPLETED_STATUS_LIST = void 0;
