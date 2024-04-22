@@ -29,7 +29,7 @@ export class Target implements ContentSource {
     id: "kusa.omegascans",
     name: "OmegaScans",
     thumbnail: "omega.png",
-    version: 1.1,
+    version: 1.2,
     website: this.baseUrl,
     supportedLanguages: ["EN_US"],
     rating: CatalogRating.NSFW,
@@ -63,7 +63,6 @@ export class Target implements ContentSource {
     else throw new Error("You see nothing here.")
   }
 
-  // TODO: update API urls
   async resolvePageSection(
     link: PageLink,
     section: string,
@@ -239,7 +238,7 @@ export class Target implements ContentSource {
       `${this.baseUrl}/series/${slug}/${chapterId}`,
     )
     const $ = load(response.data)
-    const parsedPages = $("p.flex img").toArray()
+    const parsedPages = $("div.flex img").toArray()
     const pages = parsedPages.map((page) => {
       const url =
         // @ts-expect-error this will exist
