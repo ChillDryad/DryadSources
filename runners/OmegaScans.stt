@@ -60,7 +60,7 @@ class Target {
         id: "kusa.omegascans",
         name: "OmegaScans",
         thumbnail: "omega.png",
-        version: 1.1,
+        version: 1.2,
         website: this.baseUrl,
         supportedLanguages: ["EN_US"],
         rating: daisuke_1.CatalogRating.NSFW,
@@ -93,7 +93,6 @@ class Target {
         else
             throw new Error("You see nothing here.");
     }
-    // TODO: update API urls
     async resolvePageSection(link, section) {
         if (link.id === "home") {
             const params = {
@@ -245,7 +244,7 @@ class Target {
         const slug = await this.getSeriesSlug(contentId);
         const response = await this.client.get(`${this.baseUrl}/series/${slug}/${chapterId}`);
         const $ = (0, cheerio_1.load)(response.data);
-        const parsedPages = $("p.flex img").toArray();
+        const parsedPages = $("div.flex img").toArray();
         const pages = parsedPages.map((page) => {
             const url = 
             // @ts-expect-error this will exist
