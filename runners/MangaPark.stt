@@ -356,7 +356,7 @@ class Target {
             return {
                 id,
                 title: name,
-                cover: urlCoverOri,
+                cover: urlCoverOri ?? "",
             };
         });
         return { results, isLastPage: results < 30 };
