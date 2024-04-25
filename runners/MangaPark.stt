@@ -299,7 +299,7 @@ class Target {
         });
         return chapters;
     }
-    async getChapterData(chapterId) {
+    async getChapterData(_, chapterId) {
         const { data } = await this.client.post("https://mangapark.io/apo/", {
             headers: { "content-type": "application/json" },
             body: {
@@ -309,7 +309,9 @@ class Target {
                 },
             },
         });
-        const pages = JSON.parse(data).data.get_chapterNode.data.imageFile.urlList.map((page) => ({ url: page }));
+        const pages = JSON.parse(data).data?.get_chapterNode?.data?.imageFile?.urlList.map((page) => ({
+            url: page,
+        }));
         return { pages };
     }
     async getDirectory(request) {
@@ -348,7 +350,7 @@ class Target {
         });
         const results = JSON.parse(response.data).data.get_searchComic.items.map(
         // !TODO: Don't use any. pull from schema.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // @ts-expect-error to be fixed
         (item) => {
             const { id, name, urlCoverOri } = item.data;
             return {
