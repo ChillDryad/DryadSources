@@ -109,7 +109,7 @@ export class Target implements ContentSource {
     )
     return chapters
   }
-  async getChapterData(chapterId: string): Promise<ChapterData> {
+  async getChapterData(_: unknown, chapterId: string): Promise<ChapterData> {
     const { data } = await this.client.post("https://mangapark.io/apo/", {
       headers: { "content-type": "application/json" },
       body: {
@@ -122,7 +122,9 @@ export class Target implements ContentSource {
     const pages = JSON.parse(
       data,
       //@ts-expect-error fixxxx
-    ).data.get_chapterNode.data.imageFile.urlList.map((page) => ({ url: page }))
+    ).data?.get_chapterNode?.data?.imageFile?.urlList.map((page) => ({
+      url: page,
+    }))
     return { pages }
   }
 
@@ -162,8 +164,8 @@ export class Target implements ContentSource {
     })
     const results = JSON.parse(response.data).data.get_searchComic.items.map(
       // !TODO: Don't use any. pull from schema.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (item: any) => {
+      // @ts-expect-error to be fixed
+      (item) => {
         const { id, name, urlCoverOri } = item.data
         return {
           id,

@@ -27,7 +27,8 @@ describe("MangaPark Tests", () => {
     expect(data.length).toBe(124)
   })
   test("Pages", async () => {
-    const data = await source.getChapterData("7445683")
+    const data = await source.getChapterData(null, "7445683")
+    console.log(data)
     expect(ChapterDataSchema.parse(data)).toEqual(expect.any(Object))
   })
 })
