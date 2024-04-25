@@ -170,7 +170,7 @@ export class Target implements ContentSource {
         return {
           id,
           title: name,
-          cover: urlCoverOri,
+          cover: urlCoverOri ?? "",
         }
       },
     )

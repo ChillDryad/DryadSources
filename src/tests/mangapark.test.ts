@@ -17,9 +17,10 @@ describe("MangaPark Tests", () => {
     expect(data.results.length).toBeGreaterThanOrEqual(29)
   })
   test("Content", async () => {
-    const data = await source.getContent("50280")
+    const data = await source.getContent("74763")
+    console.log(data)
     expect(ContentSchema.parse(data)).toEqual(expect.any(Object))
-    expect(data.title).toBe("Wotakoi: Love Is Hard for Otaku")
+    expect(data.title).toBe("Chainsaw Man")
   })
   test("Chapters", async () => {
     const data = await source.getChapters("50280")
