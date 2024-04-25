@@ -146,7 +146,7 @@ export class Target implements ContentSource {
         ],
         incTLangs: "en",
         incOLangs: request?.filters?.language,
-        sortby: request?.filters?.sort ?? "views_d000",
+        sortby: request?.filters?.sort,
         chapCount: request?.filters?.chapters,
         origStatus: request?.filters?.status,
       },
