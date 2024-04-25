@@ -1,0 +1,33 @@
+import { Target } from "../runners/MangaPark"
+import emulate from "@suwatte/emulator"
+import {
+  PagedResultSchema,
+  ContentSchema,
+  ChapterSchema,
+  ChapterDataSchema,
+} from "@suwatte/validate"
+
+describe("MangaPark Tests", () => {
+  const source = emulate(Target)
+  test("Directory", async () => {
+    const data = await source.getDirectory({
+      page: 1,
+    })
+    expect(PagedResultSchema.parse(data)).toEqual(expect.any(Object))
+    expect(data.results.length).toBeGreaterThanOrEqual(29)
+  })
+  test("Content", async () => {
+    const data = await source.getContent("50280")
+    expect(ContentSchema.parse(data)).toEqual(expect.any(Object))
+    expect(data.title).toBe("Wotakoi: Love Is Hard for Otaku")
+  })
+  test("Chapters", async () => {
+    const data = await source.getChapters("50280")
+    expect(ChapterSchema.array().parse(data)).toEqual(expect.any(Array))
+    expect(data.length).toBe(124)
+  })
+  test("Pages", async () => {
+    const data = await source.getChapterData("7445683")
+    expect(ChapterDataSchema.parse(data)).toEqual(expect.any(Object))
+  })
+})

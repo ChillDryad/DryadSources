@@ -18,13 +18,12 @@ export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "li.readcomiconline",
     name: "ReadComicOnline",
-    thumbnail: "readcomiconline.png", // TODO: Get this.
+    thumbnail: "readcomiconline.png",
     website: BASE,
     version: 0.2,
     supportedLanguages: ["EN_US"],
     rating: CatalogRating.SAFE,
   }
-
 
   client = new NetworkClientBuilder().setRateLimit(5, 30).build()
   parser = new Parser()

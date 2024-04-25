@@ -66,12 +66,6 @@ export class Controller {
   getFilters(): DirectoryFilter[] {
     return [
       {
-        id: "sort",
-        title: "Sort By",
-        type: FilterType.SELECT,
-        options: SORTERS,
-      },
-      {
         id: "content_type",
         title: "Content Type",
         type: FilterType.EXCLUDABLE_MULTISELECT,
@@ -126,11 +120,6 @@ export class Controller {
 
   getProperties(): Property[] {
     return [
-      // {
-      //   id: "sort",
-      //   title: "Sort By",
-      //   tags: SORTERS,
-      // },
       {
         id: "content_type",
         title: "Content Type",
@@ -209,16 +198,16 @@ export class Controller {
   ): Promise<ResolvedPageSection> {
     const response = await this.client.get(this.BASE)
     switch (section) {
-    case "popular":
-      return {
-        items: (await this.parser.parsePopular(response.data)).results,
-      }
-    case "latest":
-      return {
-        items: (await this.parser.parseLatest(response.data)).results,
-      }
-    default:
-      throw new Error("Something went horribly wrong.")
+      case "popular":
+        return {
+          items: (await this.parser.parsePopular(response.data)).results,
+        }
+      case "latest":
+        return {
+          items: (await this.parser.parseLatest(response.data)).results,
+        }
+      default:
+        throw new Error("Something went horribly wrong.")
     }
   }
 

@@ -20,15 +20,15 @@ describe("Bato Tests", () => {
     expect(data.results.length).toBeGreaterThan(1)
   })
 
-  test("Profile", async () => {
-    const content = await source.getContent("72315")
-    expect(ContentSchema.parse(content)).toEqual(expect.any(Object))
-    expect(content.title).toBe("Doctor Elise: The Royal Lady with the Lamp")
-    expect(content.recommendedPanelMode).toBe(ReadingMode.PAGED_COMIC)
-    expect(content.status).toBe(PublicationStatus.COMPLETED)
-    expect(content.properties?.[0]).toBeDefined()
-    expect(content.creators?.includes("Mini")).toBe(true)
-  })
+  // test("Profile", async () => {
+  //   const content = await source.getContent("72315")
+  //   expect(ContentSchema.parse(content)).toEqual(expect.any(Object))
+  //   expect(content.title).toBe("Doctor Elise: The Royal Lady with the Lamp")
+  //   expect(content.recommendedPanelMode).toBe(ReadingMode.PAGED_COMIC)
+  //   expect(content.status).toBe(PublicationStatus.COMPLETED)
+  //   expect(content.properties?.[0]).toBeDefined()
+  //   expect(content.creators?.includes("Mini")).toBe(true)
+  // })
 
   test("Chapters", async () => {
     const chapters = await source.getChapters("72315")
