@@ -107,13 +107,21 @@ export class Parser {
     for (const match of imageMatches) {
       if (!match[1]) continue
 
-      let url = match[1].replace(/_x236/g, "d").replace(/_x945/g, "g")
+      let url = match[1]
+        .replace(/_x236/g, "d")
+        .replace(/_x945/g, "g")
+        .replace(/pw_.g28x/g, "b")
+        .replace(/d2pr.x_27/g, "h")
 
       if (url.startsWith("https")) {
         pages.push({ url })
       } else {
         const sliced = url.slice(url.indexOf("?"))
         const containsS0 = url.includes("=s0")
+        url = url.slice(
+          0,
+          containsS0 ? url.indexOf("=s0?") : url.indexOf("=s1600?"),
+        )
         url = url.slice(
           0,
           containsS0 ? url.indexOf("=s0?") : url.indexOf("=s1600?"),
