@@ -20,7 +20,7 @@ export class Target implements ContentSource {
     name: "ReadComicOnline",
     thumbnail: "readcomiconline.png",
     website: BASE,
-    version: 0.2,
+    version: 0.3,
     supportedLanguages: ["EN_US"],
     rating: CatalogRating.SAFE,
   }
