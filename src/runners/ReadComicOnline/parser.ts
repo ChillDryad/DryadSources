@@ -100,34 +100,27 @@ export class Parser {
    * Credit to xOnlyFadi's Paperback source.
    * https://github.com/xOnlyFadi/xonlyfadi-extensions/blob/0.8/src/ReadComicOnline/ReadComicOnlineParser.ts#L82
    */
-  parsePages(data: string) {
+parsePages(data: string) {
     const pages: ChapterPage[] = []
     const imageMatches = data.matchAll(/lstImages\.push\(['"](.*)['"]\)/gi)
     console.log(imageMatches)
     for (const match of imageMatches) {
       if (!match[1]) continue
 
-      let url = match[1]
-        .replace(/_x236/g, "d")
-        .replace(/_x945/g, "g")
-        .replace(/pw_.g28x/g, "b")
-        .replace(/d2pr.x_27/g, "h")
+      let url = match[1].replace(/pw_.g28x/g, "b").replace(/d2pr.x_27/g, "h")
 
       if (url.startsWith("https")) {
         pages.push({ url })
       } else {
         const sliced = url.slice(url.indexOf("?"))
         const containsS0 = url.includes("=s0")
+
         url = url.slice(
           0,
           containsS0 ? url.indexOf("=s0?") : url.indexOf("=s1600?"),
         )
-        url = url.slice(
-          0,
-          containsS0 ? url.indexOf("=s0?") : url.indexOf("=s1600?"),
-        )
-        url = url.slice(4, 22) + url.slice(25)
-        url = url.slice(0, -6) + url.slice(-2)
+        url = url.slice(6, 24) + url.slice(28)
+        url = url.slice(0, -10) + url.slice(-2)
         url = Buffer.from(url, "base64").toString("utf-8")
         url = url.slice(0, 13) + url.slice(17)
         url = url.slice(0, -2) + (containsS0 ? "=s0" : "=s1600")
