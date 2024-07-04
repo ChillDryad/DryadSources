@@ -100,7 +100,7 @@ export class Parser {
    * Credit to xOnlyFadi's Paperback source.
    * https://github.com/xOnlyFadi/xonlyfadi-extensions/blob/0.8/src/ReadComicOnline/ReadComicOnlineParser.ts#L82
    */
-  parsePages(data: string) {
+parsePages(data: string) {
     const pages: ChapterPage[] = []
     const imageMatches = data.matchAll(/lstImages\.push\(['"](.*)['"]\)/gi)
     console.log(imageMatches)
