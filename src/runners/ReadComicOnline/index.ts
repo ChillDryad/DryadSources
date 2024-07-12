@@ -20,7 +20,7 @@ export class Target implements ContentSource {
     name: "ReadComicOnline",
     thumbnail: "readcomiconline.png",
     website: BASE,
-    version: 0.4,
+    version: 0.5,
     supportedLanguages: ["EN_US"],
     rating: CatalogRating.SAFE,
   }
@@ -65,9 +65,9 @@ export class Target implements ContentSource {
     chapterId: string,
   ): Promise<ChapterData> {
     const response = await this.client.get(`${BASE}${chapterId}`)
-    const pages = this.parser.parsePages(response.data)
-    console.log(pages)
+    const pages = await this.parser.parsePages(response.data)
     return { pages }
+    // return {}
   }
   async getDirectoryConfig(): Promise<DirectoryConfig> {
     return {
