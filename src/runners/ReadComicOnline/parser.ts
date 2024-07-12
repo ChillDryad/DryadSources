@@ -1,10 +1,10 @@
 import { type Element, load } from "cheerio"
 import { BASE } from "./constants"
+import { urlDecode } from "./utils"
 import {
   PublicationStatus,
   type Property,
   Chapter,
-  ChapterPage,
   Highlight,
   ReadingMode,
 } from "@suwatte/daisuke"
@@ -100,35 +100,19 @@ export class Parser {
    * Credit to xOnlyFadi's Paperback source.
    * https://github.com/xOnlyFadi/xonlyfadi-extensions/blob/0.8/src/ReadComicOnline/ReadComicOnlineParser.ts#L82
    */
-  parsePages(data: string) {
-    const pages: ChapterPage[] = []
-    const imageMatches = data.matchAll(/lstImages\.push\(['"](.*)['"]\)/gi)
-    console.log(imageMatches)
-    for (const match of imageMatches) {
-      if (!match[1]) continue
+  async parsePages(data: string) {
+    const client = new NetworkClient()
+    const $ = load(data)
 
-      let url = match[1].replace(/pw_.g28x/g, "b").replace(/d2pr.x_27/g, "h")
+    const imageMatches = [...data.matchAll(/lstImages\.push\(['"](.*)['"]\)/gi)]
+    const urls = imageMatches.map((match) => match[1])
+    const rguardUrl = $("script[src*='rguard.min.js']").attr("src") ?? ""
 
-      if (url.startsWith("https")) {
-        pages.push({ url })
-      } else {
-        const sliced = url.slice(url.indexOf("?"))
-        const containsS0 = url.includes("=s0")
+    const rguardScript = await client.get(`${BASE}${rguardUrl}`)
 
-        url = url.slice(
-          0,
-          containsS0 ? url.indexOf("=s0?") : url.indexOf("=s1600?"),
-        )
-        url = url.slice(6, 24) + url.slice(28)
-        url = url.slice(0, -10) + url.slice(-2)
-        url = Buffer.from(url, "base64").toString("utf-8")
-        url = url.slice(0, 13) + url.slice(17)
-        url = url.slice(0, -2) + (containsS0 ? "=s0" : "=s1600")
-        pages.push({ url: `https://2.bp.blogspot.com/${url + sliced}` })
-      }
-    }
-    console.log(pages)
-    return pages
+    const decodedUrls = urlDecode(urls, rguardScript.data)
+    console.log(decodedUrls)
+    return decodedUrls
   }
   parseChapters(html: string) {
     const $ = load(html)
