@@ -1,20 +1,13 @@
-/**
- * Base source from kagari-mimi
- * https://github.com/Cleover/paperback-sources/tree/83fe7cbef4e02a31a32d89d6c33197392446f16c/src/DynastyScans
- */
 import {
   CatalogRating,
-  Chapter,
-  ChapterData,
-  Content,
-  DeepLinkContext,
-  DirectoryConfig,
-  DirectoryRequest,
+  type Chapter,
+  type ChapterData,
+  type Content,
+  type DirectoryConfig,
+  type DirectoryRequest,
   type Highlight,
-  PagedResult,
-  Property,
-  RunnerInfo,
-  SourceConfig,
+  type PagedResult,
+  type RunnerInfo,
   type ContentSource,
   NetworkClientBuilder,
 } from "@suwatte/daisuke"
@@ -38,8 +31,6 @@ interface DynastyChapterTagging {
   released_on: string
   tags: DynastyTags[]
 }
-type DynastyTaggings = DynastyChapterTagging | DynastyHeaderTagging
-
 type DynastyMangaResponse = {
   name: string
   type: string
@@ -173,6 +164,5 @@ export class Target implements ContentSource {
   }
   async getDirectoryConfig(): Promise<DirectoryConfig> {
     return {}
-    // throw new Error("Method not implemented.")
   }
 }
