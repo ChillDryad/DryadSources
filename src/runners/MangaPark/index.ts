@@ -28,7 +28,7 @@ export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "kusa.mangapark",
     name: "MangaPark",
-    version: 0.1,
+    version: 0.2,
     website: "https://mangapark.io",
     thumbnail: "mangapark.png",
     supportedLanguages: ["EN_US"],
@@ -148,7 +148,7 @@ export class Target implements ContentSource {
         ],
         incTLangs: "en",
         incOLangs: request?.filters?.language,
-        sortby: request?.filters?.sort,
+        sortby: request?.sort?.id,
         chapCount: request?.filters?.chapters,
         origStatus: request?.filters?.status,
       },
