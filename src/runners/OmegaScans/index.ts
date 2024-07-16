@@ -241,7 +241,6 @@ export class Target implements ContentSource {
     const parsedPages = $("div.flex img").toArray()
     const pages = parsedPages.map((page) => {
       const url =
-        // @ts-expect-error this will exist
         $(page).attr("data-src")?.trim().length > 1
           ? $(page).attr("data-src")?.trim()
           : $(page).attr("src")?.trim()
