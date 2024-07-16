@@ -8,10 +8,6 @@ exports.BASE_URL = "https://dynasty-scans.com";
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Target = void 0;
-/**
- * Base source from kagari-mimi
- * https://github.com/Cleover/paperback-sources/tree/83fe7cbef4e02a31a32d89d6c33197392446f16c/src/DynastyScans
- */
 const daisuke_1 = require("@suwatte/daisuke");
 const constants_1 = require("./constants");
 const cheerio_1 = require("cheerio");
@@ -99,7 +95,6 @@ class Target {
     }
     async getDirectoryConfig() {
         return {};
-        // throw new Error("Method not implemented.")
     }
 }
 exports.Target = Target;
