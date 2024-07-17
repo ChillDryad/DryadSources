@@ -16,7 +16,7 @@ class Target {
         id: "kusa.dynastyscans",
         name: "Dynasty Scans",
         thumbnail: "dynasty.png",
-        version: 0.1,
+        version: 0.2,
         website: constants_1.BASE_URL,
         supportedLanguages: ["EN_US"],
         rating: daisuke_1.CatalogRating.MIXED,
@@ -38,6 +38,7 @@ class Target {
         params.page = request.page;
         params.q = request.query ?? "";
         params["classes[]"] = "Series";
+        params["classes[]"] = "Anthology";
         const response = await this.client.get(`${constants_1.BASE_URL}/search`, { params });
         const $ = (0, cheerio_1.load)(response.data);
         const titles = $("dl.chapter-list dd").toArray();
