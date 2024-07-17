@@ -47,7 +47,7 @@ export class Target implements ContentSource {
     id: "kusa.dynastyscans",
     name: "Dynasty Scans",
     thumbnail: "dynasty.png",
-    version: 0.1,
+    version: 0.2,
     website: BASE_URL,
     supportedLanguages: ["EN_US"],
     rating: CatalogRating.MIXED,
@@ -73,6 +73,7 @@ export class Target implements ContentSource {
     params.page = request.page
     params.q = request.query ?? ""
     params["classes[]"] = "Series"
+    params["classes[]"] = "Anthology"
 
     const response = await this.client.get(`${BASE_URL}/search`, { params })
 
