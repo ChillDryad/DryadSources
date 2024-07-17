@@ -114,6 +114,7 @@ export class Parser {
     console.log(decodedUrls)
     return decodedUrls
   }
+
   parseChapters(html: string) {
     const $ = load(html)
 
