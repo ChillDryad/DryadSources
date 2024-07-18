@@ -47,7 +47,7 @@ export class Target implements ContentSource {
     id: "kusa.dynastyscans",
     name: "Dynasty Scans",
     thumbnail: "dynasty.png",
-    version: 0.2,
+    version: 0.3,
     website: BASE_URL,
     supportedLanguages: ["EN_US"],
     rating: CatalogRating.MIXED,
