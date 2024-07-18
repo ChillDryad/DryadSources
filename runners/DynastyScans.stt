@@ -16,7 +16,7 @@ class Target {
         id: "kusa.dynastyscans",
         name: "Dynasty Scans",
         thumbnail: "dynasty.png",
-        version: 0.2,
+        version: 0.3,
         website: constants_1.BASE_URL,
         supportedLanguages: ["EN_US"],
         rating: daisuke_1.CatalogRating.MIXED,
@@ -47,7 +47,7 @@ class Target {
             const details = await this.limitedClient.get(`${constants_1.BASE_URL}${$("a.name", title).attr("href")}.json`);
             const parsedDetails = JSON.parse(details.data);
             results.push({
-                id: parsedDetails.permalink,
+                id: `${parsedDetails.type === "Anthology" ? "anthologies" : "series"}/${parsedDetails.permalink}`,
                 title: parsedDetails.name,
                 cover: `${constants_1.BASE_URL}${parsedDetails.cover}`,
             });
@@ -58,12 +58,12 @@ class Target {
         };
     }
     async getContent(contentId) {
-        const response = await this.client.get(`${constants_1.BASE_URL}/series/${contentId}.json`);
+        const response = await this.client.get(`${constants_1.BASE_URL}/${contentId}.json`);
         const details = JSON.parse(response.data);
         return { title: details.name, cover: `${constants_1.BASE_URL}${details.cover}` };
     }
     async getChapters(contentId) {
-        const response = await this.client.get(`${constants_1.BASE_URL}/series/${contentId}.json`);
+        const response = await this.client.get(`${constants_1.BASE_URL}/${contentId}.json`);
         const details = JSON.parse(response.data);
         // let volume = ""
         const chapters = [];
@@ -73,6 +73,7 @@ class Target {
             if (current?.title !== undefined) {
                 const newChapter = {
                     chapterId: current.permalink,
+                    title: current.title,
                     number: Number(current.title.match(/chapter \d+/gi)?.[0].match(/\d+/)[0]) ||
                         0,
                     index: Number(entry),
@@ -80,7 +81,6 @@ class Target {
                     date: new Date(current.released_on),
                     language: "en_us",
                 };
-                console.log(current, newChapter);
                 chapters.push(newChapter);
             }
         }
