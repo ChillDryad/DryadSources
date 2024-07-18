@@ -47,7 +47,7 @@ export class Target implements ContentSource {
     id: "kusa.dynastyscans",
     name: "Dynasty Scans",
     thumbnail: "dynasty.png",
-    version: 0.2,
+    version: 0.3,
     website: BASE_URL,
     supportedLanguages: ["EN_US"],
     rating: CatalogRating.MIXED,
@@ -87,10 +87,13 @@ export class Target implements ContentSource {
       const parsedDetails: {
         name: string
         permalink: string
+        type: string
         cover: string
       } = JSON.parse(details.data)
       results.push({
-        id: parsedDetails.permalink,
+        id: `${parsedDetails.type === "Anthology" ? "anthologies" : "series"}/${
+          parsedDetails.permalink
+        }`,
         title: parsedDetails.name,
         cover: `${BASE_URL}${parsedDetails.cover}`,
       })
@@ -102,9 +105,7 @@ export class Target implements ContentSource {
   }
 
   async getContent(contentId: string): Promise<Content> {
-    const response = await this.client.get(
-      `${BASE_URL}/series/${contentId}.json`,
-    )
+    const response = await this.client.get(`${BASE_URL}/${contentId}.json`)
     const details: {
       name: string
       tags: DynastyTags[]
@@ -115,9 +116,7 @@ export class Target implements ContentSource {
   }
 
   async getChapters(contentId: string): Promise<Chapter[]> {
-    const response = await this.client.get(
-      `${BASE_URL}/series/${contentId}.json`,
-    )
+    const response = await this.client.get(`${BASE_URL}/${contentId}.json`)
     const details: DynastyMangaResponse = JSON.parse(response.data)
     // let volume = ""
     const chapters: Chapter[] = []
@@ -128,6 +127,7 @@ export class Target implements ContentSource {
       if (current?.title !== undefined) {
         const newChapter = {
           chapterId: current.permalink,
+          title: current.title,
           number:
             Number(current.title.match(/chapter \d+/gi)?.[0].match(/\d+/)[0]) ||
             0,
@@ -136,7 +136,6 @@ export class Target implements ContentSource {
           date: new Date(current.released_on),
           language: "en_us",
         }
-        console.log(current, newChapter)
 
         chapters.push(newChapter)
       }
