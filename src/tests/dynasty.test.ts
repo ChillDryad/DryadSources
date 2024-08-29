@@ -21,7 +21,7 @@ describe("Dynasty tests", () => {
 
   test("Content", async () => {
     const content = await source.getContent(
-      "the_guy_she_was_interested_in_wasnt_a_guy_at_all",
+      "series/the_guy_she_was_interested_in_wasnt_a_guy_at_all",
     )
     expect(ContentSchema.parse(content)).toEqual(expect.any(Object))
     expect(content.title).toBe(
@@ -31,7 +31,7 @@ describe("Dynasty tests", () => {
 
   test("Chapters", async () => {
     const chapters = await source.getChapters(
-      "the_guy_she_was_interested_in_wasnt_a_guy_at_all",
+      "series/the_guy_she_was_interested_in_wasnt_a_guy_at_all",
     )
     expect(ChapterSchema.array().parse(chapters)).toEqual(expect.any(Array))
     expect(chapters.length).toBeGreaterThan(1)
