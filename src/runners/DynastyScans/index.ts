@@ -47,7 +47,7 @@ export class Target implements ContentSource {
     id: "kusa.dynastyscans",
     name: "Dynasty Scans",
     thumbnail: "dynasty.png",
-    version: 0.4,
+    version: 0.6,
     website: BASE_URL,
     supportedLanguages: ["EN_US"],
     rating: CatalogRating.MIXED,
@@ -80,9 +80,8 @@ export class Target implements ContentSource {
     const titles = $("dl.chapter-list dd").toArray()
     const results: Highlight[] = []
     for (const title of titles) {
-      const details = await this.limitedClient.get(
-        `${BASE_URL}${$("a.name", title).attr("href")}.json`,
-      )
+      const url = `${BASE_URL}${$("a.name", title).attr("href")}.json`
+      const details = await this.limitedClient.get(url)
       const parsedDetails: {
         name: string
         permalink: string
@@ -90,9 +89,7 @@ export class Target implements ContentSource {
         cover: string
       } = JSON.parse(details.data)
       results.push({
-        id: `${parsedDetails.type === "Anthology" ? "anthologies" : "series"}/${
-          parsedDetails.permalink
-        }`,
+        id: url.split(`${BASE_URL}/`)[1],
         title: parsedDetails.name,
         cover: `${BASE_URL}${parsedDetails.cover}`,
       })
@@ -104,7 +101,8 @@ export class Target implements ContentSource {
   }
 
   async getContent(contentId: string): Promise<Content> {
-    const response = await this.client.get(`${BASE_URL}/${contentId}.json`)
+    console.log("getContent", `${BASE_URL}/${contentId}`)
+    const response = await this.client.get(`${BASE_URL}/${contentId}`)
     const details: {
       name: string
       tags: DynastyTags[]
@@ -115,7 +113,8 @@ export class Target implements ContentSource {
   }
 
   async getChapters(contentId: string): Promise<Chapter[]> {
-    const response = await this.client.get(`${BASE_URL}/${contentId}.json`)
+    console.log("getChapters", `${BASE_URL}/${contentId}`)
+    const response = await this.client.get(`${BASE_URL}/${contentId}`)
     const details: DynastyMangaResponse = JSON.parse(response.data)
     // let volume = ""
     const chapters: Chapter[] = []
