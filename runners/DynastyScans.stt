@@ -16,7 +16,7 @@ class Target {
         id: "kusa.dynastyscans",
         name: "Dynasty Scans",
         thumbnail: "dynasty.png",
-        version: 0.4,
+        version: 0.6,
         website: constants_1.BASE_URL,
         supportedLanguages: ["EN_US"],
         rating: daisuke_1.CatalogRating.MIXED,
@@ -43,10 +43,11 @@ class Target {
         const titles = $("dl.chapter-list dd").toArray();
         const results = [];
         for (const title of titles) {
-            const details = await this.limitedClient.get(`${constants_1.BASE_URL}${$("a.name", title).attr("href")}.json`);
+            const url = `${constants_1.BASE_URL}${$("a.name", title).attr("href")}.json`;
+            const details = await this.limitedClient.get(url);
             const parsedDetails = JSON.parse(details.data);
             results.push({
-                id: `${parsedDetails.type === "Anthology" ? "anthologies" : "series"}/${parsedDetails.permalink}`,
+                id: url.split(`${constants_1.BASE_URL}/`)[1],
                 title: parsedDetails.name,
                 cover: `${constants_1.BASE_URL}${parsedDetails.cover}`,
             });
@@ -57,12 +58,14 @@ class Target {
         };
     }
     async getContent(contentId) {
-        const response = await this.client.get(`${constants_1.BASE_URL}/${contentId}.json`);
+        console.log("getContent", `${constants_1.BASE_URL}/${contentId}`);
+        const response = await this.client.get(`${constants_1.BASE_URL}/${contentId}`);
         const details = JSON.parse(response.data);
         return { title: details.name, cover: `${constants_1.BASE_URL}${details.cover}` };
     }
     async getChapters(contentId) {
-        const response = await this.client.get(`${constants_1.BASE_URL}/${contentId}.json`);
+        console.log("getChapters", `${constants_1.BASE_URL}/${contentId}`);
+        const response = await this.client.get(`${constants_1.BASE_URL}/${contentId}`);
         const details = JSON.parse(response.data);
         // let volume = ""
         const chapters = [];
