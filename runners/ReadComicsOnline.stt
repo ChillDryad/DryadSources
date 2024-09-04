@@ -108,7 +108,7 @@ class Target {
         name: "ReadComicsOnline.ru",
         version: 0.1,
         website: constants_1.BASE_URL,
-        thumbnail: "readcomicsonline.png",
+        thumbnail: "readcomiconline.png",
         supportedLanguages: ["EN_US"],
         minSupportedAppVersion: "5.0",
         rating: daisuke_1.CatalogRating.MIXED,

@@ -5,12 +5,12 @@ exports.Target = void 0;
 const daisuke_1 = require("@suwatte/daisuke");
 const cheerio_1 = require("cheerio");
 class Target {
-    baseUrl = "https://manga18fx.com/";
+    baseUrl = "https://manga18fx.com";
     client = new NetworkClient();
     info = {
         id: "kusa.manga18fx",
         name: "Manga18fx",
-        thumbnail: "manga18fx.png",
+        thumbnail: "manga18fx.jpg",
         version: 0.1,
         website: this.baseUrl,
         supportedLanguages: ["EN_US"],
@@ -18,27 +18,74 @@ class Target {
     };
     async getDirectory(request) {
         const params = {};
-        const response = await this.client.get(this.baseUrl);
+        const response = await this.client.get(`${this.baseUrl}${request.page ? `/page/${request.page}` : ""}`);
         const $ = (0, cheerio_1.load)(response.data);
         const webtoons = $("div.listupd div.page-item").toArray();
         const highlights = webtoons.map((webtoon) => {
-            console.log($(webtoon).html());
+            return {
+                title: $("h3 a", webtoon).text().trim(),
+                id: $("h3 a", webtoon).attr("href"),
+                cover: $("div.thumb-manga a img", webtoon).attr("data-src") ??
+                    $("div.thumb-manga a img", webtoon).attr("src"),
+            };
         });
-        // const highlights = webtoons.map(webtoon: Element => (
-        // ))
-        throw new Error("Method not implemented.");
+        return {
+            results: highlights,
+            isLastPage: highlights.length < 24,
+        };
     }
     async getContent(contentId) {
-        throw new Error("Method not implemented.");
+        const response = await this.client.get(`${this.baseUrl}${contentId}`);
+        const $ = (0, cheerio_1.load)(response.data);
+        const title = $("h1").text().trim();
+        const cover = $("div.tab-summary div.summary_image img").attr("data-src") ??
+            $("div.tab-summary div.summary_image img").attr("src");
+        const summary = $("div.panel-story-description div.dsct").text();
+        const additionalTitles = $("");
+        const chapters = await this.getChapters(contentId);
+        return {
+            title,
+            cover,
+            summary,
+            chapters,
+        };
     }
     async getChapters(contentId) {
-        throw new Error("Method not implemented.");
+        const response = await this.client.get(`${this.baseUrl}${contentId}`);
+        const $ = (0, cheerio_1.load)(response.data);
+        const data = $("li.a-h").toArray();
+        const chapters = data.map((chapter, i) => {
+            const chapterNumber = Number($("a.chapter-name", chapter)
+                .text()
+                .match(/(\d|\.)+/g)?.[0]);
+            return {
+                chapterId: $("a.chapter-name", chapter)
+                    .attr("href")
+                    .split("manga/")[1]
+                    .split("/")[1],
+                title: $("a.chapter-name", chapter).text(),
+                index: i,
+                number: chapterNumber,
+                language: "EN_US",
+                date: new Date(),
+                webUrl: `${this.baseUrl}${$("a.chapter-name", chapter).attr("href")}`,
+            };
+        });
+        return chapters;
     }
     async getChapterData(contentId, chapterId) {
-        throw new Error("Method not implemented.");
+        const response = await this.client.get(`${this.baseUrl}${contentId}/${chapterId}`);
+        const $ = (0, cheerio_1.load)(response.data);
+        const pages = $("div.page-break")
+            .toArray()
+            .map((page, i) => {
+            return { url: $("img", page).attr("data-src") ?? $("img").attr("src") };
+        });
+        console.log(pages);
+        return { pages };
     }
     async getDirectoryConfig(configID) {
-        throw new Error("Method not implemented.");
+        return {};
     }
 }
 exports.Target = Target;
