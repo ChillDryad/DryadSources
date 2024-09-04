@@ -4,16 +4,12 @@ import {
   ChapterData,
   Content,
   ContentSource,
-  DeepLinkContext,
   DirectoryConfig,
   DirectoryRequest,
-  FilterType,
   PagedResult,
-  Property,
   RunnerInfo,
-  SourceConfig,
 } from "@suwatte/daisuke"
-import { BASE_URL, GENRES, STATUS, TYPE } from "./constants"
+import { BASE_URL } from "./constants"
 import { load } from "cheerio"
 
 export class Target implements ContentSource {
