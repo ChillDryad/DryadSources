@@ -19,20 +19,17 @@ describe("Manga18fx tests", () => {
     expect(data.results.length).toBeGreaterThan(1)
   })
   // test("Content", async () => {
-  //   const content = await source.getContent("desire-realization-app")
+  //   const content = await source.getContent("bunking-bed-raw")
   //   expect(ContentSchema.parse(content)).toEqual(expect.any(Object))
-  //   expect(content.title).toBe("Desire Realization App")
+  //   expect(content.title).toBe("Bunking Bed Raw")
   // })
-  // test("Chapters", async () => {
-  //   const chapters = await source.getChapters("desire-realization-app")
-  //   expect(ChapterSchema.array().parse(chapters)).toEqual(expect.any(Array))
-  //   expect(chapters.length).toBeGreaterThan(1)
-  // })
+  test("Chapters", async () => {
+    const chapters = await source.getChapters("bunking-bed-raw")
+    expect(ChapterSchema.array().parse(chapters)).toEqual(expect.any(Array))
+    expect(chapters.length).toBeGreaterThan(1)
+  })
   // test("Reader", async () => {
-  //   const data = await source.getChapterData(
-  //     "desire-realization-app",
-  //     "chapter-1",
-  //   )
+  //   const data = await source.getChapterData("bunking-bed-raw", "chapter-93")
   //   expect(ChapterDataSchema.parse(data)).toEqual(expect.any(Object))
   // })
 })

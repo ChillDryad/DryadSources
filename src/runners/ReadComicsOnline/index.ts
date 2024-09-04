@@ -18,7 +18,7 @@ export class Target implements ContentSource {
     name: "ReadComicsOnline.ru",
     version: 0.1,
     website: BASE_URL,
-    thumbnail: "readcomicsonline.png", //todo: get this
+    thumbnail: "readcomiconline.png",
     supportedLanguages: ["EN_US"],
     minSupportedAppVersion: "5.0",
     rating: CatalogRating.MIXED,
