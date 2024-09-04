@@ -19,6 +19,15 @@ describe("Dynasty tests", () => {
     expect(data.results.length).toBe(20)
   }, 14000)
 
+  test("Search", async () => {
+    const data = await source.getDirectory({
+      page: 1,
+      query: "Bloom into you",
+    })
+    expect(PagedResultSchema.parse(data)).toEqual(expect.any(Object))
+    expect(data.results.length).toBe(20)
+  }, 14000)
+
   test("Content", async () => {
     const content = await source.getContent(
       "series/the_guy_she_was_interested_in_wasnt_a_guy_at_all",
