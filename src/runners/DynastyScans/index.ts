@@ -47,7 +47,7 @@ export class Target implements ContentSource {
     id: "kusa.dynastyscans",
     name: "Dynasty Scans",
     thumbnail: "dynasty.png",
-    version: 0.6,
+    version: 0.7,
     website: BASE_URL,
     supportedLanguages: ["EN_US"],
     rating: CatalogRating.MIXED,
@@ -71,8 +71,8 @@ export class Target implements ContentSource {
     }
 
     params.page = request.page
-    params.q = request.query ?? ""
-    params["classes[]"] = "Series&classes%5B%5D=Anthology"
+    params.q = request.query ? request.query.replace(" ", "+") : ""
+    params["classes[]"] = "Anthology&classes%5B%5D=Series"
 
     const response = await this.client.get(`${BASE_URL}/search`, { params })
 
@@ -88,11 +88,12 @@ export class Target implements ContentSource {
         type: string
         cover: string
       } = JSON.parse(details.data)
-      results.push({
-        id: url.split(`${BASE_URL}/`)[1],
-        title: parsedDetails.name,
-        cover: `${BASE_URL}${parsedDetails.cover}`,
-      })
+      if (parsedDetails.name)
+        results.push({
+          id: url.split(`${BASE_URL}/`)[1],
+          title: parsedDetails.name,
+          cover: `${BASE_URL}${parsedDetails.cover}` ?? "",
+        })
     }
     return {
       results,
@@ -101,7 +102,6 @@ export class Target implements ContentSource {
   }
 
   async getContent(contentId: string): Promise<Content> {
-    console.log("getContent", `${BASE_URL}/${contentId}`)
     const response = await this.client.get(`${BASE_URL}/${contentId}`)
     const details: {
       name: string
@@ -113,7 +113,6 @@ export class Target implements ContentSource {
   }
 
   async getChapters(contentId: string): Promise<Chapter[]> {
-    console.log("getChapters", `${BASE_URL}/${contentId}`)
     const response = await this.client.get(`${BASE_URL}/${contentId}`)
     const details: DynastyMangaResponse = JSON.parse(response.data)
     // let volume = ""
