@@ -24,7 +24,7 @@ export class Target implements ContentSource {
     id: "kusa.manga18fx",
     name: "Manga18fx",
     thumbnail: "manga18fx.jpg",
-    version: 0.1,
+    version: 0.2,
     website: this.baseUrl,
     supportedLanguages: ["EN_US"],
     rating: CatalogRating.NSFW,
@@ -32,8 +32,6 @@ export class Target implements ContentSource {
 
   async getDirectory(request: DirectoryRequest): Promise<PagedResult> {
     let url = this.baseUrl
-
-    console.log(request)
 
     if (request.query)
       url = `${url}/search?q=${request.query.replace(" ", "+")}${
