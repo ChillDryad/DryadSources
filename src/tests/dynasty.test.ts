@@ -22,10 +22,10 @@ describe("Dynasty tests", () => {
   test("Search", async () => {
     const data = await source.getDirectory({
       page: 1,
-      query: "Bloom into you",
+      query: "My Dearest Nemesis",
     })
     expect(PagedResultSchema.parse(data)).toEqual(expect.any(Object))
-    expect(data.results.length).toBe(20)
+    expect(data.results.length).toBe(1)
   }, 14000)
 
   test("Content", async () => {

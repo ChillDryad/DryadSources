@@ -47,7 +47,7 @@ export class Target implements ContentSource {
     id: "kusa.dynastyscans",
     name: "Dynasty Scans",
     thumbnail: "dynasty.png",
-    version: 0.7,
+    version: 0.8,
     website: BASE_URL,
     supportedLanguages: ["EN_US"],
     rating: CatalogRating.MIXED,
@@ -72,9 +72,11 @@ export class Target implements ContentSource {
 
     params.page = request.page
     params.q = request.query ? request.query.replace(" ", "+") : ""
-    params["classes[]"] = "Anthology&classes%5B%5D=Series"
 
-    const response = await this.client.get(`${BASE_URL}/search`, { params })
+    const response = await this.client.get(
+      `${BASE_URL}/search?classes%5B%5D=Anthology&classes%5B%5D=Series`,
+      { params },
+    )
 
     const $ = load(response.data)
     const titles = $("dl.chapter-list dd").toArray()
@@ -97,7 +99,7 @@ export class Target implements ContentSource {
     }
     return {
       results,
-      isLastPage: results.length < 20,
+      isLastPage: titles.length < 20,
     }
   }
 
