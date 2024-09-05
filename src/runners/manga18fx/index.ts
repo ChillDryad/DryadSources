@@ -7,12 +7,14 @@ import {
   DeepLinkContext,
   DirectoryConfig,
   DirectoryRequest,
+  FilterType,
   PagedResult,
   Property,
   RunnerInfo,
   SourceConfig,
 } from "@suwatte/daisuke"
 import { Element, load } from "cheerio"
+import { GENRES } from "./constants"
 
 export class Target implements ContentSource {
   baseUrl = "https://manga18fx.com"
@@ -29,14 +31,20 @@ export class Target implements ContentSource {
   }
 
   async getDirectory(request: DirectoryRequest): Promise<PagedResult> {
-    const params: Record<
-      string,
-      string | string[] | boolean | undefined | number
-    > = {}
+    let url = this.baseUrl
 
-    const response = await this.client.get(
-      `${this.baseUrl}${request.page ? `/page/${request.page}` : ""}`,
-    )
+    console.log(request)
+
+    if (request.query)
+      url = `${url}/search?q=${request.query.replace(" ", "+")}${
+        request.page ? `&page=${request.page}` : ""
+      }`
+    else if (request?.filters?.genres)
+      url = `${url}/manga-genre/${request.filters.genres}${
+        request.page ? `/${request.page}` : ""
+      }`
+
+    const response = await this.client.get(url)
 
     const $ = load(response.data)
     const webtoons = $("div.listupd div.page-item").toArray()
@@ -49,6 +57,7 @@ export class Target implements ContentSource {
           $("div.thumb-manga a img", webtoon).attr("src"),
       }
     })
+
     return {
       results: highlights,
       isLastPage: highlights.length < 24,
@@ -115,7 +124,16 @@ export class Target implements ContentSource {
     return { pages }
   }
 
-  async getDirectoryConfig(configID?: string): Promise<DirectoryConfig> {
-    return {}
+  async getDirectoryConfig(): Promise<DirectoryConfig> {
+    return {
+      filters: [
+        {
+          id: "genres",
+          title: "Genres",
+          type: FilterType.SELECT,
+          options: GENRES,
+        },
+      ],
+    }
   }
 }
