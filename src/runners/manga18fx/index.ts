@@ -71,7 +71,7 @@ export class Target implements ContentSource {
       $("div.tab-summary div.summary_image img").attr("data-src") ??
       $("div.tab-summary div.summary_image img").attr("src")
     const summary = $("div.panel-story-description div.dsct").text()
-    const additionalTitles = $("")
+    // const additionalTitles = $("")
     const chapters = await this.getChapters(contentId)
     return {
       title,
@@ -115,10 +115,9 @@ export class Target implements ContentSource {
     const $ = load(response.data)
     const pages = $("div.page-break")
       .toArray()
-      .map((page: Element, i: number) => {
+      .map((page: Element) => {
         return { url: $("img", page).attr("data-src") ?? $("img").attr("src") }
       })
-    console.log(pages)
     return { pages }
   }
 
