@@ -126,14 +126,14 @@ export class Target implements ContentSource {
   }
   async getDirectoryConfig(configID?: string): Promise<DirectoryConfig> {
     return {
-      filters: [
-        {
-          id: "genres",
-          title: "Genres",
-          type: FilterType.SELECT,
-          options: GENRES,
-        },
-      ],
+      // filters: [
+      //   {
+      //     id: "genres",
+      //     title: "Genres",
+      //     type: FilterType.SELECT,
+      //     options: GENRES,
+      //   },
+      // ],
     }
   }
 }
