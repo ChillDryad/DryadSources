@@ -4,17 +4,12 @@ import {
   ChapterData,
   Content,
   ContentSource,
-  DeepLinkContext,
   DirectoryConfig,
   DirectoryRequest,
-  FilterType,
   PagedResult,
-  Property,
   RunnerInfo,
-  SourceConfig,
 } from "@suwatte/daisuke"
 import { load, type Element } from "cheerio"
-import { GENRES } from "./constants"
 
 export class Target implements ContentSource {
   baseUrl = "https://1st-kissmanga.net"
