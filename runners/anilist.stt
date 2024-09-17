@@ -131,9 +131,9 @@ query ($id: Int) {
     }
 }`;
 exports.SimpleSearchQuery = `
-query SimpleSearch ($search: String, $isAdult: Boolean) {
+query SimpleSearch ($search: String) {
       Page(perPage: 30) {
-        media(search: $search, type: MANGA, isAdult: $isAdult) {
+        media(search: $search, type: MANGA) {
           id
           title {
             userPreferred
@@ -215,8 +215,8 @@ query HomePageViewMoreQuery ($page: Int){
         ? "SCORE_DESC"
         : "POPULARITY_DESC"}, type: MANGA, isAdult: false ${["manga", "manhwa"].includes(key)
     ? key === "manga"
-        ? ",countryOfOrigin: \"JP\""
-        : ",countryOfOrigin: \"KR\" "
+        ? ',countryOfOrigin: "JP"'
+        : ',countryOfOrigin: "KR" '
     : ""}) {
       ...media
     }
@@ -320,7 +320,39 @@ query ($id: Int) {
 ${MediaFragment}
 `;
 exports.FullSearchQuery = `
-    query FullSearch($page: Int = 1, $id: Int, $type: MediaType = MANGA, $isAdult: Boolean, $search: String, $format: [MediaFormat], $status: MediaStatus, $countryOfOrigin: CountryCode, $source: MediaSource, $season: MediaSeason, $seasonYear: Int, $year: String, $onList: Boolean, $yearLesser: FuzzyDateInt, $yearGreater: FuzzyDateInt, $episodeLesser: Int, $episodeGreater: Int, $durationLesser: Int, $durationGreater: Int, $chapterLesser: Int, $chapterGreater: Int, $volumeLesser: Int, $volumeGreater: Int, $licensedBy: [String], $isLicensed: Boolean, $genres: [String], $excludedGenres: [String], $tags: [String], $excludedTags: [String], $minimumTagRank: Int, $sort: [MediaSort] = [POPULARITY_DESC, SCORE_DESC]) {
+    query FullSearch(	
+      $page: Int = 1, 
+      $id: Int, 
+      $type: MediaType = MANGA, 
+      $isAdult: Boolean, 
+      $search: String
+      $format: [MediaFormat], 
+      $status: MediaStatus, 
+      $countryOfOrigin: CountryCode, 
+      $source: MediaSource, 
+      $season: MediaSeason, 
+      $seasonYear: Int, 
+      $year: String, 
+      $onList: Boolean, 
+      $yearLesser: FuzzyDateInt, 
+      $yearGreater: FuzzyDateInt, 
+      $episodeLesser: Int, 
+      $episodeGreater: Int, 
+      $durationLesser: Int, 
+      $durationGreater: Int, 
+      $chapterLesser: Int, 
+      $chapterGreater: Int, 
+      $volumeLesser: Int, 
+      $volumeGreater: Int, 
+      $licensedBy: [String], 
+      $isLicensed: Boolean, 
+      $genres: [String], $
+      excludedGenres: [String], 
+      $tags: [String], 
+      $excludedTags: [String], 
+      $minimumTagRank: Int, 
+      $sort: [MediaSort] = [POPULARITY_DESC, SCORE_DESC]
+    ) {
       Page(page: $page, perPage: 30) {
         pageInfo {
           total
@@ -329,13 +361,43 @@ exports.FullSearchQuery = `
           lastPage
           hasNextPage
         }
-        media(id: $id, type: $type, season: $season, format_in: $format, status: $status, countryOfOrigin: $countryOfOrigin, source: $source, search: $search, onList: $onList, seasonYear: $seasonYear, startDate_like: $year, startDate_lesser: $yearLesser, startDate_greater: $yearGreater, episodes_lesser: $episodeLesser, episodes_greater: $episodeGreater, duration_lesser: $durationLesser, duration_greater: $durationGreater, chapters_lesser: $chapterLesser, chapters_greater: $chapterGreater, volumes_lesser: $volumeLesser, volumes_greater: $volumeGreater, licensedBy_in: $licensedBy, isLicensed: $isLicensed, genre_in: $genres, genre_not_in: $excludedGenres, tag_in: $tags, tag_not_in: $excludedTags, minimumTagRank: $minimumTagRank, sort: $sort, isAdult: $isAdult) {
+        media(
+          id: $id, 
+					type: $type, 
+					season: $season, 
+					format_in: $format, 
+					status: $status, 
+					countryOfOrigin: $countryOfOrigin, 
+					source: $source, 
+					search: $search, 
+					onList: $onList, 
+					seasonYear: $seasonYear, 
+					startDate_like: $year, 
+					startDate_lesser: $yearLesser, 
+					startDate_greater: $yearGreater, 
+					episodes_lesser: $episodeLesser, 
+					episodes_greater: $episodeGreater, 
+					duration_lesser: $durationLesser, 
+					duration_greater: $durationGreater, 
+					chapters_lesser: $chapterLesser, 
+					chapters_greater: $chapterGreater, 
+					volumes_lesser: $volumeLesser, 
+					volumes_greater: $volumeGreater, 
+					licensedBy_in: $licensedBy, 
+					isLicensed: $isLicensed, 
+					genre_in: $genres, 
+					genre_not_in: $excludedGenres, 
+					tag_in: $tags, 
+					tag_not_in: $excludedTags, 
+					minimumTagRank: $minimumTagRank, 
+					sort: $sort, 
+					isAdult: $isAdult
+        ) {
           ...media
         }
       }
     }
     ${MediaFragment}
-
 `;
 exports.GenresQuery = `
     query {
@@ -580,7 +642,7 @@ const advancedTracker_1 = require("./impl/advancedTracker");
 const info = {
     id: "kusa.anilist",
     name: "Anilist",
-    version: 1.5,
+    version: 1.6,
     website: "https://anilist.co",
     thumbnail: "anilist.png",
 };
@@ -974,8 +1036,8 @@ const simpleSearch = async (search) => {
     console.log({ adult });
     const { data: { Page }, } = await (0, _1.request)(gql_1.SimpleSearchQuery, {
         search,
-        isAdult: adult,
     });
+    console.log(Page);
     const media = Page?.media;
     if (!media)
         return [];
@@ -1028,7 +1090,8 @@ const fullSearch = async (query) => {
         search: query.query,
         sort,
         ...(query.filters && (0, utils_1.convertSTTFilter)(query.filters)),
-        ...(!query.filters && { excludedGenres: ["Hentai"] }),
+        // ...(!query.filters && { excludedGenres: ["Hentai"] }),
+        // ...!query.filters,
         ...(query.tag && {
             ...(query.tag.propertyId === "genres" && { genres: [query.tag.tagId] }),
             ...(query.tag.propertyId !== "genres" && { tags: [query.tag.tagId] }),
