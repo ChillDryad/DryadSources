@@ -42,8 +42,8 @@ export const simpleSearch = async (search: string): Promise<Highlight[]> => {
     data: { Page },
   } = await request<SimpleSearchResponse>(SimpleSearchQuery, {
     search,
-    isAdult: adult,
   })
+  console.log(Page)
 
   const media = Page?.media
 
@@ -108,7 +108,8 @@ export const fullSearch = async (query: DirectoryRequest) => {
     search: query.query,
     sort,
     ...(query.filters && convertSTTFilter(query.filters)),
-    ...(!query.filters && { excludedGenres: ["Hentai"] }),
+    // ...(!query.filters && { excludedGenres: ["Hentai"] }),
+    // ...!query.filters,
     ...(query.tag && {
       ...(query.tag.propertyId === "genres" && { genres: [query.tag.tagId] }),
       ...(query.tag.propertyId !== "genres" && { tags: [query.tag.tagId] }),
