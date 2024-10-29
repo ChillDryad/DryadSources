@@ -6,13 +6,13 @@ const info: RunnerInfo = {
   id: "kusa.hiperdex",
   name: "Hiperdex",
   thumbnail: "hiperdex.png",
-  version: 0.3,
+  version: 0.4,
   rating: CatalogRating.NSFW,
-  website: "https://hiperdex.com",
+  website: "https://hipertoon.com/",
 }
 
 class Hiperdex extends TachiDaraTemplate {
-  baseUrl = "https://hiperdex.com"
+  baseUrl = "https://hipertoon.com/"
   lang = "en"
   name = info.name
 
