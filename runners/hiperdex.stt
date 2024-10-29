@@ -9,12 +9,12 @@ const info = {
     id: "kusa.hiperdex",
     name: "Hiperdex",
     thumbnail: "hiperdex.png",
-    version: 0.3,
+    version: 0.4,
     rating: daisuke_1.CatalogRating.NSFW,
-    website: "https://hiperdex.com",
+    website: "https://hipertoon.com/",
 };
 class Hiperdex extends tachidara_1.TachiDaraTemplate {
-    baseUrl = "https://hiperdex.com";
+    baseUrl = "https://hipertoon.com/";
     lang = "en";
     name = info.name;
     searchPage(page) {
