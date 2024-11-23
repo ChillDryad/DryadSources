@@ -2,7 +2,7 @@ import type { ChapterPage, Content, Property } from "@suwatte/daisuke"
 import { load } from "cheerio"
 import { LANGUAGES } from "./constants"
 export class Parser {
-  parsePagedResponse(html: string) {
+  parsePagedResponse(html: string, searchType?: string) {
     const selector = "div.container div.gallery"
     const $ = load(html)
     const items = $(selector).toArray()
