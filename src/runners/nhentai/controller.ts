@@ -29,11 +29,12 @@ export class Controller {
 
   async getSearchResults(query: DirectoryRequest): Promise<PagedResult> {
     const params: Record<string, unknown> = {}
+    params.q = query.query
     params.page = query.page ?? 1
-    params.query = query.query
 
     let url = this.BASE
-    if (query.filters?.tags !== undefined)
+    if (query.query) url = `${url}/search/`
+    else if (query.filters?.tags !== undefined)
       url = `${url}/tag/${query.filters.tags.replaceAll(" ", "-")}`
     if (query?.tag) url = `${url}/tag/${query.tag.tagId}`
     const response = await this.client.get(url, {
@@ -42,6 +43,7 @@ export class Controller {
     const results = this.parser.parsePagedResponse(response.data)
     return { results, isLastPage: results.length > 60 }
   }
+
   async getContent(id: string): Promise<Content> {
     const response = await this.client.get(`${this.BASE}/g/${id}`)
     return this.parser.parseContent(response.data, id)
