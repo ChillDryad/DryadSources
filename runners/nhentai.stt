@@ -965,9 +965,9 @@ exports.TAGS = [
     },
 ];
 exports.LANGUAGES = [
-    { id: "12227", language: "english", code: "en-GB" },
-    { id: "6346", language: "japanese", code: "JA" },
-    { id: "29963", language: "chinese", code: "zh-zh" },
+    { id: "12227", language: "english", code: "en-GB", flag: "🇬🇧" },
+    { id: "6346", language: "japanese", code: "JA", flag: "🇯🇵" },
+    { id: "29963", language: "chinese", code: "zh-zh", flag: "🇭🇰" },
 ];
 
 },{}],2:[function(require,module,exports){
@@ -1040,7 +1040,7 @@ class Target {
     info = {
         id: "net.nhentai",
         name: "nHentai",
-        version: 0.6,
+        version: 0.7,
         website: "https://nhentai.net",
         supportedLanguages: ["EN_GB", "JA", "ZH"],
         thumbnail: "nhentai.png",
@@ -1074,7 +1074,7 @@ exports.Parser = void 0;
 const cheerio_1 = require("cheerio");
 const constants_1 = require("./constants");
 class Parser {
-    parsePagedResponse(html, searchType) {
+    parsePagedResponse(html) {
         const selector = "div.container div.gallery";
         const $ = (0, cheerio_1.load)(html);
         const items = $(selector).toArray();
@@ -1085,14 +1085,14 @@ class Parser {
             const language = constants_1.LANGUAGES.filter((l) => {
                 if ($(item).attr("data-tags")?.includes(l.id))
                     return l.code;
-            })[0].code;
+            })[0];
             if (!id || !cover || !title)
                 throw "Failed to parse";
             return {
                 id,
                 cover,
-                title,
-                language: language ?? "Unknown",
+                title: `${language.flag ?? ""} ${title}`,
+                language: language.code ?? "Unknown",
             };
         });
         return highlights;
