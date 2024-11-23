@@ -993,10 +993,12 @@ class Controller {
     }
     async getSearchResults(query) {
         const params = {};
+        params.q = query.query;
         params.page = query.page ?? 1;
-        params.query = query.query;
         let url = this.BASE;
-        if (query.filters?.tags !== undefined)
+        if (query.query)
+            url = `${url}/search/`;
+        else if (query.filters?.tags !== undefined)
             url = `${url}/tag/${query.filters.tags.replaceAll(" ", "-")}`;
         if (query?.tag)
             url = `${url}/tag/${query.tag.tagId}`;
@@ -1038,7 +1040,7 @@ class Target {
     info = {
         id: "net.nhentai",
         name: "nHentai",
-        version: 0.5,
+        version: 0.6,
         website: "https://nhentai.net",
         supportedLanguages: ["EN_GB", "JA", "ZH"],
         thumbnail: "nhentai.png",
@@ -1072,7 +1074,7 @@ exports.Parser = void 0;
 const cheerio_1 = require("cheerio");
 const constants_1 = require("./constants");
 class Parser {
-    parsePagedResponse(html) {
+    parsePagedResponse(html, searchType) {
         const selector = "div.container div.gallery";
         const $ = (0, cheerio_1.load)(html);
         const items = $(selector).toArray();
