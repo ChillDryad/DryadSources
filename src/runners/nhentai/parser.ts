@@ -2,7 +2,7 @@ import type { ChapterPage, Content, Property } from "@suwatte/daisuke"
 import { load } from "cheerio"
 import { LANGUAGES } from "./constants"
 export class Parser {
-  parsePagedResponse(html: string, searchType?: string) {
+  parsePagedResponse(html: string) {
     const selector = "div.container div.gallery"
     const $ = load(html)
     const items = $(selector).toArray()
@@ -12,13 +12,13 @@ export class Parser {
       const title = $("a div.caption", item).text()
       const language = LANGUAGES.filter((l) => {
         if ($(item).attr("data-tags")?.includes(l.id)) return l.code
-      })[0].code
+      })[0]
       if (!id || !cover || !title) throw "Failed to parse"
       return {
         id,
         cover,
-        title,
-        language: language ?? "Unknown",
+        title: `${language.flag ?? ""} ${title}`,
+        language: language.code ?? "Unknown",
       }
     })
     return highlights

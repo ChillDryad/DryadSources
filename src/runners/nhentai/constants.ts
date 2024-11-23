@@ -964,7 +964,7 @@ export const TAGS: Tag[] = [
 ]
 
 export const LANGUAGES = [
-  { id: "12227", language: "english", code: "en-GB" },
-  { id: "6346", language: "japanese", code: "JA" },
-  { id: "29963", language: "chinese", code: "zh-zh" },
+  { id: "12227", language: "english", code: "en-GB", flag: "🇬🇧" },
+  { id: "6346", language: "japanese", code: "JA", flag: "🇯🇵" },
+  { id: "29963", language: "chinese", code: "zh-zh", flag: "🇭🇰" },
 ]
