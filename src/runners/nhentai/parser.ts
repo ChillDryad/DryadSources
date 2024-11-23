@@ -17,8 +17,8 @@ export class Parser {
       return {
         id,
         cover,
-        title: `${language.flag ?? ""} ${title}`,
-        language: language.code ?? "Unknown",
+        title: `${language?.flag ?? ""} ${title}`,
+        language: language?.code ?? "Unknown",
       }
     })
     return highlights
