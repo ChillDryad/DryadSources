@@ -16,7 +16,7 @@ export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "kusa.readcomicsonline",
     name: "ReadComicsOnline.ru",
-    version: 0.1,
+    version: 0.2,
     website: BASE_URL,
     thumbnail: "readcomiconline.png",
     supportedLanguages: ["EN_US"],
@@ -80,6 +80,7 @@ export class Target implements ContentSource {
     return {
       title: $("h2.listmanga-header").first().text().trim(),
       cover: `https:${$("div.boxed img").attr("src").trim()}`,
+      recommendedPanelMode: 1,
     }
   }
   async getChapters(contentId: string): Promise<Chapter[]> {
