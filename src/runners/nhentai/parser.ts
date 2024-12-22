@@ -76,7 +76,7 @@ export class Parser {
 
       if (!type) throw "Couldn't parse"
       return {
-        url: `https://i.nhentai.net/galleries/${id}/${i + 1}.${
+        url: `https://i4.nhentai.net/galleries/${id}/${i + 1}.${
           type[type.length - 1]
         }`,
       }
