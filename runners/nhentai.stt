@@ -1040,7 +1040,7 @@ class Target {
     info = {
         id: "net.nhentai",
         name: "nHentai",
-        version: 0.8,
+        version: 0.9,
         website: "https://nhentai.net",
         supportedLanguages: ["EN_GB", "JA", "ZH"],
         thumbnail: "nhentai.png",
@@ -1146,7 +1146,7 @@ class Parser {
             if (!type)
                 throw "Couldn't parse";
             return {
-                url: `https://i.nhentai.net/galleries/${id}/${i + 1}.${type[type.length - 1]}`,
+                url: `https://i4.nhentai.net/galleries/${id}/${i + 1}.${type[type.length - 1]}`,
             };
         });
         return pages;
