@@ -1,7 +1,4 @@
 import { type Tag } from "@suwatte/daisuke"
-import { GlobalStore } from "./store"
-
-export const globalStore = new GlobalStore()
 
 export const GENRES: Tag[] = [
   { id: "1", title: "Romance" },
