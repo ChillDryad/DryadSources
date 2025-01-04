@@ -29,7 +29,7 @@ export class Target implements ContentSource {
     id: "kusa.omegascans",
     name: "OmegaScans",
     thumbnail: "omega.png",
-    version: 1.2,
+    version: 1.3,
     website: this.baseUrl,
     supportedLanguages: ["EN_US"],
     rating: CatalogRating.NSFW,
@@ -238,7 +238,7 @@ export class Target implements ContentSource {
       `${this.baseUrl}/series/${slug}/${chapterId}`,
     )
     const $ = load(response.data)
-    const parsedPages = $("div.flex img").toArray()
+    const parsedPages = $("div.flex.flex-col>img").toArray()
     const pages = parsedPages.map((page) => {
       const url =
         $(page).attr("data-src")?.trim().length > 1
@@ -248,6 +248,7 @@ export class Target implements ContentSource {
         url,
       }
     })
+    pages.pop()
     return { pages }
   }
   async getDirectoryConfig(): Promise<DirectoryConfig> {
