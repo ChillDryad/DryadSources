@@ -28,7 +28,7 @@ export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "kusa.mangapark",
     name: "MangaPark",
-    version: 0.2,
+    version: 0.3,
     website: "https://mangapark.io",
     thumbnail: "mangapark.png",
     supportedLanguages: ["EN_US"],
@@ -54,6 +54,8 @@ export class Target implements ContentSource {
     const properties: Property[] = []
     const creators = content.authors
     const isNSFW = content.sfw_result
+    const cover = `https://mangapark.io${content.urlCoverOri}`
+
     properties.push({
       id: "genres",
       title: "Genres",
@@ -68,10 +70,9 @@ export class Target implements ContentSource {
         noninteractive: true,
       })),
     })
-
     return {
       title: content.name,
-      cover: content.urlCoverOri,
+      cover,
       isNSFW,
       creators,
       properties,
