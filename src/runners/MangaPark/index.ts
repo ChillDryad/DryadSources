@@ -28,7 +28,7 @@ export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "kusa.mangapark",
     name: "MangaPark",
-    version: 0.3,
+    version: 0.4,
     website: "https://mangapark.io",
     thumbnail: "mangapark.png",
     supportedLanguages: ["EN_US"],
@@ -168,10 +168,11 @@ export class Target implements ContentSource {
       // @ts-expect-error to be fixed
       (item) => {
         const { id, name, urlCoverOri } = item.data
+        const cover = urlCoverOri ? `https://mangapark.io${urlCoverOri}` : ""
         return {
           id,
           title: name,
-          cover: urlCoverOri ?? "",
+          cover,
         }
       },
     )
