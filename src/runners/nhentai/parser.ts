@@ -16,7 +16,7 @@ export class Parser {
       if (!id || !cover || !title) throw "Failed to parse"
       return {
         id,
-        cover,
+        cover: `https:${cover}`,
         title: `${language?.flag ?? ""} ${title}`,
         language: language?.code ?? "Unknown",
       }
