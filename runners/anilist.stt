@@ -215,8 +215,8 @@ query HomePageViewMoreQuery ($page: Int){
         ? "SCORE_DESC"
         : "POPULARITY_DESC"}, type: MANGA, isAdult: false ${["manga", "manhwa"].includes(key)
     ? key === "manga"
-        ? ',countryOfOrigin: "JP"'
-        : ',countryOfOrigin: "KR" '
+        ? ",countryOfOrigin: \"JP\""
+        : ",countryOfOrigin: \"KR\" "
     : ""}) {
       ...media
     }
