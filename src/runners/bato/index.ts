@@ -21,7 +21,7 @@ export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "kusa.bato",
     name: "Bato",
-    version: 0.7,
+    version: 0.8,
     website: "https://bato.to",
     supportedLanguages: LANG_TAGS.map((l) => l.id),
     thumbnail: "bato.png",
@@ -77,7 +77,7 @@ export class Target implements ContentSource {
       filters: this.controller.getFilters(),
       sort: {
         options: SORTERS,
-        canChangeOrder: true,
+        canChangeOrder: false,
       },
     }
   }
