@@ -129,7 +129,6 @@ export class Parser {
   parseChapters(html: string, contentId: string) {
     const $ = load(html)
     const chapterList = $("table#chapter_table tbody tr").toArray()
-    console.log(chapterList.length)
     const chapters = this.arrayToChapters($, chapterList, contentId)
     return chapters
   }
