@@ -32,7 +32,6 @@ export class Controller {
   private store = ObjectStore
 
   async getSearchResults(query: DirectoryRequest): Promise<PagedResult> {
-    console.log(query)
     const params: Record<string, unknown> = {}
     params.langs = (await this.store.get("lang")) || ""
     // Keyword
