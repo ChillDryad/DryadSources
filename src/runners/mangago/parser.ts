@@ -62,7 +62,7 @@ export class Parser {
     const creators: string[] = []
     const properties: Property[] = []
     const information = $("table.left tbody tr").toArray()
-
+    const summary = $("div.manga_summary").text().trim()
     let status = PublicationStatus.ONGOING
 
     information.forEach((property) => {
@@ -120,6 +120,7 @@ export class Parser {
         title,
         cover,
         chapters,
+        summary,
         properties,
         status,
         isNSFW,
