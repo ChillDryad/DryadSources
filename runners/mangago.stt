@@ -68,7 +68,7 @@ class Target {
         id: "kusa.mangago",
         name: "Mangago",
         thumbnail: "mangago.png",
-        version: 0.3,
+        version: 0.4,
         website: this.baseURL,
         supportedLanguages: ["EN_US"],
         rating: daisuke_1.CatalogRating.MIXED,
@@ -93,7 +93,7 @@ class Target {
                 ...(request.filters?.genres?.excluded ?? []),
                 ...(request.filters?.adult?.excluded ?? []),
             ];
-            url = `${this.baseURL}/genre/${included.length > 0 ? included.join(",") : "All"}/${request.page ?? 1}/?f=${request.filters?.status?.includes("completed") ? "0" : "1"}&o=${request.filters?.status?.includes("ongoing") ? "0" : "1"}&sortby=view&e=${excluded.length > 0 ? excluded.join(",") : ""}`;
+            url = `${this.baseURL}/genre/${included.length > 0 ? included.join(",") : "All"}/${request.page ?? 1}/?f=${request.filters?.status?.includes("completed") ? "0" : "1"}&o=${request.filters?.status?.includes("ongoing") ? "0" : "1"}&sortby=${request.sort.id || "view"}&e=${excluded.length > 0 ? excluded.join(",") : ""}`;
             const response = await this.client.get(url);
             const results = this.parser.parseSearch(response.data);
             return {
@@ -208,6 +208,7 @@ class Parser {
         const creators = [];
         const properties = [];
         const information = $("table.left tbody tr").toArray();
+        const summary = $("div.manga_summary").text().trim();
         let status = daisuke_1.PublicationStatus.ONGOING;
         information.forEach((property) => {
             let tags;
@@ -262,6 +263,7 @@ class Parser {
                 title,
                 cover,
                 chapters,
+                summary,
                 properties,
                 status,
                 isNSFW,

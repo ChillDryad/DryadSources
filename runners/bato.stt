@@ -444,13 +444,15 @@ class Controller {
     store = ObjectStore;
     async getSearchResults(query) {
         const params = {};
-        params.langs = (await this.store.get("lang")) || "en";
+        params.langs = (await this.store.get("lang")) || "";
         // Keyword
         if (query.query)
             params["word"] = query.query;
         // Page
         if (query.page)
             params["page"] = query.page;
+        if (query.sort)
+            params.sort = `${query.sort.id}.za`; //${query.sort.ascending ? 'za' : 'az'}`
         if (query.filters) {
             const includedTags = [];
             const excludedTags = [];
@@ -467,8 +469,6 @@ class Controller {
                 params.chapters = 1;
             if (query.filters?.status)
                 params.release = query.filters.status;
-            if (query.filters?.sort)
-                params.sort = query.filters.sort;
         }
         const response = await this.client.get(`${this.BASE}/browse`, {
             params,
@@ -648,7 +648,7 @@ class Target {
     info = {
         id: "kusa.bato",
         name: "Bato",
-        version: 0.7,
+        version: 0.8,
         website: "https://bato.to",
         supportedLanguages: constants_1.LANG_TAGS.map((l) => l.id),
         thumbnail: "bato.png",
@@ -700,7 +700,7 @@ class Target {
             filters: this.controller.getFilters(),
             sort: {
                 options: constants_1.SORTERS,
-                canChangeOrder: true,
+                canChangeOrder: false,
             },
         };
     }
