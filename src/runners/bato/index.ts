@@ -77,7 +77,7 @@ export class Target implements ContentSource {
       filters: this.controller.getFilters(),
       sort: {
         options: SORTERS,
-        canChangeOrder: false,
+        canChangeOrder: true,
       },
     }
   }

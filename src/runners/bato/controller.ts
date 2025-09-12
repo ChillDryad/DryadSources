@@ -39,7 +39,7 @@ export class Controller {
     // Page
     if (query.page) params["page"] = query.page
     if (query.sort)
-      params.sort = `${query.sort.id}.za` //${query.sort.ascending ? 'za' : 'az'}`
+      params.sort = `${query.sort.id}.${query.sort?.ascending ? 'az' : 'za'}`
 
     if (query.filters) {
       const includedTags: string[] = []
