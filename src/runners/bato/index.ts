@@ -21,7 +21,7 @@ export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "kusa.bato",
     name: "Bato",
-    version: 0.8,
+    version: 0.9,
     website: "https://bato.to",
     supportedLanguages: LANG_TAGS.map((l) => l.id),
     thumbnail: "bato.png",
