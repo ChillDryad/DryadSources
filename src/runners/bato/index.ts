@@ -21,7 +21,7 @@ export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "kusa.bato",
     name: "Bato",
-    version: 0.9,
+    version: 1.0,
     website: "https://bato.to",
     supportedLanguages: LANG_TAGS.map((l) => l.id),
     thumbnail: "bato.png",
@@ -47,29 +47,29 @@ export class Target implements ContentSource {
   async getPreferenceMenu(): Promise<Form> {
     return this.controller.getPreferences()
   }
-  async getSectionsForPage(page: PageLink): Promise<PageSection[]> {
-    if (page.id === "home") {
-      const sections: PageSection[] = [
-        {
-          id: "popular",
-          title: "Popular Titles",
-          style: SectionStyle.GALLERY,
-        },
-        {
-          id: "latest",
-          title: "Latest Titles",
-          style: SectionStyle.PADDED_LIST,
-        },
-      ]
-      return sections
-    }
-    throw new Error("I don't know how you got here.")
-  }
-  async resolvePageSection(link: PageLink, sectionId: string) {
-    if (link.id === "home")
-      return this.controller.resolveHomeSections(link, sectionId)
-    else throw new Error(`Something bad happened when I loaded ${link.id}`)
-  }
+  // async getSectionsForPage(page: PageLink): Promise<PageSection[]> {
+  //   if (page.id === "home") {
+  //     const sections: PageSection[] = [
+  //       {
+  //         id: "popular",
+  //         title: "Popular Titles",
+  //         style: SectionStyle.GALLERY,
+  //       },
+  //       {
+  //         id: "latest",
+  //         title: "Latest Titles",
+  //         style: SectionStyle.PADDED_LIST,
+  //       },
+  //     ]
+  //     return sections
+  //   }
+  //   throw new Error("I don't know how you got here.")
+  // }
+  // async resolvePageSection(link: PageLink, sectionId: string) {
+  //   if (link.id === "home")
+  //     return this.controller.resolveHomeSections(link, sectionId)
+  //   else throw new Error(`Something bad happened when I loaded ${link.id}`)
+  // }
   async getDirectoryConfig(
     _configID?: string | undefined,
   ): Promise<DirectoryConfig> {
