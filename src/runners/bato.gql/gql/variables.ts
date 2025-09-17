@@ -20,17 +20,20 @@ export const directory_variables = ({
   incOLangs?: string[]
   sort?: string
   chapCount?: string
-}) => ({
-  select: {
-    page,
-    size,
-    where,
-    word,
-    excGenres,
-    incGenres,
-    incTLangs,
-    incOLangs,
-    sort,
-    chapCount
-  },
-})
+}) => {
+  const variables = {
+    select: {
+      page,
+      size,
+      where,
+      word,
+      excGenres,
+      incGenres,
+      incTLangs,
+      incOLangs,
+      sort,
+    },
+  }
+  console.log({variables})
+  return variables
+}

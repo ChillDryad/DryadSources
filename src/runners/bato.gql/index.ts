@@ -26,7 +26,7 @@ export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "kusa.batogql",
     name: "Bato v3x",
-    version: 0.1,
+    version: 0.2,
     website: "https://bato.to/",
     supportedLanguages: LANG_TAGS.map(l => l.id),
     thumbnail: "bato.png",
@@ -42,9 +42,9 @@ export class Target implements ContentSource {
 
   // TODO: Make sure we only include tags for supported filters.
   async getDirectory(request: DirectoryRequest): Promise<PagedResult> {
-    console.log(request)
-    const includedTags: string[] = request?.filters ? [] : await this.store.stringArray("include")
-    const excludedTags: string[] = request?.filters ? [] : await this.store.stringArray("exclude") 
+    // console.log(request)
+    const includedTags: string[] = request.filters ? [] : await this.store.stringArray("include")
+    const excludedTags: string[] = request.filters ? [] : await this.store.stringArray("exclude") 
     if (request.filters) {
       for (const filter in request.filters) {
         try {
@@ -55,7 +55,7 @@ export class Target implements ContentSource {
         }
       }
     }
-    console.log("chap: ", request?.filters?.chapters)
+    const language = await this.store.stringArray("lang") || []
     const { data } = await this.client.post(this.queryUrl, {
       headers: {
         "content-type": "application/json",
@@ -68,7 +68,7 @@ export class Target implements ContentSource {
           sort: request.sort?.id,
           incGenres: includedTags,
           excGenres: excludedTags,
-          incTLangs: await this.store.stringArray("lang"),
+          incTLangs: language,
           incOLangs: request.filters?.origin,
           // chapCount: request.filters?.chapters
         }),
@@ -150,7 +150,7 @@ export class Target implements ContentSource {
       .map((chapter: any, i: number) => {
         const { data } = chapter
         return {
-          chapterId: data.urlPath,
+          chapterId: data.id,
           number: chapterData.length - 1 - i,
           index: i,
           title: data.dname,
@@ -165,6 +165,7 @@ export class Target implements ContentSource {
     _contentId: string,
     chapterId: string,
   ): Promise<ChapterData> {
+    console.log(`${this.baseUrl}/chapter/${chapterId}`)
     const res = await this.client.get(`${this.baseUrl}/chapter/${chapterId}`)
     const $ = load(res.data)
     const script = $("script:contains('const batoWord =')")?.html()
@@ -266,8 +267,6 @@ export class Target implements ContentSource {
                 options: languages,
                 value: (await this.store.stringArray("lang")) || ["en"],
                 didChange: (value) => {
-                  console.log(value)
-                  console.log(this.store.set("lang", value))
                   return this.store.set("lang", value)
                 },
               }),
