@@ -691,20 +691,23 @@ query($manga: ID!) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.directory_variables = void 0;
-const directory_variables = ({ page, size = 25, where = "browse", word = "", excGenres = [], incGenres = [], incTLangs = [], incOLangs = [], sort = "views_d000", chapCount = "", }) => ({
-    select: {
-        page,
-        size,
-        where,
-        word,
-        excGenres,
-        incGenres,
-        incTLangs,
-        incOLangs,
-        sort,
-        chapCount
-    },
-});
+const directory_variables = ({ page, size = 25, where = "browse", word = "", excGenres = [], incGenres = [], incTLangs = [], incOLangs = [], sort = "views_d000", chapCount = "", }) => {
+    const variables = {
+        select: {
+            page,
+            size,
+            where,
+            word,
+            excGenres,
+            incGenres,
+            incTLangs,
+            incOLangs,
+            sort,
+        },
+    };
+    console.log({ variables });
+    return variables;
+};
 exports.directory_variables = directory_variables;
 
 },{}],5:[function(require,module,exports){
@@ -723,7 +726,7 @@ class Target {
     info = {
         id: "kusa.batogql",
         name: "Bato v3x",
-        version: 0.1,
+        version: 0.2,
         website: "https://bato.to/",
         supportedLanguages: constants_1.LANG_TAGS.map(l => l.id),
         thumbnail: "bato.png",
@@ -736,9 +739,9 @@ class Target {
     store = ObjectStore;
     // TODO: Make sure we only include tags for supported filters.
     async getDirectory(request) {
-        console.log(request);
-        const includedTags = request?.filters ? [] : await this.store.stringArray("include");
-        const excludedTags = request?.filters ? [] : await this.store.stringArray("exclude");
+        // console.log(request)
+        const includedTags = request.filters ? [] : await this.store.stringArray("include");
+        const excludedTags = request.filters ? [] : await this.store.stringArray("exclude");
         if (request.filters) {
             for (const filter in request.filters) {
                 try {
@@ -750,7 +753,7 @@ class Target {
                 }
             }
         }
-        console.log("chap: ", request?.filters?.chapters);
+        const language = await this.store.stringArray("lang") || [];
         const { data } = await this.client.post(this.queryUrl, {
             headers: {
                 "content-type": "application/json",
@@ -763,7 +766,7 @@ class Target {
                     sort: request.sort?.id,
                     incGenres: includedTags,
                     excGenres: excludedTags,
-                    incTLangs: await this.store.stringArray("lang"),
+                    incTLangs: language,
                     incOLangs: request.filters?.origin,
                     // chapCount: request.filters?.chapters
                 }),
@@ -843,7 +846,7 @@ class Target {
             .map((chapter, i) => {
             const { data } = chapter;
             return {
-                chapterId: data.urlPath,
+                chapterId: data.id,
                 number: chapterData.length - 1 - i,
                 index: i,
                 title: data.dname,
@@ -854,6 +857,7 @@ class Target {
         return chapters;
     }
     async getChapterData(_contentId, chapterId) {
+        console.log(`${this.baseUrl}/chapter/${chapterId}`);
         const res = await this.client.get(`${this.baseUrl}/chapter/${chapterId}`);
         const $ = (0, cheerio_1.load)(res.data);
         const script = $("script:contains('const batoWord =')")?.html();
@@ -949,8 +953,6 @@ class Target {
                             options: languages,
                             value: (await this.store.stringArray("lang")) || ["en"],
                             didChange: (value) => {
-                                console.log(value);
-                                console.log(this.store.set("lang", value));
                                 return this.store.set("lang", value);
                             },
                         }),
