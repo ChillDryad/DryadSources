@@ -37,6 +37,13 @@ export const SORT: Option[] = [
   { title: "Most Views 6 hours", id: "views_h006" },
 ]
 
+export const LANGUAGE: Tag[] = [
+  { title: "Chinese", id: "zh" },
+  { title: "English", id: "en" },
+  { title: "Japanese", id: "ja" },
+  { title: "Korean", id: "ko" },
+]
+
 export const STATUS: Tag[] = [
   { title: "All", id: "" },
   { title: "Pending", id: "pending" },
@@ -44,13 +51,6 @@ export const STATUS: Tag[] = [
   { title: "Completed", id: "completed" },
   { title: "Hiatus", id: "hiatus" },
   { title: "Cancelled", id: "cancelled" },
-]
-
-export const LANGUAGE: Tag[] = [
-  { title: "Chinese", id: "zh" },
-  { title: "English", id: "en" },
-  { title: "Japanese", id: "ja" },
-  { title: "Korean", id: "ko" },
 ]
 
 export const CHAPTERS: Tag[] = [
