@@ -26,7 +26,7 @@ export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "kusa.batogql",
     name: "Bato v3x",
-    version: 0.2,
+    version: 0.3,
     website: "https://bato.to/",
     supportedLanguages: LANG_TAGS.map(l => l.id),
     thumbnail: "bato.png",
@@ -42,36 +42,41 @@ export class Target implements ContentSource {
 
   // TODO: Make sure we only include tags for supported filters.
   async getDirectory(request: DirectoryRequest): Promise<PagedResult> {
-    // console.log(request)
-    const includedTags: string[] = request.filters ? [] : await this.store.stringArray("include")
-    const excludedTags: string[] = request.filters ? [] : await this.store.stringArray("exclude") 
-    if (request.filters) {
-      for (const filter in request.filters) {
-        try {
-          includedTags.push(...(request.filters[filter].included))
-          excludedTags.push(...(request.filters[filter].excluded))
-        } catch (e) {
-          return
-        }
-      }
-    }
-    const language = await this.store.stringArray("lang") || []
+    console.log(request)
+    const genFilters = request.filters?.general
+    const includedTags: string[] = genFilters?.included
+      ? []
+      : await this.store.stringArray("include")
+    const excludedTags: string[] = genFilters?.excluded
+      ? []
+      : await this.store.stringArray("exclude")
+
+    const language = (await this.store.stringArray("lang")) || []
+    const defaultVars = directory_variables({
+      page: request.page,
+      word: request?.query,
+      sort: request.sort?.id,
+      excGenres: excludedTags,
+      incGenres: includedTags,
+      incTLangs: language,
+      incOLangs: request.filters?.origin,
+      chapCount: request.filters?.chapters,
+    })
+    const searchVars = directory_variables({
+      page: request.page,
+      word: request?.query,
+      sort: request.sort?.id,
+      excGenres: excludedTags,
+      incTLangs: language,
+      incOLangs: request.filters?.origin,
+    })
     const { data } = await this.client.post(this.queryUrl, {
       headers: {
         "content-type": "application/json",
       },
       body: {
         query: directory,
-        variables: directory_variables({
-          page: request.page,
-          word: request?.query,
-          sort: request.sort?.id,
-          incGenres: includedTags,
-          excGenres: excludedTags,
-          incTLangs: language,
-          incOLangs: request.filters?.origin,
-          // chapCount: request.filters?.chapters
-        }),
+        variables: request?.query ? searchVars : defaultVars,
       },
     })
 
@@ -244,12 +249,12 @@ export class Target implements ContentSource {
         type: FilterType.SELECT,
         options: STATUS_TAGS,
       },
-      // {
-      //   id: "chapters",
-      //   title: "Uploaded Chapters",
-      //   type: FilterType.SELECT,
-      //   options: CHAPTERS,
-      // },
+      {
+        id: "chapters",
+        title: "Uploaded Chapters",
+        type: FilterType.SELECT,
+        options: CHAPTERS,
+      },
     ]
   }
 
