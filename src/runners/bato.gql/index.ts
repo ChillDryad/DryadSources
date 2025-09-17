@@ -47,7 +47,6 @@ export class Target implements ContentSource {
     const excludedTags: string[] = request?.filters ? [] : await this.store.stringArray("exclude") 
     if (request.filters) {
       for (const filter in request.filters) {
-        console.log(filter)
         try {
           includedTags.push(...(request.filters[filter].included))
           excludedTags.push(...(request.filters[filter].excluded))
@@ -56,6 +55,7 @@ export class Target implements ContentSource {
         }
       }
     }
+    console.log("chap: ", request?.filters?.chapters)
     const { data } = await this.client.post(this.queryUrl, {
       headers: {
         "content-type": "application/json",
@@ -69,7 +69,8 @@ export class Target implements ContentSource {
           incGenres: includedTags,
           excGenres: excludedTags,
           incTLangs: await this.store.stringArray("lang"),
-          incOLangs: request.filters?.origin
+          incOLangs: request.filters?.origin,
+          // chapCount: request.filters?.chapters
         }),
       },
     })
@@ -143,9 +144,9 @@ export class Target implements ContentSource {
     })
     const chapterData = JSON.parse(data).data.get_content_chapterList
     const language = JSON.parse(data).data.get_content_comicNode.data.tranLang
-    /* eslint-disable  @typescript-eslint/no-explicit-any */
     const chapters: Chapter[] = chapterData
       .reverse()
+      /* eslint-disable  @typescript-eslint/no-explicit-any */
       .map((chapter: any, i: number) => {
         const { data } = chapter
         return {
@@ -242,12 +243,12 @@ export class Target implements ContentSource {
         type: FilterType.SELECT,
         options: STATUS_TAGS,
       },
-      {
-        id: "chapters",
-        title: "Uploaded Chapters",
-        type: FilterType.SELECT,
-        options: CHAPTERS,
-      },
+      // {
+      //   id: "chapters",
+      //   title: "Uploaded Chapters",
+      //   type: FilterType.SELECT,
+      //   options: CHAPTERS,
+      // },
     ]
   }
 
