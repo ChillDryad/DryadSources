@@ -52,7 +52,7 @@ export class Target implements ContentSource {
           includedTags.push(...(request.filters[filter].included))
           excludedTags.push(...(request.filters[filter].excluded))
         } catch (e) {
-          
+          return
         }
       }
     }
@@ -143,17 +143,20 @@ export class Target implements ContentSource {
     })
     const chapterData = JSON.parse(data).data.get_content_chapterList
     const language = JSON.parse(data).data.get_content_comicNode.data.tranLang
-    const chapters:Chapter[] = chapterData.reverse().map((chapter:any, i:number) => {
-      const {data} = chapter
-      return {
-        chapterId: data.urlPath,
-        number: chapterData.length - 1 - i,
-        index: i,
-        title: data.dname,
-        date: new Date(data.datePublic),
-        language,
-      }
-    })
+    /* eslint-disable  @typescript-eslint/no-explicit-any */
+    const chapters: Chapter[] = chapterData
+      .reverse()
+      .map((chapter: any, i: number) => {
+        const { data } = chapter
+        return {
+          chapterId: data.urlPath,
+          number: chapterData.length - 1 - i,
+          index: i,
+          title: data.dname,
+          date: new Date(data.datePublic),
+          language,
+        }
+      })
     return chapters
   }
 

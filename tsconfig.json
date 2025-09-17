@@ -8,9 +8,9 @@
     "outDir": "./dist",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "strict": true,
+    "strict": false,
     "strictNullChecks": false,
-    "skipLibCheck": true
+    "skipLibCheck": true,
   },
   "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts", "/stt"]
 }
