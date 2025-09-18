@@ -3,7 +3,6 @@ import {
   ChapterData,
   Content,
   ContentSource,
-  DeepLinkContext,
   DirectoryConfig,
   DirectoryRequest,
   Form,
@@ -11,10 +10,9 @@ import {
   Property,
   PublicationStatus,
   RunnerInfo,
-  SourceConfig,
   type Highlight
 } from "@suwatte/daisuke"
-import { CatalogRating, FilterType, NetworkClientBuilder, ReadingMode, UIMultiPicker, UIToggle } from "@suwatte/daisuke"
+import { CatalogRating, FilterType, ReadingMode, UIMultiPicker, UIToggle } from "@suwatte/daisuke"
 import { load } from "cheerio"
 import { chapter_query, content, directory } from "./gql"
 import { directory_variables } from "./gql/variables"
@@ -31,8 +29,6 @@ import {
   STATUS_TAGS 
 } from "./constants"
 import { AES, enc } from "crypto-js"
-
-// import { GlobalStore } from "./store"
 
 export class Target implements ContentSource {
   info: RunnerInfo = {
@@ -183,13 +179,19 @@ export class Target implements ContentSource {
     const language = JSON.parse(data).data.get_content_comicNode.data.tranLang
     const chapters: Chapter[] = chapterData
       .reverse()
-      /* eslint-disable  @typescript-eslint/no-explicit-any */
-      .map((chapter: any, i: number) => {
+      .map((chapter: {
+        data: {
+          id: string,
+          dname: string,
+          datePublic: string
+          imageFiles?: string[]
+        }
+      }, i: number) => {
         const { data } = chapter
         const chapterPages = {pages: data.imageFiles?.map((file:any) => ({url: file}))}
         return {
           chapterId: data.id,
-          number: chapterData.length - i,
+          number: chapterData.length - 1 - i,
           index: i,
           title: data.dname,
           date: new Date(data.datePublic),
