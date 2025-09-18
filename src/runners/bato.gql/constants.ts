@@ -8,7 +8,6 @@ export const CONTENT_TYPE: Tag[] = [
   { id: "oneshot", title: "oneshot" },
   { id: "_4_koma", title: "4 koma" },
 ]
-
 export const DEMOGRAPHICS: Tag[] = [
   { id: "shoujo", title: "shoujo" },
   { id: "shounen", title: "shounen" },
@@ -32,7 +31,6 @@ export const ADULT_GENRES: Tag[] = [
   { id: "smut", title: "smut", nsfw: true },
   { id: "hentai", title: "hentai", nsfw: true },
 ]
-
 export const GENRES: Tag[] = [
   { id: "_4_koma", title: "4-Koma", nsfw: false },
   { id: "action", title: "Action", nsfw: false },

@@ -12,8 +12,16 @@ import {
   RunnerInfo,
   type Highlight
 } from "@suwatte/daisuke"
-import { CatalogRating, FilterType, ReadingMode, UIMultiPicker, UIToggle } from "@suwatte/daisuke"
+import { 
+  CatalogRating, 
+  FilterType, 
+  ReadingMode, 
+  UIMultiPicker, 
+  UIToggle 
+} from "@suwatte/daisuke"
 import { load } from "cheerio"
+import { AES, enc } from "crypto-js"
+
 import { chapter_query, content, directory } from "./gql"
 import { directory_variables } from "./gql/variables"
 import { 
@@ -28,7 +36,6 @@ import {
   sort, 
   STATUS_TAGS 
 } from "./constants"
-import { AES, enc } from "crypto-js"
 
 export class Target implements ContentSource {
   info: RunnerInfo = {
@@ -68,6 +75,7 @@ export class Target implements ContentSource {
         ] 
       : await this.store.stringArray("exclude")
     const language = await this.store.stringArray("lang")
+    
     const browseVars = directory_variables({
       page: request.page,
       word: request?.query,
@@ -88,6 +96,7 @@ export class Target implements ContentSource {
         : [...ADULT_GENRES.map((a) => a.title), ...(excludedTags || [])],
       incTLangs: language,
     })
+    
     const { data } = await this.client.post(this.queryUrl, {
       headers: {
         "content-type": "application/json",
@@ -129,13 +138,15 @@ export class Target implements ContentSource {
         variables: {"manga": contentId},
       }
     })
+    
     const details = JSON.parse(data).data.get_content_comicNode.data
     const properties: Property[] = []
     properties.push({
       id: "genres",
       title: "Genres",
-      tags: ALL_GENRES.filter(v => details.genres.includes(v.title))
+      tags: ALL_GENRES.filter(v => details.genres.includes(v.id))
     })
+    
     let recommendedPanelMode = ReadingMode.PAGED_MANGA
     if (details.readDirection === "ttb")
       recommendedPanelMode = ReadingMode.WEBTOON
@@ -149,6 +160,7 @@ export class Target implements ContentSource {
       if (details.uploadStatus.includes("hiatus")) status = PublicationStatus.HIATUS
       if (details.uploadStatus.includes("completed")) status = PublicationStatus.COMPLETED
     }
+
     return {
       title: details.name,
       cover: details.urlCover600,
@@ -175,8 +187,10 @@ export class Target implements ContentSource {
         variables: { manga: contentId },
       },
     })
+
     const chapterData = JSON.parse(data).data.get_content_chapterList
     const language = JSON.parse(data).data.get_content_comicNode.data.tranLang
+    
     const chapters: Chapter[] = chapterData
       .reverse()
       .map((chapter: {
@@ -294,62 +308,62 @@ export class Target implements ContentSource {
     ]
   }
 
-    async getPreferenceMenu(): Promise<Form> {
-      const languages = ORIGIN_TAGS.map((l) => ({ id: l.id, title: l.title }))
-      return {
-        sections: [
-          {
-            // NSFW
-            header: "Enable NSFW content?",
-            children: [
-              UIToggle({
-                id: "language",
-                title: "Enable NSFW content",
-                value: (await this.store.boolean("nsfw")) || false,
-                didChange: (value: boolean) => {
-                  return this.store.set("nsfw", value)
-                },
-              }),
-            ],
-          },
-          {
-            // LANGUAGE OPTIONS
-            header: "Language Options",
-            children: [
-              UIMultiPicker({
-                id: "language",
-                title: "Default Language",
-                options: languages,
-                value: (await this.store.stringArray("lang")) || ["en"],
-                didChange: (value) => {
-                  return this.store.set("lang", value)
-                },
-              }),
-            ],
-          },
-          {
-            // Default Filters
-            header: "Default Filters",
-            children: [
-              UIMultiPicker({
-                id: "include",
-                title: "Include",
-                options: ALL_GENRES,
-                value: await this.store.stringArray("include") || [],
-                didChange: (v) => this.store.set("include", v),
-              }),
-              UIMultiPicker({
-                id: "exclude",
-                title: "Exclude",
-                options: ALL_GENRES,
-                value: await this.store.stringArray("exclude") || [],
-                didChange: (v) => this.store.set("exclude", v),
-              }),
-            ],
-          },
-        ],
-      }
+  async getPreferenceMenu(): Promise<Form> {
+    const languages = ORIGIN_TAGS.map((l) => ({ id: l.id, title: l.title }))
+    return {
+      sections: [
+        {
+          // NSFW
+          header: "Enable NSFW content?",
+          children: [
+            UIToggle({
+              id: "language",
+              title: "Enable NSFW content",
+              value: (await this.store.boolean("nsfw")) || false,
+              didChange: (value: boolean) => {
+                return this.store.set("nsfw", value)
+              },
+            }),
+          ],
+        },
+        {
+          // LANGUAGE OPTIONS
+          header: "Language Options",
+          children: [
+            UIMultiPicker({
+              id: "language",
+              title: "Default Language",
+              options: languages,
+              value: (await this.store.stringArray("lang")) || ["en"],
+              didChange: (value) => {
+                return this.store.set("lang", value)
+              },
+            }),
+          ],
+        },
+        {
+          // Default Filters
+          header: "Default Filters",
+          children: [
+            UIMultiPicker({
+              id: "include",
+              title: "Include",
+              options: ALL_GENRES,
+              value: await this.store.stringArray("include") || [],
+              didChange: (v) => this.store.set("include", v),
+            }),
+            UIMultiPicker({
+              id: "exclude",
+              title: "Exclude",
+              options: ALL_GENRES,
+              value: await this.store.stringArray("exclude") || [],
+              didChange: (v) => this.store.set("exclude", v),
+            }),
+          ],
+        },
+      ],
     }
+  }
   
   async getDirectoryConfig(
     _configID?: string | undefined,
