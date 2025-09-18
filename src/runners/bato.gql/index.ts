@@ -328,7 +328,8 @@ export class Target implements ContentSource {
               title: "Enable NSFW content",
               value: (await this.store.boolean("nsfw")) || false,
               didChange: (value: boolean) => {
-                return this.store.set("nsfw", value ?? false)
+                if(typeof(value) !== "boolean") return this.store.set("nsfw", false)
+                return this.store.set("nsfw", value || false)
               },
             }),
           ],
