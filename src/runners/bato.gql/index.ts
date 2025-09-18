@@ -202,7 +202,7 @@ export class Target implements ContentSource {
         }
       }, i: number) => {
         const { data } = chapter
-        const chapterPages = {pages: data.imageFiles?.map((file:any) => ({url: file}))}
+        const chapterPages = {pages: data.imageFiles?.map((file:string) => ({url: file}))}
         return {
           chapterId: data.id,
           number: chapterData.length - 1 - i,
