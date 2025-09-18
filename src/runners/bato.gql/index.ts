@@ -12,8 +12,9 @@ import {
   PublicationStatus,
   RunnerInfo,
   SourceConfig,
+  type Highlight
 } from "@suwatte/daisuke"
-import { CatalogRating, FilterType, NetworkClientBuilder, ReadingMode, UIMultiPicker } from "@suwatte/daisuke"
+import { CatalogRating, FilterType, NetworkClientBuilder, ReadingMode, UIMultiPicker, UIToggle } from "@suwatte/daisuke"
 import { load } from "cheerio"
 import { chapter_query, content, directory } from "./gql"
 import { directory_variables } from "./gql/variables"
@@ -26,7 +27,7 @@ export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "kusa.batogql",
     name: "Bato v3x",
-    version: 0.5,
+    version: 0.6,
     website: "https://bato.to/",
     supportedLanguages: LANG_TAGS.map(l => l.id),
     thumbnail: "bato.png",
@@ -42,6 +43,7 @@ export class Target implements ContentSource {
 
   // TODO: Make sure we only include tags for supported filters.
   async getDirectory(request: DirectoryRequest): Promise<PagedResult> {
+    const nsfwEnabled = await this.store.boolean("nsfw")
     const genFilters = request.filters
     const includedTags: string[] = genFilters
       ? [
@@ -60,13 +62,13 @@ export class Target implements ContentSource {
         ]
       : await this.store.stringArray("exclude")
     const language = (await this.store.stringArray("lang")) || []
-    const defaultVars = directory_variables({
+    const browseVars = directory_variables({
       page: request.page,
       word: request?.query,
       sort: request.sort?.id,
       incOLangs: request.filters?.origin,
       chapCount: request.filters?.chapters,
-      excGenres: excludedTags,
+      excGenres: nsfwEnabled ? [...excludedTags] : [...ADULT_GENRES.map(a => a.title), ...excludedTags],
       incGenres: includedTags,
       incTLangs: language,
     })
@@ -75,7 +77,7 @@ export class Target implements ContentSource {
       word: request?.query,
       sort: request.sort?.id,
       incOLangs: request.filters?.origin,
-      excGenres: excludedTags,
+      excGenres: nsfwEnabled ? [...excludedTags] : [...ADULT_GENRES.map(a => a.title), ...excludedTags],
       incTLangs: language,
     })
     const { data } = await this.client.post(this.queryUrl, {
@@ -84,12 +86,12 @@ export class Target implements ContentSource {
       },
       body: {
         query: directory,
-        variables: request?.query ? searchVars : defaultVars,
+        variables: request?.query ? searchVars : browseVars,
       },
     })
 
     const items = JSON.parse(data).data.get_content_searchComic.items
-    const results = items.map(
+    const results:Highlight[] = items.map(
       (item: {
         id: string
         data: { name: string; urlCoverOri: string; genres: string[] }
@@ -239,6 +241,7 @@ export class Target implements ContentSource {
       {
         id: "adult",
         title: "Mature",
+        subtitle: "Must be enabled in source settings (settings => installed runners => bato v3x)",
         type: FilterType.EXCLUDABLE_MULTISELECT,
         options: ADULT_GENRES,
       },
@@ -282,6 +285,20 @@ export class Target implements ContentSource {
       return {
         sections: [
           {
+            // NSFW
+            header: "Enable NSFW content?",
+            children: [
+              UIToggle({
+                id: "language",
+                title: "Enable NSFW content",
+                value: (await this.store.boolean("nsfw")) || false,
+                didChange: (value: boolean) => {
+                  return this.store.set("nsfw", value)
+                },
+              }),
+            ],
+          },
+          {
             // LANGUAGE OPTIONS
             header: "Language Options",
             children: [
@@ -297,8 +314,8 @@ export class Target implements ContentSource {
             ],
           },
           {
-            // Include
-            header: "Default Included Genres",
+            // Default Filters
+            header: "Default Filters",
             children: [
               UIMultiPicker({
                 id: "include",
@@ -307,12 +324,6 @@ export class Target implements ContentSource {
                 value: await this.store.stringArray("include"),
                 didChange: (v) => this.store.set("include", v),
               }),
-            ],
-          },
-          {
-            // Exclude
-            header: "Default Excluded Genres",
-            children: [
               UIMultiPicker({
                 id: "exclude",
                 title: "Exclude",
