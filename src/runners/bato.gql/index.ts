@@ -10,6 +10,7 @@ import {
   Property,
   PublicationStatus,
   RunnerInfo,
+  UIPicker,
   type Highlight
 } from "@suwatte/daisuke"
 import { 
@@ -41,7 +42,7 @@ export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "kusa.batogql",
     name: "Bato v3x",
-    version: 0.7,
+    version: 0.8,
     website: "https://bato.to/",
     supportedLanguages: LANG_TAGS.map(l => l.id),
     thumbnail: "bato.png",
@@ -56,8 +57,9 @@ export class Target implements ContentSource {
   store = ObjectStore
 
   async getDirectory(request: DirectoryRequest): Promise<PagedResult> {
+    console.log(request)
     const nsfwEnabled = await this.store.boolean("nsfw")
-    const genFilters = request.filters
+    const genFilters = request?.filters
     const includedTags: string[] = genFilters
       ? [
           ...(genFilters["content_type"]?.included ?? []),
@@ -65,7 +67,7 @@ export class Target implements ContentSource {
           ...(genFilters["adult"]?.included ?? []),
           ...(genFilters["general"]?.included ?? []),
         ]
-      : await this.store.stringArray("include")
+      : await this.store.stringArray("include") || []
     const excludedTags: string[] = genFilters
       ? [
           ...(genFilters["content_type"]?.excluded ?? []),
@@ -73,7 +75,8 @@ export class Target implements ContentSource {
           ...(genFilters["adult"]?.excluded ?? []),
           ...(genFilters["general"]?.excluded ?? []),
         ] 
-      : await this.store.stringArray("exclude")
+      : await this.store.stringArray("exclude") || []
+
     const language = await this.store.stringArray("lang")
     
     const browseVars = directory_variables({
@@ -82,7 +85,12 @@ export class Target implements ContentSource {
       sort: request.sort?.id,
       incOLangs: request.filters?.origin,
       chapCount: request.filters?.chapters,
-      excGenres: nsfwEnabled ? [...excludedTags] : [...ADULT_GENRES.map(a => a.title), ...(excludedTags || [])],
+      excGenres: nsfwEnabled 
+        ? [...excludedTags] 
+        : [
+          ...ADULT_GENRES.map(a => a.title), 
+          ...(excludedTags || [])
+        ],
       incGenres: includedTags,
       incTLangs: language,
     })
@@ -349,14 +357,14 @@ export class Target implements ContentSource {
               id: "include",
               title: "Include",
               options: ALL_GENRES,
-              value: await this.store.stringArray("include") || [],
+              value: (await this.store.stringArray("include")) || [],
               didChange: (v) => this.store.set("include", v),
             }),
             UIMultiPicker({
               id: "exclude",
               title: "Exclude",
               options: ALL_GENRES,
-              value: await this.store.stringArray("exclude") || [],
+              value: (await this.store.stringArray("exclude")) || [],
               didChange: (v) => this.store.set("exclude", v),
             }),
           ],

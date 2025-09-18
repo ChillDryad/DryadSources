@@ -12,8 +12,28 @@ describe("Bato Tests", () => {
 
   test("Query", async () => {
     const data = await source.getDirectory({
+      sort: {
+        id: "field_score",
+      },
+      filters: {
+        general: { included: ["adaptation"], excluded: [] },
+        demographic: { included: ["josei"], excluded: [] },
+      },
       page: 1,
-      query: "doctor",
+    })
+    expect(PagedResultSchema.parse(data)).toEqual(expect.any(Object))
+    expect(data.results.length).toBeGreaterThan(1)
+  })
+  test("Empty Query", async () => {
+    const data = await source.getDirectory({
+      sort: {
+        id: "field_score",
+      },
+      filters: {
+        general: { included: [], excluded: [] },
+        demographic: { included: [], excluded: [] },
+      },
+      page: 1,
     })
     expect(PagedResultSchema.parse(data)).toEqual(expect.any(Object))
     expect(data.results.length).toBeGreaterThan(1)
@@ -32,6 +52,7 @@ describe("Bato Tests", () => {
 
   test("Reader", async () => {
     const data = await source.getChapterData("_", "1591864")
+    
     expect(ChapterDataSchema.parse(data)).toEqual(expect.any(Object))
   })
 })
