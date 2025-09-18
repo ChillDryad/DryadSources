@@ -728,7 +728,7 @@ class Target {
     info = {
         id: "kusa.batogql",
         name: "Bato v3x",
-        version: 0.5,
+        version: 0.6,
         website: "https://bato.to/",
         supportedLanguages: constants_1.LANG_TAGS.map(l => l.id),
         thumbnail: "bato.png",
@@ -741,6 +741,7 @@ class Target {
     store = ObjectStore;
     // TODO: Make sure we only include tags for supported filters.
     async getDirectory(request) {
+        const nsfwEnabled = await this.store.boolean("nsfw");
         const genFilters = request.filters;
         const includedTags = genFilters
             ? [
@@ -759,13 +760,13 @@ class Target {
             ]
             : await this.store.stringArray("exclude");
         const language = (await this.store.stringArray("lang")) || [];
-        const defaultVars = (0, variables_1.directory_variables)({
+        const browseVars = (0, variables_1.directory_variables)({
             page: request.page,
             word: request?.query,
             sort: request.sort?.id,
             incOLangs: request.filters?.origin,
             chapCount: request.filters?.chapters,
-            excGenres: excludedTags,
+            excGenres: nsfwEnabled ? [...excludedTags] : [...constants_1.ADULT_GENRES.map(a => a.title), ...excludedTags],
             incGenres: includedTags,
             incTLangs: language,
         });
@@ -774,7 +775,7 @@ class Target {
             word: request?.query,
             sort: request.sort?.id,
             incOLangs: request.filters?.origin,
-            excGenres: excludedTags,
+            excGenres: nsfwEnabled ? [...excludedTags] : [...constants_1.ADULT_GENRES.map(a => a.title), ...excludedTags],
             incTLangs: language,
         });
         const { data } = await this.client.post(this.queryUrl, {
@@ -783,7 +784,7 @@ class Target {
             },
             body: {
                 query: gql_1.directory,
-                variables: request?.query ? searchVars : defaultVars,
+                variables: request?.query ? searchVars : browseVars,
             },
         });
         const items = JSON.parse(data).data.get_content_searchComic.items;
@@ -921,6 +922,7 @@ class Target {
             {
                 id: "adult",
                 title: "Mature",
+                subtitle: "Must be enabled in source settings (settings => installed runners => bato v3x)",
                 type: daisuke_2.FilterType.EXCLUDABLE_MULTISELECT,
                 options: constants_1.ADULT_GENRES,
             },
@@ -962,6 +964,20 @@ class Target {
         return {
             sections: [
                 {
+                    // NSFW
+                    header: "Enable NSFW content?",
+                    children: [
+                        (0, daisuke_2.UIToggle)({
+                            id: "language",
+                            title: "Enable NSFW content",
+                            value: (await this.store.boolean("nsfw")) || false,
+                            didChange: (value) => {
+                                return this.store.set("nsfw", value);
+                            },
+                        }),
+                    ],
+                },
+                {
                     // LANGUAGE OPTIONS
                     header: "Language Options",
                     children: [
@@ -977,8 +993,8 @@ class Target {
                     ],
                 },
                 {
-                    // Include
-                    header: "Default Included Genres",
+                    // Default Filters
+                    header: "Default Filters",
                     children: [
                         (0, daisuke_2.UIMultiPicker)({
                             id: "include",
@@ -987,12 +1003,6 @@ class Target {
                             value: await this.store.stringArray("include"),
                             didChange: (v) => this.store.set("include", v),
                         }),
-                    ],
-                },
-                {
-                    // Exclude
-                    header: "Default Excluded Genres",
-                    children: [
                         (0, daisuke_2.UIMultiPicker)({
                             id: "exclude",
                             title: "Exclude",
