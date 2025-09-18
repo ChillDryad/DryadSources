@@ -42,12 +42,13 @@ export class Target implements ContentSource {
 
   // TODO: Make sure we only include tags for supported filters.
   async getDirectory(request: DirectoryRequest): Promise<PagedResult> {
-    const genFilters = request.filters?.general
+    const genFilters = request.filters
+    console.info(genFilters)
     const includedTags: string[] = genFilters?.included
-      ? []
+      ? genFilters.included || []
       : await this.store.stringArray("include")
     const excludedTags: string[] = genFilters?.excluded
-      ? []
+      ? genFilters.excluded || []
       : await this.store.stringArray("exclude")
 
     const language = (await this.store.stringArray("lang")) || []
@@ -81,12 +82,20 @@ export class Target implements ContentSource {
 
     const items = JSON.parse(data).data.get_content_searchComic.items
     const results = items.map(
-      (item: { id: string; data: { name: string; urlCoverOri: string } }) => ({
+      (item: {
+        id: string
+        data: { name: string; urlCoverOri: string; genres: string[] }
+      }) => ({
         id: item.id,
         title: item.data.name,
         cover: item.data.urlCoverOri,
+        isNSFW:
+          ADULT_GENRES.filter((a) =>
+            item.data.genres.includes(a.title),
+          ).length > 1,
       }),
     )
+    console.log({results})
     return {
       results,
       isLastPage: results.length < 25,
@@ -131,6 +140,9 @@ export class Target implements ContentSource {
       additionalTitles: details.altNames,
       webUrl: `${this.baseUrl}${details.urlPath}`,
       recommendedPanelMode,
+      isNSFW:
+        ADULT_GENRES.filter((a) => details.genres.includes(a.title)).length >
+        1,
       status,
       properties,
     }

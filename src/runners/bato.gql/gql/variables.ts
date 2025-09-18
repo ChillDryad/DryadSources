@@ -32,6 +32,7 @@ export const directory_variables = ({
       incTLangs,
       incOLangs,
       sort,
+      chapCount
     },
   }
   console.log({variables})
