@@ -26,7 +26,7 @@ export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "kusa.batogql",
     name: "Bato v3x",
-    version: 0.4,
+    version: 0.5,
     website: "https://bato.to/",
     supportedLanguages: LANG_TAGS.map(l => l.id),
     thumbnail: "bato.png",
@@ -43,32 +43,40 @@ export class Target implements ContentSource {
   // TODO: Make sure we only include tags for supported filters.
   async getDirectory(request: DirectoryRequest): Promise<PagedResult> {
     const genFilters = request.filters
-    console.info(genFilters)
-    const includedTags: string[] = genFilters?.included
-      ? genFilters.included || []
+    const includedTags: string[] = genFilters
+      ? [
+          ...(genFilters["content_type"]?.included ?? []),
+          ...(genFilters["demographic"]?.included ?? []),
+          ...(genFilters["adult"]?.included ?? []),
+          ...(genFilters["general"]?.included ?? []),
+        ]
       : await this.store.stringArray("include")
-    const excludedTags: string[] = genFilters?.excluded
-      ? genFilters.excluded || []
+    const excludedTags: string[] = genFilters
+      ? [
+          ...(genFilters["content_type"]?.excluded ?? []),
+          ...(genFilters["demographic"]?.excluded ?? []),
+          ...(genFilters["adult"]?.excluded ?? []),
+          ...(genFilters["general"]?.excluded ?? []),
+        ]
       : await this.store.stringArray("exclude")
-
     const language = (await this.store.stringArray("lang")) || []
     const defaultVars = directory_variables({
       page: request.page,
       word: request?.query,
       sort: request.sort?.id,
+      incOLangs: request.filters?.origin,
+      chapCount: request.filters?.chapters,
       excGenres: excludedTags,
       incGenres: includedTags,
       incTLangs: language,
-      incOLangs: request.filters?.origin,
-      chapCount: request.filters?.chapters,
     })
     const searchVars = directory_variables({
       page: request.page,
       word: request?.query,
       sort: request.sort?.id,
+      incOLangs: request.filters?.origin,
       excGenres: excludedTags,
       incTLangs: language,
-      incOLangs: request.filters?.origin,
     })
     const { data } = await this.client.post(this.queryUrl, {
       headers: {
@@ -95,7 +103,6 @@ export class Target implements ContentSource {
           ).length > 1,
       }),
     )
-    console.log({results})
     return {
       results,
       isLastPage: results.length < 25,
