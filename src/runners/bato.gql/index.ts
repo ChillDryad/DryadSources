@@ -57,7 +57,6 @@ export class Target implements ContentSource {
   store = ObjectStore
 
   async getDirectory(request: DirectoryRequest): Promise<PagedResult> {
-    console.log(request)
     const nsfwEnabled = await this.store.boolean("nsfw")
     const genFilters = request?.filters
     const includedTags: string[] = genFilters
@@ -329,7 +328,7 @@ export class Target implements ContentSource {
               title: "Enable NSFW content",
               value: (await this.store.boolean("nsfw")) || false,
               didChange: (value: boolean) => {
-                return this.store.set("nsfw", value)
+                return this.store.set("nsfw", value ?? false)
               },
             }),
           ],
