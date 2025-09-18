@@ -34,107 +34,6 @@ export const ADULT_GENRES: Tag[] = [
 ]
 
 export const GENRES: Tag[] = [
-  { id: "action", title: "action" },
-  { id: "adaptation", title: "adaptation" },
-  { id: "adventure", title: "adventure" },
-  { id: "age_gap", title: "age gap" },
-  { id: "aliens", title: "aliens" },
-  { id: "animals", title: "animals" },
-  { id: "anthology", title: "anthology" },
-  { id: "blackmail", title: "blackmail" },
-  { id: "brocon_siscon", title: "brocon siscon" },
-  { id: "cars", title: "cars" },
-  { id: "comedy", title: "comedy" },
-  { id: "cooking", title: "cooking" },
-  { id: "crime", title: "crime" },
-  { id: "crossdressing", title: "crossdressing" },
-  { id: "cultivation", title: "cultivation" },
-  { id: "death_game", title: "death game" },
-  { id: "degeneratemc", title: "degeneratemc" },
-  { id: "delinquents", title: "delinquents" },
-  { id: "dementia", title: "dementia" },
-  { id: "demons", title: "demons" },
-  { id: "drama", title: "drama" },
-  { id: "fantasy", title: "fantasy" },
-  { id: "fan_colored", title: "fan colored" },
-  { id: "fetish", title: "fetish" },
-  { id: "full_color", title: "full color" },
-  { id: "game", title: "game" },
-  { id: "gender_bender", title: "gender bender" },
-  { id: "genderswap", title: "genderswap" },
-  { id: "ghosts", title: "ghosts" },
-  { id: "gyaru", title: "gyaru" },
-  { id: "harem", title: "harem" },
-  { id: "harlequin", title: "harlequin" },
-  { id: "historical", title: "historical" },
-  { id: "horror", title: "horror" },
-  { id: "incest", title: "incest" },
-  { id: "isekai", title: "isekai" },
-  { id: "kids", title: "kids" },
-  { id: "loli", title: "loli" },
-  { id: "magic", title: "magic" },
-  { id: "magical_girls", title: "magical girls" },
-  { id: "martial_arts", title: "martial arts" },
-  { id: "master_servant", title: "master servant" },
-  { id: "mecha", title: "mecha" },
-  { id: "medical", title: "medical" },
-  { id: "milf", title: "milf" },
-  { id: "military", title: "military" },
-  { id: "monster_girls", title: "monster girls" },
-  { id: "monsters", title: "monsters" },
-  { id: "music", title: "music" },
-  { id: "mystery", title: "mystery" },
-  { id: "netorare", title: "netorare" },
-  { id: "ninja", title: "ninja" },
-  { id: "office_workers", title: "office workers" },
-  { id: "omegaverse", title: "omegaverse" },
-  { id: "parody", title: "parody" },
-  { id: "philosophical", title: "philosophical" },
-  { id: "police", title: "police" },
-  { id: "post_apocalyptic", title: "post apocalyptic" },
-  { id: "psychological", title: "psychological" },
-  { id: "reincarnation", title: "reincarnation" },
-  { id: "reverse_harem", title: "reverse harem" },
-  { id: "romance", title: "romance" },
-  { id: "samurai", title: "samurai" },
-  { id: "school_life", title: "school life" },
-  { id: "sci_fi", title: "sci fi" },
-  { id: "shota", title: "shota" },
-  { id: "shoujo_ai", title: "shoujo ai" },
-  { id: "shounen_ai", title: "shounen ai" },
-  { id: "showbiz", title: "showbiz" },
-  { id: "slice_of_life", title: "slice of life" },
-  { id: "sm_bdsm", title: "sm bdsm" },
-  { id: "space", title: "space" },
-  { id: "sports", title: "sports" },
-  { id: "step_family", title: "step family" },
-  { id: "super_power", title: "super power" },
-  { id: "superhero", title: "superhero" },
-  { id: "supernatural", title: "supernatural" },
-  { id: "survival", title: "survival" },
-  { id: "teacher_student", title: "teacher student" },
-  { id: "thriller", title: "thriller" },
-  { id: "time_travel", title: "time travel" },
-  { id: "traditional_games", title: "traditional games" },
-  { id: "tragedy", title: "tragedy" },
-  { id: "vampires", title: "vampires" },
-  { id: "video_games", title: "video games" },
-  { id: "villainess", title: "villainess" },
-  { id: "virtual_reality", title: "virtual reality" },
-  { id: "wuxia", title: "wuxia" },
-  { id: "xianxia", title: "xianxia" },
-  { id: "xuanhuan", title: "xuanhuan" },
-  { id: "zombies", title: "zombies" },
-]
-
-export const ALL_GENRES: Tag[] = [
-  ...DEMOGRAPHICS,
-  ...ADULT_GENRES,
-  ...GENRES,
-  ...CONTENT_TYPE,
-]
-
-export const GENERIC_TAGS: Tag[] = [
   { id: "_4_koma", title: "4-Koma", nsfw: false },
   { id: "action", title: "Action", nsfw: false },
   { id: "adaptation", title: "Adaptation", nsfw: false },
@@ -264,6 +163,14 @@ export const GENERIC_TAGS: Tag[] = [
   { id: "yakuzas", title: "Yakuzas", nsfw: false },
   { id: "zombies", title: "Zombies", nsfw: false },
 ]
+
+export const ALL_GENRES: Tag[] = [
+  ...DEMOGRAPHICS,
+  ...ADULT_GENRES,
+  ...GENRES,
+  ...CONTENT_TYPE,
+]
+
 
 export const STATUS_TAGS: Tag[] = [
   { id: "pending", title: "Pending", nsfw: false },
@@ -491,10 +398,10 @@ export const LANG_TAGS: Tag[] = [
 
 export const CHAPTERS: Tag[] = [
   { id: "", title: "All" },
-  { id: "1-9", title: "1-9" },
-  { id: "10-29", title: "10-29" },
-  { id: "30-99", title: "30-99" },
-  { id: "100-199", title: "100-199" },
+  { id: "1~9", title: "1-9" },
+  { id: "10~29", title: "10-29" },
+  { id: "30~99", title: "30-99" },
+  { id: "100~199", title: "100-199" },
   { id: "200", title: "+200" },
   { id: "100", title: "+100" },
   { id: "50", title: "+50" },
@@ -502,27 +409,6 @@ export const CHAPTERS: Tag[] = [
   { id: "1", title: "+1" },
 ]
 
-// For future use with ObjectStore
-export const PREFERENCE_KEYS = {
-  language: "bato_language",
-  content: "bato_content",
-  genres: "bato_genres",
-  demographic: "bato_demographic",
-  mature: "bato_mature",
-  originalLanguage: "bato_origin",
-  translatedLanguage: "bato_translated",
-  status: "bato_status",
-  chapters: "bato_chapters",
-}
-
-// export const getAllGenreTags = () => {
-//   return [
-//     ...GENERIC_TAGS,
-//     ...ADULT_TAGS,
-//     ...CONTENT_TYPE_TAGS,
-//     ...DEMOGRAPHIC_TAGS,
-//   ]
-// }
 
 export const sort: Option[] = [
   {id: "field_score", title:"Rating Score"},

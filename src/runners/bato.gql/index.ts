@@ -18,7 +18,18 @@ import { CatalogRating, FilterType, NetworkClientBuilder, ReadingMode, UIMultiPi
 import { load } from "cheerio"
 import { chapter_query, content, directory } from "./gql"
 import { directory_variables } from "./gql/variables"
-import { ADULT_GENRES, ALL_GENRES, CHAPTERS, CONTENT_TYPE, DEMOGRAPHICS, GENERIC_TAGS, GENRES, LANG_TAGS, ORIGIN_TAGS, sort, STATUS_TAGS } from "./constants"
+import { 
+  ADULT_GENRES, 
+  ALL_GENRES, 
+  CHAPTERS, 
+  CONTENT_TYPE, 
+  DEMOGRAPHICS, 
+  GENRES, 
+  LANG_TAGS, 
+  ORIGIN_TAGS, 
+  sort, 
+  STATUS_TAGS 
+} from "./constants"
 import { AES, enc } from "crypto-js"
 
 // import { GlobalStore } from "./store"
@@ -41,7 +52,6 @@ export class Target implements ContentSource {
 
   store = ObjectStore
 
-  // TODO: Make sure we only include tags for supported filters.
   async getDirectory(request: DirectoryRequest): Promise<PagedResult> {
     const nsfwEnabled = await this.store.boolean("nsfw")
     const genFilters = request.filters
@@ -59,16 +69,16 @@ export class Target implements ContentSource {
           ...(genFilters["demographic"]?.excluded ?? []),
           ...(genFilters["adult"]?.excluded ?? []),
           ...(genFilters["general"]?.excluded ?? []),
-        ]
+        ] 
       : await this.store.stringArray("exclude")
-    const language = (await this.store.stringArray("lang")) || []
+    const language = await this.store.stringArray("lang")
     const browseVars = directory_variables({
       page: request.page,
       word: request?.query,
       sort: request.sort?.id,
       incOLangs: request.filters?.origin,
       chapCount: request.filters?.chapters,
-      excGenres: nsfwEnabled ? [...excludedTags] : [...ADULT_GENRES.map(a => a.title), ...excludedTags],
+      excGenres: nsfwEnabled ? [...excludedTags] : [...ADULT_GENRES.map(a => a.title), ...(excludedTags || [])],
       incGenres: includedTags,
       incTLangs: language,
     })
@@ -77,7 +87,9 @@ export class Target implements ContentSource {
       word: request?.query,
       sort: request.sort?.id,
       incOLangs: request.filters?.origin,
-      excGenres: nsfwEnabled ? [...excludedTags] : [...ADULT_GENRES.map(a => a.title), ...excludedTags],
+      excGenres: nsfwEnabled
+        ? [...excludedTags]
+        : [...ADULT_GENRES.map((a) => a.title), ...(excludedTags || [])],
       incTLangs: language,
     })
     const { data } = await this.client.post(this.queryUrl, {
@@ -129,17 +141,17 @@ export class Target implements ContentSource {
       tags: ALL_GENRES.filter(v => details.genres.includes(v.title))
     })
     let recommendedPanelMode = ReadingMode.PAGED_MANGA
-    if (details.readDirection === "Top to Bottom")
+    if (details.readDirection === "ttb")
       recommendedPanelMode = ReadingMode.WEBTOON
-    else if (details.readDirection === "Left to Right")
+    else if (details.readDirection === "ltr")
       recommendedPanelMode = ReadingMode.PAGED_COMIC
 
     let status: PublicationStatus | undefined
     if(details.uploadStatus) {
-      if (details.uploadStatus.includes("Ongoing")) status = PublicationStatus.ONGOING
-      if (details.uploadStatus.includes("Cancelled")) status = PublicationStatus.CANCELLED
-      if (details.uploadStatus.includes("Hiatus")) status = PublicationStatus.HIATUS
-      if (details.uploadStatus.includes("Completed")) status = PublicationStatus.COMPLETED
+      if (details.uploadStatus.includes("ongoing")) status = PublicationStatus.ONGOING
+      if (details.uploadStatus.includes("cancelled")) status = PublicationStatus.CANCELLED
+      if (details.uploadStatus.includes("hiatus")) status = PublicationStatus.HIATUS
+      if (details.uploadStatus.includes("completed")) status = PublicationStatus.COMPLETED
     }
     return {
       title: details.name,
@@ -321,14 +333,14 @@ export class Target implements ContentSource {
                 id: "include",
                 title: "Include",
                 options: ALL_GENRES,
-                value: await this.store.stringArray("include"),
+                value: await this.store.stringArray("include") || [],
                 didChange: (v) => this.store.set("include", v),
               }),
               UIMultiPicker({
                 id: "exclude",
                 title: "Exclude",
                 options: ALL_GENRES,
-                value: await this.store.stringArray("exclude"),
+                value: await this.store.stringArray("exclude") || [],
                 didChange: (v) => this.store.set("exclude", v),
               }),
             ],
