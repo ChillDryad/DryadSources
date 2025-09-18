@@ -107,6 +107,7 @@ query($manga: ID!) {
       title
       lang
       urlPath
+      imageFiles
     }
   }
 }

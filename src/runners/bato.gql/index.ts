@@ -26,7 +26,7 @@ export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "kusa.batogql",
     name: "Bato v3x",
-    version: 0.3,
+    version: 0.4,
     website: "https://bato.to/",
     supportedLanguages: LANG_TAGS.map(l => l.id),
     thumbnail: "bato.png",
@@ -42,7 +42,6 @@ export class Target implements ContentSource {
 
   // TODO: Make sure we only include tags for supported filters.
   async getDirectory(request: DirectoryRequest): Promise<PagedResult> {
-    console.log(request)
     const genFilters = request.filters?.general
     const includedTags: string[] = genFilters?.included
       ? []
@@ -130,7 +129,7 @@ export class Target implements ContentSource {
       summary: details.summary.text,
       creators: [...details.authors, ...details.artists],
       additionalTitles: details.altNames,
-      webUrl: `${this.baseUrl}/${details.urlPath}`,
+      webUrl: `${this.baseUrl}${details.urlPath}`,
       recommendedPanelMode,
       status,
       properties,
@@ -154,12 +153,14 @@ export class Target implements ContentSource {
       /* eslint-disable  @typescript-eslint/no-explicit-any */
       .map((chapter: any, i: number) => {
         const { data } = chapter
+        const chapterPages = {pages: data.imageFiles?.map((file:any) => ({url: file}))}
         return {
           chapterId: data.id,
-          number: chapterData.length - 1 - i,
+          number: chapterData.length - i,
           index: i,
           title: data.dname,
           date: new Date(data.datePublic),
+          data: chapterPages.pages ? chapterPages : undefined,
           language,
         }
       })
@@ -170,7 +171,6 @@ export class Target implements ContentSource {
     _contentId: string,
     chapterId: string,
   ): Promise<ChapterData> {
-    console.log(`${this.baseUrl}/chapter/${chapterId}`)
     const res = await this.client.get(`${this.baseUrl}/chapter/${chapterId}`)
     const $ = load(res.data)
     const script = $("script:contains('const batoWord =')")?.html()
