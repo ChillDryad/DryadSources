@@ -704,6 +704,7 @@ const directory_variables = ({ page, size = 25, where = "browse", word = "", exc
             incTLangs,
             incOLangs,
             sort,
+            chapCount
         },
     };
     console.log({ variables });
@@ -727,7 +728,7 @@ class Target {
     info = {
         id: "kusa.batogql",
         name: "Bato v3x",
-        version: 0.4,
+        version: 0.5,
         website: "https://bato.to/",
         supportedLanguages: constants_1.LANG_TAGS.map(l => l.id),
         thumbnail: "bato.png",
@@ -740,31 +741,41 @@ class Target {
     store = ObjectStore;
     // TODO: Make sure we only include tags for supported filters.
     async getDirectory(request) {
-        const genFilters = request.filters?.general;
-        const includedTags = genFilters?.included
-            ? []
+        const genFilters = request.filters;
+        const includedTags = genFilters
+            ? [
+                ...(genFilters["content_type"]?.included ?? []),
+                ...(genFilters["demographic"]?.included ?? []),
+                ...(genFilters["adult"]?.included ?? []),
+                ...(genFilters["general"]?.included ?? []),
+            ]
             : await this.store.stringArray("include");
-        const excludedTags = genFilters?.excluded
-            ? []
+        const excludedTags = genFilters
+            ? [
+                ...(genFilters["content_type"]?.excluded ?? []),
+                ...(genFilters["demographic"]?.excluded ?? []),
+                ...(genFilters["adult"]?.excluded ?? []),
+                ...(genFilters["general"]?.excluded ?? []),
+            ]
             : await this.store.stringArray("exclude");
         const language = (await this.store.stringArray("lang")) || [];
         const defaultVars = (0, variables_1.directory_variables)({
             page: request.page,
             word: request?.query,
             sort: request.sort?.id,
+            incOLangs: request.filters?.origin,
+            chapCount: request.filters?.chapters,
             excGenres: excludedTags,
             incGenres: includedTags,
             incTLangs: language,
-            incOLangs: request.filters?.origin,
-            chapCount: request.filters?.chapters,
         });
         const searchVars = (0, variables_1.directory_variables)({
             page: request.page,
             word: request?.query,
             sort: request.sort?.id,
+            incOLangs: request.filters?.origin,
             excGenres: excludedTags,
             incTLangs: language,
-            incOLangs: request.filters?.origin,
         });
         const { data } = await this.client.post(this.queryUrl, {
             headers: {
@@ -780,6 +791,7 @@ class Target {
             id: item.id,
             title: item.data.name,
             cover: item.data.urlCoverOri,
+            isNSFW: constants_1.ADULT_GENRES.filter((a) => item.data.genres.includes(a.title)).length > 1,
         }));
         return {
             results,
@@ -827,6 +839,8 @@ class Target {
             additionalTitles: details.altNames,
             webUrl: `${this.baseUrl}${details.urlPath}`,
             recommendedPanelMode,
+            isNSFW: constants_1.ADULT_GENRES.filter((a) => details.genres.includes(a.title)).length >
+                1,
             status,
             properties,
         };
