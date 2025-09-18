@@ -682,6 +682,7 @@ query($manga: ID!) {
       title
       lang
       urlPath
+      imageFiles
     }
   }
 }
@@ -726,7 +727,7 @@ class Target {
     info = {
         id: "kusa.batogql",
         name: "Bato v3x",
-        version: 0.3,
+        version: 0.4,
         website: "https://bato.to/",
         supportedLanguages: constants_1.LANG_TAGS.map(l => l.id),
         thumbnail: "bato.png",
@@ -739,7 +740,6 @@ class Target {
     store = ObjectStore;
     // TODO: Make sure we only include tags for supported filters.
     async getDirectory(request) {
-        console.log(request);
         const genFilters = request.filters?.general;
         const includedTags = genFilters?.included
             ? []
@@ -825,7 +825,7 @@ class Target {
             summary: details.summary.text,
             creators: [...details.authors, ...details.artists],
             additionalTitles: details.altNames,
-            webUrl: `${this.baseUrl}/${details.urlPath}`,
+            webUrl: `${this.baseUrl}${details.urlPath}`,
             recommendedPanelMode,
             status,
             properties,
@@ -848,19 +848,20 @@ class Target {
             /* eslint-disable  @typescript-eslint/no-explicit-any */
             .map((chapter, i) => {
             const { data } = chapter;
+            const chapterPages = { pages: data.imageFiles?.map((file) => ({ url: file })) };
             return {
                 chapterId: data.id,
-                number: chapterData.length - 1 - i,
+                number: chapterData.length - i,
                 index: i,
                 title: data.dname,
                 date: new Date(data.datePublic),
+                data: chapterPages.pages ? chapterPages : undefined,
                 language,
             };
         });
         return chapters;
     }
     async getChapterData(_contentId, chapterId) {
-        console.log(`${this.baseUrl}/chapter/${chapterId}`);
         const res = await this.client.get(`${this.baseUrl}/chapter/${chapterId}`);
         const $ = (0, cheerio_1.load)(res.data);
         const script = $("script:contains('const batoWord =')")?.html();
