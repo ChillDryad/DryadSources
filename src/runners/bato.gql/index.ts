@@ -3,7 +3,6 @@ import {
   ChapterData,
   Content,
   ContentSource,
-  DeepLinkContext,
   DirectoryConfig,
   DirectoryRequest,
   Form,
@@ -11,23 +10,38 @@ import {
   Property,
   PublicationStatus,
   RunnerInfo,
-  SourceConfig,
   type Highlight
 } from "@suwatte/daisuke"
-import { CatalogRating, FilterType, NetworkClientBuilder, ReadingMode, UIMultiPicker, UIToggle } from "@suwatte/daisuke"
+import { 
+  CatalogRating, 
+  FilterType, 
+  ReadingMode, 
+  UIMultiPicker, 
+  UIToggle 
+} from "@suwatte/daisuke"
 import { load } from "cheerio"
-import { chapter_query, content, directory } from "./gql"
-import { directory_variables } from "./gql/variables"
-import { ADULT_GENRES, ALL_GENRES, CHAPTERS, CONTENT_TYPE, DEMOGRAPHICS, GENERIC_TAGS, GENRES, LANG_TAGS, ORIGIN_TAGS, sort, STATUS_TAGS } from "./constants"
 import { AES, enc } from "crypto-js"
 
-// import { GlobalStore } from "./store"
+import { chapter_query, content, directory } from "./gql"
+import { directory_variables } from "./gql/variables"
+import { 
+  ADULT_GENRES, 
+  ALL_GENRES, 
+  CHAPTERS, 
+  CONTENT_TYPE, 
+  DEMOGRAPHICS, 
+  GENRES, 
+  LANG_TAGS, 
+  ORIGIN_TAGS, 
+  sort, 
+  STATUS_TAGS 
+} from "./constants"
 
 export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "kusa.batogql",
     name: "Bato v3x",
-    version: 0.6,
+    version: 0.7,
     website: "https://bato.to/",
     supportedLanguages: LANG_TAGS.map(l => l.id),
     thumbnail: "bato.png",
@@ -41,7 +55,6 @@ export class Target implements ContentSource {
 
   store = ObjectStore
 
-  // TODO: Make sure we only include tags for supported filters.
   async getDirectory(request: DirectoryRequest): Promise<PagedResult> {
     const nsfwEnabled = await this.store.boolean("nsfw")
     const genFilters = request.filters
@@ -59,16 +72,17 @@ export class Target implements ContentSource {
           ...(genFilters["demographic"]?.excluded ?? []),
           ...(genFilters["adult"]?.excluded ?? []),
           ...(genFilters["general"]?.excluded ?? []),
-        ]
+        ] 
       : await this.store.stringArray("exclude")
-    const language = (await this.store.stringArray("lang")) || []
+    const language = await this.store.stringArray("lang")
+    
     const browseVars = directory_variables({
       page: request.page,
       word: request?.query,
       sort: request.sort?.id,
       incOLangs: request.filters?.origin,
       chapCount: request.filters?.chapters,
-      excGenres: nsfwEnabled ? [...excludedTags] : [...ADULT_GENRES.map(a => a.title), ...excludedTags],
+      excGenres: nsfwEnabled ? [...excludedTags] : [...ADULT_GENRES.map(a => a.title), ...(excludedTags || [])],
       incGenres: includedTags,
       incTLangs: language,
     })
@@ -77,9 +91,12 @@ export class Target implements ContentSource {
       word: request?.query,
       sort: request.sort?.id,
       incOLangs: request.filters?.origin,
-      excGenres: nsfwEnabled ? [...excludedTags] : [...ADULT_GENRES.map(a => a.title), ...excludedTags],
+      excGenres: nsfwEnabled
+        ? [...excludedTags]
+        : [...ADULT_GENRES.map((a) => a.title), ...(excludedTags || [])],
       incTLangs: language,
     })
+    
     const { data } = await this.client.post(this.queryUrl, {
       headers: {
         "content-type": "application/json",
@@ -121,26 +138,29 @@ export class Target implements ContentSource {
         variables: {"manga": contentId},
       }
     })
+    
     const details = JSON.parse(data).data.get_content_comicNode.data
     const properties: Property[] = []
     properties.push({
       id: "genres",
       title: "Genres",
-      tags: ALL_GENRES.filter(v => details.genres.includes(v.title))
+      tags: ALL_GENRES.filter(v => details.genres.includes(v.id))
     })
+    
     let recommendedPanelMode = ReadingMode.PAGED_MANGA
-    if (details.readDirection === "Top to Bottom")
+    if (details.readDirection === "ttb")
       recommendedPanelMode = ReadingMode.WEBTOON
-    else if (details.readDirection === "Left to Right")
+    else if (details.readDirection === "ltr")
       recommendedPanelMode = ReadingMode.PAGED_COMIC
 
     let status: PublicationStatus | undefined
     if(details.uploadStatus) {
-      if (details.uploadStatus.includes("Ongoing")) status = PublicationStatus.ONGOING
-      if (details.uploadStatus.includes("Cancelled")) status = PublicationStatus.CANCELLED
-      if (details.uploadStatus.includes("Hiatus")) status = PublicationStatus.HIATUS
-      if (details.uploadStatus.includes("Completed")) status = PublicationStatus.COMPLETED
+      if (details.uploadStatus.includes("ongoing")) status = PublicationStatus.ONGOING
+      if (details.uploadStatus.includes("cancelled")) status = PublicationStatus.CANCELLED
+      if (details.uploadStatus.includes("hiatus")) status = PublicationStatus.HIATUS
+      if (details.uploadStatus.includes("completed")) status = PublicationStatus.COMPLETED
     }
+
     return {
       title: details.name,
       cover: details.urlCover600,
@@ -167,17 +187,25 @@ export class Target implements ContentSource {
         variables: { manga: contentId },
       },
     })
+
     const chapterData = JSON.parse(data).data.get_content_chapterList
     const language = JSON.parse(data).data.get_content_comicNode.data.tranLang
+    
     const chapters: Chapter[] = chapterData
       .reverse()
-      /* eslint-disable  @typescript-eslint/no-explicit-any */
-      .map((chapter: any, i: number) => {
+      .map((chapter: {
+        data: {
+          id: string,
+          dname: string,
+          datePublic: string
+          imageFiles?: string[]
+        }
+      }, i: number) => {
         const { data } = chapter
-        const chapterPages = {pages: data.imageFiles?.map((file:any) => ({url: file}))}
+        const chapterPages = {pages: data.imageFiles?.map((file:string) => ({url: file}))}
         return {
           chapterId: data.id,
-          number: chapterData.length - i,
+          number: chapterData.length - 1 - i,
           index: i,
           title: data.dname,
           date: new Date(data.datePublic),
@@ -280,62 +308,62 @@ export class Target implements ContentSource {
     ]
   }
 
-    async getPreferenceMenu(): Promise<Form> {
-      const languages = ORIGIN_TAGS.map((l) => ({ id: l.id, title: l.title }))
-      return {
-        sections: [
-          {
-            // NSFW
-            header: "Enable NSFW content?",
-            children: [
-              UIToggle({
-                id: "language",
-                title: "Enable NSFW content",
-                value: (await this.store.boolean("nsfw")) || false,
-                didChange: (value: boolean) => {
-                  return this.store.set("nsfw", value)
-                },
-              }),
-            ],
-          },
-          {
-            // LANGUAGE OPTIONS
-            header: "Language Options",
-            children: [
-              UIMultiPicker({
-                id: "language",
-                title: "Default Language",
-                options: languages,
-                value: (await this.store.stringArray("lang")) || ["en"],
-                didChange: (value) => {
-                  return this.store.set("lang", value)
-                },
-              }),
-            ],
-          },
-          {
-            // Default Filters
-            header: "Default Filters",
-            children: [
-              UIMultiPicker({
-                id: "include",
-                title: "Include",
-                options: ALL_GENRES,
-                value: await this.store.stringArray("include"),
-                didChange: (v) => this.store.set("include", v),
-              }),
-              UIMultiPicker({
-                id: "exclude",
-                title: "Exclude",
-                options: ALL_GENRES,
-                value: await this.store.stringArray("exclude"),
-                didChange: (v) => this.store.set("exclude", v),
-              }),
-            ],
-          },
-        ],
-      }
+  async getPreferenceMenu(): Promise<Form> {
+    const languages = ORIGIN_TAGS.map((l) => ({ id: l.id, title: l.title }))
+    return {
+      sections: [
+        {
+          // NSFW
+          header: "Enable NSFW content?",
+          children: [
+            UIToggle({
+              id: "language",
+              title: "Enable NSFW content",
+              value: (await this.store.boolean("nsfw")) || false,
+              didChange: (value: boolean) => {
+                return this.store.set("nsfw", value)
+              },
+            }),
+          ],
+        },
+        {
+          // LANGUAGE OPTIONS
+          header: "Language Options",
+          children: [
+            UIMultiPicker({
+              id: "language",
+              title: "Default Language",
+              options: languages,
+              value: (await this.store.stringArray("lang")) || ["en"],
+              didChange: (value) => {
+                return this.store.set("lang", value)
+              },
+            }),
+          ],
+        },
+        {
+          // Default Filters
+          header: "Default Filters",
+          children: [
+            UIMultiPicker({
+              id: "include",
+              title: "Include",
+              options: ALL_GENRES,
+              value: await this.store.stringArray("include") || [],
+              didChange: (v) => this.store.set("include", v),
+            }),
+            UIMultiPicker({
+              id: "exclude",
+              title: "Exclude",
+              options: ALL_GENRES,
+              value: await this.store.stringArray("exclude") || [],
+              didChange: (v) => this.store.set("exclude", v),
+            }),
+          ],
+        },
+      ],
     }
+  }
   
   async getDirectoryConfig(
     _configID?: string | undefined,

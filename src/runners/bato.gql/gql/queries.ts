@@ -1,51 +1,16 @@
 export const directory = `
 query get_content_searchComic($select: SearchComic_Select) {
   get_content_searchComic(select: $select) {
-    reqPage
-    reqSize
-    reqSort
-    reqWord
-    newPage
-    paging {
-      total
-      pages
-      page
-      init
-      size
-      skip
-      limit
-    }
     items {
       id
       data {
         id
         name
-        dbStatus
-        isNormal
         genres
         origLang
         tranLang
         uploadStatus
-        originalStatus
-        originalPubFrom
-        originalPubTill
-        urlCover600
-        urlCover300
         urlCoverOri
-        stat_is_hot
-        stat_is_new
-        stat_count_emotions {
-          field
-          count
-        }
-        stat_count_statuss {
-          field
-          count
-        }
-        stat_score_avg
-        stat_score_bay
-        stat_count_chapters_normal
-        stat_count_chapters_others
       }
     }
   }
@@ -68,16 +33,7 @@ query ($manga: ID!) {
       origLang
       tranLang
       uploadStatus
-      originalStatus
-      originalPubFrom
-      originalPubTill
       urlCover600
-      urlCover300
-      urlCoverOri
-      stat_score_avg
-      stat_score_bay
-      stat_count_chapters_normal
-      stat_count_chapters_others
       readDirection
       summary {
         text
@@ -95,14 +51,7 @@ query($manga: ID!) {
   get_content_chapterList(comicId:$manga) {
     data {
       id
-      dbStatus
-      isNormal
-      isHidden
-      isDeleted
-      isFinal
-      dateCreate
       datePublic
-      dateModify
       dname
       title
       lang
