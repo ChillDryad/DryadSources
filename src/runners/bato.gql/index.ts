@@ -26,7 +26,7 @@ export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "kusa.batogql",
     name: "Bato v3x",
-    version: 0.4,
+    version: 0.5,
     website: "https://bato.to/",
     supportedLanguages: LANG_TAGS.map(l => l.id),
     thumbnail: "bato.png",
@@ -42,32 +42,41 @@ export class Target implements ContentSource {
 
   // TODO: Make sure we only include tags for supported filters.
   async getDirectory(request: DirectoryRequest): Promise<PagedResult> {
-    const genFilters = request.filters?.general
-    const includedTags: string[] = genFilters?.included
-      ? []
+    const genFilters = request.filters
+    const includedTags: string[] = genFilters
+      ? [
+          ...(genFilters["content_type"]?.included ?? []),
+          ...(genFilters["demographic"]?.included ?? []),
+          ...(genFilters["adult"]?.included ?? []),
+          ...(genFilters["general"]?.included ?? []),
+        ]
       : await this.store.stringArray("include")
-    const excludedTags: string[] = genFilters?.excluded
-      ? []
+    const excludedTags: string[] = genFilters
+      ? [
+          ...(genFilters["content_type"]?.excluded ?? []),
+          ...(genFilters["demographic"]?.excluded ?? []),
+          ...(genFilters["adult"]?.excluded ?? []),
+          ...(genFilters["general"]?.excluded ?? []),
+        ]
       : await this.store.stringArray("exclude")
-
     const language = (await this.store.stringArray("lang")) || []
     const defaultVars = directory_variables({
       page: request.page,
       word: request?.query,
       sort: request.sort?.id,
+      incOLangs: request.filters?.origin,
+      chapCount: request.filters?.chapters,
       excGenres: excludedTags,
       incGenres: includedTags,
       incTLangs: language,
-      incOLangs: request.filters?.origin,
-      chapCount: request.filters?.chapters,
     })
     const searchVars = directory_variables({
       page: request.page,
       word: request?.query,
       sort: request.sort?.id,
+      incOLangs: request.filters?.origin,
       excGenres: excludedTags,
       incTLangs: language,
-      incOLangs: request.filters?.origin,
     })
     const { data } = await this.client.post(this.queryUrl, {
       headers: {
@@ -81,10 +90,17 @@ export class Target implements ContentSource {
 
     const items = JSON.parse(data).data.get_content_searchComic.items
     const results = items.map(
-      (item: { id: string; data: { name: string; urlCoverOri: string } }) => ({
+      (item: {
+        id: string
+        data: { name: string; urlCoverOri: string; genres: string[] }
+      }) => ({
         id: item.id,
         title: item.data.name,
         cover: item.data.urlCoverOri,
+        isNSFW:
+          ADULT_GENRES.filter((a) =>
+            item.data.genres.includes(a.title),
+          ).length > 1,
       }),
     )
     return {
@@ -131,6 +147,9 @@ export class Target implements ContentSource {
       additionalTitles: details.altNames,
       webUrl: `${this.baseUrl}${details.urlPath}`,
       recommendedPanelMode,
+      isNSFW:
+        ADULT_GENRES.filter((a) => details.genres.includes(a.title)).length >
+        1,
       status,
       properties,
     }
