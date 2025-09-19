@@ -42,7 +42,7 @@ export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "kusa.batogql",
     name: "Bato v3x",
-    version: 0.8,
+    version: 0.81,
     website: "https://bato.to/",
     supportedLanguages: LANG_TAGS.map(l => l.id),
     thumbnail: "bato.png",
@@ -57,7 +57,6 @@ export class Target implements ContentSource {
   store = ObjectStore
 
   async getDirectory(request: DirectoryRequest): Promise<PagedResult> {
-    const nsfwEnabled = await this.store.boolean("nsfw")
     const genFilters = request?.filters
     const includedTags: string[] = genFilters
       ? [
@@ -84,12 +83,7 @@ export class Target implements ContentSource {
       sort: request.sort?.id,
       incOLangs: request.filters?.origin,
       chapCount: request.filters?.chapters,
-      excGenres: nsfwEnabled 
-        ? [...excludedTags] 
-        : [
-          ...ADULT_GENRES.map(a => a.title), 
-          ...(excludedTags || [])
-        ],
+      excGenres:  [...excludedTags],
       incGenres: includedTags,
       incTLangs: language,
     })
@@ -98,9 +92,7 @@ export class Target implements ContentSource {
       word: request?.query,
       sort: request.sort?.id,
       incOLangs: request.filters?.origin,
-      excGenres: nsfwEnabled
-        ? [...excludedTags]
-        : [...ADULT_GENRES.map((a) => a.title), ...(excludedTags || [])],
+      excGenres: [...excludedTags],
       incTLangs: language,
     })
     
@@ -319,21 +311,6 @@ export class Target implements ContentSource {
     const languages = ORIGIN_TAGS.map((l) => ({ id: l.id, title: l.title }))
     return {
       sections: [
-        {
-          // NSFW
-          header: "Enable NSFW content?",
-          children: [
-            UIToggle({
-              id: "language",
-              title: "Enable NSFW content",
-              value: (await this.store.boolean("nsfw")) || false,
-              didChange: (value: boolean) => {
-                if(typeof(value) !== "boolean") return this.store.set("nsfw", false)
-                return this.store.set("nsfw", value || false)
-              },
-            }),
-          ],
-        },
         {
           // LANGUAGE OPTIONS
           header: "Language Options",
