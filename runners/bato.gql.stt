@@ -563,7 +563,7 @@ class Target {
     info = {
         id: "kusa.batogql",
         name: "Bato v3x",
-        version: 0.8,
+        version: 0.81,
         website: "https://bato.to/",
         supportedLanguages: constants_1.LANG_TAGS.map(l => l.id),
         thumbnail: "bato.png",
@@ -575,7 +575,6 @@ class Target {
     client = new NetworkClient();
     store = ObjectStore;
     async getDirectory(request) {
-        const nsfwEnabled = await this.store.boolean("nsfw");
         const genFilters = request?.filters;
         const includedTags = genFilters
             ? [
@@ -600,12 +599,7 @@ class Target {
             sort: request.sort?.id,
             incOLangs: request.filters?.origin,
             chapCount: request.filters?.chapters,
-            excGenres: nsfwEnabled
-                ? [...excludedTags]
-                : [
-                    ...constants_1.ADULT_GENRES.map(a => a.title),
-                    ...(excludedTags || [])
-                ],
+            excGenres: [...excludedTags],
             incGenres: includedTags,
             incTLangs: language,
         });
@@ -614,9 +608,7 @@ class Target {
             word: request?.query,
             sort: request.sort?.id,
             incOLangs: request.filters?.origin,
-            excGenres: nsfwEnabled
-                ? [...excludedTags]
-                : [...constants_1.ADULT_GENRES.map((a) => a.title), ...(excludedTags || [])],
+            excGenres: [...excludedTags],
             incTLangs: language,
         });
         const { data } = await this.client.post(this.queryUrl, {
@@ -762,7 +754,7 @@ class Target {
             {
                 id: "adult",
                 title: "Mature",
-                subtitle: "Must be enabled in source settings (settings => installed runners => bato v3x)",
+                subtitle: "Can be disabled in source settings (settings => installed runners => bato v3x => exclude)",
                 type: daisuke_2.FilterType.EXCLUDABLE_MULTISELECT,
                 options: constants_1.ADULT_GENRES,
             },
@@ -803,22 +795,6 @@ class Target {
         const languages = constants_1.ORIGIN_TAGS.map((l) => ({ id: l.id, title: l.title }));
         return {
             sections: [
-                {
-                    // NSFW
-                    header: "Enable NSFW content?",
-                    children: [
-                        (0, daisuke_2.UIToggle)({
-                            id: "language",
-                            title: "Enable NSFW content",
-                            value: (await this.store.boolean("nsfw")) || false,
-                            didChange: (value) => {
-                                if (typeof (value) !== "boolean")
-                                    return this.store.set("nsfw", false);
-                                return this.store.set("nsfw", value || false);
-                            },
-                        }),
-                    ],
-                },
                 {
                     // LANGUAGE OPTIONS
                     header: "Language Options",
