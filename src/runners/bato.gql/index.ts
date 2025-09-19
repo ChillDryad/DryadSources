@@ -268,7 +268,7 @@ export class Target implements ContentSource {
       {
         id: "adult",
         title: "Mature",
-        subtitle: "Must be enabled in source settings (settings => installed runners => bato v3x)",
+        subtitle: "Can be disabled in source settings (settings => installed runners => bato v3x => exclude)",
         type: FilterType.EXCLUDABLE_MULTISELECT,
         options: ADULT_GENRES,
       },
