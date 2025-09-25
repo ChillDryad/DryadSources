@@ -10,6 +10,7 @@ import {
   Property,
   PublicationStatus,
   RunnerInfo,
+  SourceConfig,
   UIPicker,
   type Highlight
 } from "@suwatte/daisuke"
@@ -242,7 +243,6 @@ export class Target implements ContentSource {
       }, i: number) => {
         const { data } = chapter
         const chapterPages = {pages: data.imageFiles?.map((file:string) => ({url: file}))}
-
         return {
           chapterId: data.id,
           //@ts-expect-error TODO: Update type.
