@@ -3,7 +3,6 @@ import {
   ChapterData,
   Content,
   ContentSource,
-  DeepLinkContext,
   DirectoryConfig,
   DirectoryRequest,
   Form,
@@ -42,16 +41,6 @@ import {
 import { trackerSearch, trackerVariables } from "./gql/AniList"
 
 export class Target implements ContentSource {
-  getTags?(): Promise<Property[]> {
-    throw new Error("Method not implemented.")
-  }
-  config?: SourceConfig
-  onEnvironmentLoaded?(): Promise<void> {
-    throw new Error("Method not implemented.")
-  }
-  handleURL?(url: string): Promise<DeepLinkContext | null> {
-    throw new Error("Method not implemented.")
-  }
   info: RunnerInfo = {
     id: "kusa.batogql",
     name: "Bato v3x",
