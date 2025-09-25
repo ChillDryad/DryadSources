@@ -245,14 +245,14 @@ export class Target implements ContentSource {
 
         return {
           chapterId: data.id,
-          //@ts-expect-error
+          //@ts-expect-error TODO: Update type.
           number: data.chaNum,
           index: i,
           title: data.dname,
           date: new Date(data.datePublic),
           data: chapterPages.pages ? chapterPages : undefined,
           language,
-          //@ts-expect-error
+          //@ts-expect-error TODO: Update type.
           volume: data.volNum ?? undefined
         }
       })
