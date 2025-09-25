@@ -43,7 +43,7 @@ export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "kusa.batogql",
     name: "Bato v3x",
-    version: 0.81,
+    version: 0.82,
     website: "https://bato.to/",
     supportedLanguages: LANG_TAGS.map(l => l.id),
     thumbnail: "bato.png",
@@ -143,10 +143,10 @@ export class Target implements ContentSource {
 
     let trackerInfo
     try {
-      const experimental_trackers = await this.store.boolean(
-        "experimental_trackers",
-      )
-      if (experimental_trackers) {
+      // const experimental_trackers = await this.store.boolean(
+      //   "experimental_trackers",
+      // )
+      // if (experimental_trackers) {
         const tracker_data = await this.client.post(
           "https://graphql.anilist.co",
           {
@@ -174,7 +174,7 @@ export class Target implements ContentSource {
         } else {
           console.info("Multiple entries detected. None added.")
         }
-      }
+      // }
     } catch (e) {
       console.error(e)
     }
@@ -242,14 +242,18 @@ export class Target implements ContentSource {
       }, i: number) => {
         const { data } = chapter
         const chapterPages = {pages: data.imageFiles?.map((file:string) => ({url: file}))}
+
         return {
           chapterId: data.id,
-          number: chapterData.length - 1 - i,
+          //@ts-expect-error
+          number: data.chaNum,
           index: i,
           title: data.dname,
           date: new Date(data.datePublic),
           data: chapterPages.pages ? chapterPages : undefined,
           language,
+          //@ts-expect-error
+          volume: data.volNum ?? undefined
         }
       })
     return chapters
@@ -386,20 +390,20 @@ export class Target implements ContentSource {
             }),
           ],
         },
-        {
-          // LANGUAGE OPTIONS
-          header: "BETA OPTIONS",
-          children: [
-            UIToggle({
-              id: "experimental_trackers",
-              title: "Enable Experimental tracker support",
-              value: (await this.store.boolean("experimental_trackers")) || false,
-              didChange: (value) => {
-                return this.store.set("experimental_trackers", value)
-              },
-            }),
-          ],
-        },
+        // {
+        //   // LANGUAGE OPTIONS
+        //   header: "BETA OPTIONS",
+        //   children: [
+        //     UIToggle({
+        //       id: "experimental_trackers",
+        //       title: "Enable Experimental tracker support",
+        //       value: (await this.store.boolean("experimental_trackers")) || false,
+        //       didChange: (value) => {
+        //         return this.store.set("experimental_trackers", value)
+        //       },
+        //     }),
+        //   ],
+        // },
       ],
     }
   }
