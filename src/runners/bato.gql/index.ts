@@ -3,6 +3,7 @@ import {
   ChapterData,
   Content,
   ContentSource,
+  DeepLinkContext,
   DirectoryConfig,
   DirectoryRequest,
   Form,
@@ -10,6 +11,7 @@ import {
   Property,
   PublicationStatus,
   RunnerInfo,
+  SourceConfig,
   UIPicker,
   type Highlight
 } from "@suwatte/daisuke"
@@ -37,12 +39,23 @@ import {
   sort, 
   STATUS_TAGS 
 } from "./constants"
+import { trackerSearch, trackerVariables } from "./gql/AniList"
 
 export class Target implements ContentSource {
+  getTags?(): Promise<Property[]> {
+    throw new Error("Method not implemented.")
+  }
+  config?: SourceConfig
+  onEnvironmentLoaded?(): Promise<void> {
+    throw new Error("Method not implemented.")
+  }
+  handleURL?(url: string): Promise<DeepLinkContext | null> {
+    throw new Error("Method not implemented.")
+  }
   info: RunnerInfo = {
     id: "kusa.batogql",
     name: "Bato v3x",
-    version: 0.81,
+    version: 0.82,
     website: "https://bato.to/",
     supportedLanguages: LANG_TAGS.map(l => l.id),
     thumbnail: "bato.png",
@@ -139,6 +152,44 @@ export class Target implements ContentSource {
     })
     
     const details = JSON.parse(data).data.get_content_comicNode.data
+
+    let trackerInfo
+    try {
+      // const experimental_trackers = await this.store.boolean(
+      //   "experimental_trackers",
+      // )
+      // if (experimental_trackers) {
+        const tracker_data = await this.client.post(
+          "https://graphql.anilist.co",
+          {
+            headers: {
+              "content-type": "application/json",
+            },
+            body: {
+              query: trackerSearch,
+              variables: trackerVariables({
+                search: details.name,
+                start: details.originalPubFrom,
+              }),
+            },
+          },
+        )
+        const tdata = JSON.parse(tracker_data.data)
+        if (tdata.data.Page.media.length === 1){
+          console.log(tdata.data.Page.media)
+          trackerInfo = {
+            anilist: tdata.data.Page.media[0].id.toString(),
+            mangaupdates: tdata.data.Page.media[0].idMal.toString(),
+          }
+          console.info({trackerInfo})
+          console.info("Tracking data added automagically!")
+        } else {
+          console.info("Multiple entries detected. None added.")
+        }
+      // }
+    } catch (e) {
+      console.error(e)
+    }
     const properties: Property[] = []
     properties.push({
       id: "genres",
@@ -168,6 +219,7 @@ export class Target implements ContentSource {
       additionalTitles: details.altNames,
       webUrl: `${this.baseUrl}${details.urlPath}`,
       recommendedPanelMode,
+      trackerInfo,
       isNSFW:
         ADULT_GENRES.filter((a) => details.genres.includes(a.title)).length >
         1,
@@ -204,12 +256,15 @@ export class Target implements ContentSource {
         const chapterPages = {pages: data.imageFiles?.map((file:string) => ({url: file}))}
         return {
           chapterId: data.id,
-          number: chapterData.length - 1 - i,
+          //@ts-expect-error TODO: Update type.
+          number: data.chaNum,
           index: i,
           title: data.dname,
           date: new Date(data.datePublic),
           data: chapterPages.pages ? chapterPages : undefined,
           language,
+          //@ts-expect-error TODO: Update type.
+          volume: data.volNum ?? undefined
         }
       })
     return chapters
@@ -268,7 +323,7 @@ export class Target implements ContentSource {
       {
         id: "adult",
         title: "Mature",
-        subtitle: "Must be enabled in source settings (settings => installed runners => bato v3x)",
+        subtitle: "Can be disabled in source settings (settings => installed runners => bato v3x => exclude)",
         type: FilterType.EXCLUDABLE_MULTISELECT,
         options: ADULT_GENRES,
       },
@@ -346,6 +401,20 @@ export class Target implements ContentSource {
             }),
           ],
         },
+        // {
+        //   // LANGUAGE OPTIONS
+        //   header: "BETA OPTIONS",
+        //   children: [
+        //     UIToggle({
+        //       id: "experimental_trackers",
+        //       title: "Enable Experimental tracker support",
+        //       value: (await this.store.boolean("experimental_trackers")) || false,
+        //       didChange: (value) => {
+        //         return this.store.set("experimental_trackers", value)
+        //       },
+        //     }),
+        //   ],
+        // },
       ],
     }
   }

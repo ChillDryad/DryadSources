@@ -43,6 +43,7 @@ export const OAuthImplementation: OAuthAuthenticatable = {
     }
   },
   async handleOAuthCallback(response) {
+    console.log("oauth callback")
     const fragment = `?${response.split("#")[1]}`
     const accessToken = getParamFromURL(fragment, "access_token")
     const expiresIn = getParamFromURL(fragment, "expires_in")

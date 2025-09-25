@@ -19,15 +19,13 @@ export function getParamFromURL(url: string, param: string) {
  * Checks if a user is authenticated
  */
 export async function authenticated() {
+  console.log("authenticated fn")
   const token = await SecureStore.get("access_token")
-  const expiry = await SecureStore.get("expires")
-
-  if (!token) return false
-  if (!expiry || !(typeof expiry === "string")) return false
-  const expiryDate = new Date(expiry)
-
+  const expiry = await SecureStore.string("expires")
+  console.log({token,expiry})
   const now = new Date()
-
+  if (!expiry) return false
+  const expiryDate = new Date(expiry)
   if (now > expiryDate) {
     // Token expired remove keys
     await SecureStore.remove("access_token")
@@ -35,6 +33,8 @@ export async function authenticated() {
     await SecureStore.remove("handle")
     return false
   }
+  if (!token) return false
+
   return true
 }
 

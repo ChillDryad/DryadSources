@@ -32,6 +32,7 @@ query ($manga: ID!) {
       genres
       origLang
       tranLang
+      originalPubFrom
       uploadStatus
       urlCover600
       readDirection
@@ -56,6 +57,8 @@ query($manga: ID!) {
       title
       lang
       urlPath
+      volNum
+      chaNum
       imageFiles
     }
   }
