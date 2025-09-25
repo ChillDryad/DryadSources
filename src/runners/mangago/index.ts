@@ -23,7 +23,7 @@ export class Target implements ContentSource {
     id: "kusa.mangago",
     name: "Mangago",
     thumbnail: "mangago.png",
-    version: 0.2,
+    version: 0.4,
     website: this.baseURL,
     supportedLanguages: ["EN_US"],
     rating: CatalogRating.MIXED,
@@ -31,14 +31,15 @@ export class Target implements ContentSource {
 
   async getDirectory(request: DirectoryRequest): Promise<PagedResult> {
     let url = ""
-
     if (request?.query) {
-      url = `${this.baseURL}/r/l_search/?name=${request.query}&page=${request.page}`
+      url = `${this.baseURL}/r/l_search/?name=${request.query}&page=${
+        request.page || 1
+      }`
       const response = await this.client.get(url)
       const results = this.parser.parseQuery(response.data)
       return {
         results,
-        isLastPage: results.length < 48,
+        isLastPage: results.length < 10,
       }
     } else {
       const included = [
@@ -52,10 +53,10 @@ export class Target implements ContentSource {
       url = `${this.baseURL}/genre/${
         included.length > 0 ? included.join(",") : "All"
       }/${request.page ?? 1}/?f=${
-        request.filters?.status?.includes("completed") ? "0" : "1" ?? 1
+        request.filters?.status?.includes("completed") ? "0" : "1"
       }&o=${
-        request.filters?.status?.includes("ongoing") ? "0" : "1" ?? 1
-      }&sortby=view&e=${excluded.length > 0 ? excluded.join(",") : ""}`
+        request.filters?.status?.includes("ongoing") ? "0" : "1"
+      }&sortby=${request.sort.id || "view"}&e=${excluded.length > 0 ? excluded.join(",") : ""}`
       const response = await this.client.get(url)
       const results = this.parser.parseSearch(response.data)
       return {

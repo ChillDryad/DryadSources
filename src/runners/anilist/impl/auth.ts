@@ -5,6 +5,7 @@ import { CurrentViewerResponse } from "../types"
 
 export const AuthImplementation: RunnerAuthenticatable = {
   async getAuthenticatedUser() {
+    console.log("authenticated?")
     const isAuthenticated = await authenticated()
     if (!isAuthenticated) return null
 
@@ -43,6 +44,7 @@ export const OAuthImplementation: OAuthAuthenticatable = {
     }
   },
   async handleOAuthCallback(response) {
+    console.log("oauth callback")
     const fragment = `?${response.split("#")[1]}`
     const accessToken = getParamFromURL(fragment, "access_token")
     const expiresIn = getParamFromURL(fragment, "expires_in")

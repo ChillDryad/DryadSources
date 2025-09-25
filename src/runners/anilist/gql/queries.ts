@@ -157,8 +157,8 @@ query HomePageViewMoreQuery ($page: Int){
         }, type: MANGA, isAdult: false ${
   ["manga", "manhwa"].includes(key)
     ? key === "manga"
-      ? ',countryOfOrigin: "JP"'
-      : ',countryOfOrigin: "KR" '
+      ? ",countryOfOrigin: \"JP\""
+      : ",countryOfOrigin: \"KR\" "
     : ""
 }) {
       ...media

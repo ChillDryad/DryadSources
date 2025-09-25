@@ -36,7 +36,7 @@ export class Parser {
     const results = $("ul#search_list li").toArray()
 
     const highlights = results.map((result: Element) => {
-      const title = $("h2", result).text()
+      const title = $("h2", result).text().trim()
       const cover = $("img", result).attr("src")?.trim().replace(/i\d+/, "i9")
       const id = $("h2 a", result).attr("href")?.split("/read-manga/")[1].trim()
       if (id && title && cover)
@@ -62,7 +62,7 @@ export class Parser {
     const creators: string[] = []
     const properties: Property[] = []
     const information = $("table.left tbody tr").toArray()
-
+    const summary = $("div.manga_summary").text().trim()
     let status = PublicationStatus.ONGOING
 
     information.forEach((property) => {
@@ -120,6 +120,7 @@ export class Parser {
         title,
         cover,
         chapters,
+        summary,
         properties,
         status,
         isNSFW,

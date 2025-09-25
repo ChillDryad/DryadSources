@@ -33,11 +33,13 @@ export class Controller {
 
   async getSearchResults(query: DirectoryRequest): Promise<PagedResult> {
     const params: Record<string, unknown> = {}
-    params.langs = (await this.store.get("lang")) || "en"
+    params.langs = (await this.store.get("lang")) || ""
     // Keyword
     if (query.query) params["word"] = query.query
     // Page
     if (query.page) params["page"] = query.page
+    if (query.sort)
+      params.sort = `${query.sort.id}.${query.sort?.ascending ? "az" : "za"}`
 
     if (query.filters) {
       const includedTags: string[] = []
@@ -54,7 +56,6 @@ export class Controller {
         params.langs = query.filters.translated.toString()
       if (!query.filters?.chapters) params.chapters = 1
       if (query.filters?.status) params.release = query.filters.status
-      if (query.filters?.sort) params.sort = query.filters.sort
     }
     const response = await this.client.get(`${this.BASE}/browse`, {
       params,
