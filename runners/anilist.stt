@@ -478,6 +478,7 @@ const utils_1 = require("../utils");
 const gql_1 = require("../gql");
 exports.AuthImplementation = {
     async getAuthenticatedUser() {
+        console.log("authenticated?");
         const isAuthenticated = await (0, utils_1.authenticated)();
         if (!isAuthenticated)
             return null;
@@ -509,6 +510,7 @@ exports.OAuthImplementation = {
         };
     },
     async handleOAuthCallback(response) {
+        console.log("oauth callback");
         const fragment = `?${response.split("#")[1]}`;
         const accessToken = (0, utils_1.getParamFromURL)(fragment, "access_token");
         const expiresIn = (0, utils_1.getParamFromURL)(fragment, "expires_in");
@@ -642,7 +644,7 @@ const advancedTracker_1 = require("./impl/advancedTracker");
 const info = {
     id: "kusa.anilist",
     name: "Anilist",
-    version: 1.6,
+    version: 1.7,
     website: "https://anilist.co",
     thumbnail: "anilist.png",
 };
@@ -921,14 +923,14 @@ exports.getParamFromURL = getParamFromURL;
  * Checks if a user is authenticated
  */
 async function authenticated() {
+    console.log("authenticated fn");
     const token = await SecureStore.get("access_token");
-    const expiry = await SecureStore.get("expires");
-    if (!token)
-        return false;
-    if (!expiry || !(typeof expiry === "string"))
+    const expiry = await SecureStore.string("expires");
+    console.log({ token, expiry });
+    const now = new Date();
+    if (!expiry)
         return false;
     const expiryDate = new Date(expiry);
-    const now = new Date();
     if (now > expiryDate) {
         // Token expired remove keys
         await SecureStore.remove("access_token");
@@ -936,6 +938,8 @@ async function authenticated() {
         await SecureStore.remove("handle");
         return false;
     }
+    if (!token)
+        return false;
     return true;
 }
 exports.authenticated = authenticated;
