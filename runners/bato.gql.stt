@@ -550,6 +550,8 @@ query($manga: ID!) {
       title
       lang
       urlPath
+      volNum
+      chaNum
       imageFiles
     }
   }
@@ -596,7 +598,7 @@ class Target {
     info = {
         id: "kusa.batogql",
         name: "Bato v3x",
-        version: 0.81,
+        version: 0.82,
         website: "https://bato.to/",
         supportedLanguages: constants_1.LANG_TAGS.map(l => l.id),
         thumbnail: "bato.png",
@@ -678,34 +680,36 @@ class Target {
         const details = JSON.parse(data).data.get_content_comicNode.data;
         let trackerInfo;
         try {
-            const experimental_trackers = await this.store.boolean("experimental_trackers");
-            if (experimental_trackers) {
-                const tracker_data = await this.client.post("https://graphql.anilist.co", {
-                    headers: {
-                        "content-type": "application/json",
-                    },
-                    body: {
-                        query: AniList_1.trackerSearch,
-                        variables: (0, AniList_1.trackerVariables)({
-                            search: details.name,
-                            start: details.originalPubFrom,
-                        }),
-                    },
-                });
-                const tdata = JSON.parse(tracker_data.data);
-                if (tdata.data.Page.media.length === 1) {
-                    console.log(tdata.data.Page.media);
-                    trackerInfo = {
-                        anilist: tdata.data.Page.media[0].id.toString(),
-                        mangaupdates: tdata.data.Page.media[0].idMal.toString(),
-                    };
-                    console.info({ trackerInfo });
-                    console.info("Tracking data added automagically!");
-                }
-                else {
-                    console.info("Multiple entries detected. None added.");
-                }
+            // const experimental_trackers = await this.store.boolean(
+            //   "experimental_trackers",
+            // )
+            // if (experimental_trackers) {
+            const tracker_data = await this.client.post("https://graphql.anilist.co", {
+                headers: {
+                    "content-type": "application/json",
+                },
+                body: {
+                    query: AniList_1.trackerSearch,
+                    variables: (0, AniList_1.trackerVariables)({
+                        search: details.name,
+                        start: details.originalPubFrom,
+                    }),
+                },
+            });
+            const tdata = JSON.parse(tracker_data.data);
+            if (tdata.data.Page.media.length === 1) {
+                console.log(tdata.data.Page.media);
+                trackerInfo = {
+                    anilist: tdata.data.Page.media[0].id.toString(),
+                    mangaupdates: tdata.data.Page.media[0].idMal.toString(),
+                };
+                console.info({ trackerInfo });
+                console.info("Tracking data added automagically!");
             }
+            else {
+                console.info("Multiple entries detected. None added.");
+            }
+            // }
         }
         catch (e) {
             console.error(e);
@@ -766,12 +770,15 @@ class Target {
             const chapterPages = { pages: data.imageFiles?.map((file) => ({ url: file })) };
             return {
                 chapterId: data.id,
-                number: chapterData.length - 1 - i,
+                //@ts-expect-error TODO: Update type.
+                number: data.chaNum,
                 index: i,
                 title: data.dname,
                 date: new Date(data.datePublic),
                 data: chapterPages.pages ? chapterPages : undefined,
                 language,
+                //@ts-expect-error TODO: Update type.
+                volume: data.volNum ?? undefined
             };
         });
         return chapters;
@@ -898,20 +905,20 @@ class Target {
                         }),
                     ],
                 },
-                {
-                    // LANGUAGE OPTIONS
-                    header: "BETA OPTIONS",
-                    children: [
-                        (0, daisuke_2.UIToggle)({
-                            id: "experimental_trackers",
-                            title: "Enable Experimental tracker support",
-                            value: (await this.store.boolean("experimental_trackers")) || false,
-                            didChange: (value) => {
-                                return this.store.set("experimental_trackers", value);
-                            },
-                        }),
-                    ],
-                },
+                // {
+                //   // LANGUAGE OPTIONS
+                //   header: "BETA OPTIONS",
+                //   children: [
+                //     UIToggle({
+                //       id: "experimental_trackers",
+                //       title: "Enable Experimental tracker support",
+                //       value: (await this.store.boolean("experimental_trackers")) || false,
+                //       didChange: (value) => {
+                //         return this.store.set("experimental_trackers", value)
+                //       },
+                //     }),
+                //   ],
+                // },
             ],
         };
     }

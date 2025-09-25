@@ -478,7 +478,6 @@ const utils_1 = require("../utils");
 const gql_1 = require("../gql");
 exports.AuthImplementation = {
     async getAuthenticatedUser() {
-        console.log("authenticated?");
         const isAuthenticated = await (0, utils_1.authenticated)();
         if (!isAuthenticated)
             return null;
