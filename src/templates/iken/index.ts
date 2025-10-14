@@ -15,9 +15,6 @@ export abstract class IkenTemplate {
   constructor(params: Record<string,string>) {
     
   }
-  onEnvironmentLoaded?(): Promise<void> {
-    throw new Error("Method not implemented.")
-  }
   async getDirectory(request: DirectoryRequest): Promise<PagedResult> {
     return { results: [], isLastPage: true }
   }
