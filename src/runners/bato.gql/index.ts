@@ -151,7 +151,7 @@ export class Target implements ContentSource {
     })
     
     let trackerInfo
-    let info:String[] =[]
+    const info: string[] = []
     try {
       const experimental_trackers = await this.store.boolean(
         "experimental_trackers",
@@ -229,6 +229,7 @@ export class Target implements ContentSource {
         ADULT_GENRES.filter((a) => details.genres.includes(a.title)).length >
         1,
       status,
+      info,
       properties,
     }
   }
