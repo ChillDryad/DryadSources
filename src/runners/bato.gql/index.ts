@@ -10,8 +10,6 @@ import {
   Property,
   PublicationStatus,
   RunnerInfo,
-  SourceConfig,
-  UIPicker,
   type Highlight
 } from "@suwatte/daisuke"
 import { 
@@ -44,7 +42,7 @@ export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "kusa.batogql",
     name: "Bato v3x",
-    version: 0.82,
+    version: 0.83,
     website: "https://bato.to/",
     supportedLanguages: LANG_TAGS.map(l => l.id),
     thumbnail: "bato.png",
@@ -142,12 +140,20 @@ export class Target implements ContentSource {
     
     const details = JSON.parse(data).data.get_content_comicNode.data
 
+    const properties: Property[] = []
+    properties.push({
+      id: "genres",
+      title: "Genres",
+      tags: ALL_GENRES.filter((v) => details.genres.includes(v.id)),
+    })
+    
     let trackerInfo
+    const info: string[] = []
     try {
-      // const experimental_trackers = await this.store.boolean(
-      //   "experimental_trackers",
-      // )
-      // if (experimental_trackers) {
+      const experimental_trackers = await this.store.boolean(
+        "experimental_trackers",
+      )
+      if (experimental_trackers) {
         const tracker_data = await this.client.post(
           "https://graphql.anilist.co",
           {
@@ -165,26 +171,16 @@ export class Target implements ContentSource {
         )
         const tdata = JSON.parse(tracker_data.data)
         if (tdata.data.Page.media.length === 1){
-          console.log(tdata.data.Page.media)
           trackerInfo = {
             anilist: tdata.data.Page.media[0].id.toString(),
             mangaupdates: tdata.data.Page.media[0].idMal.toString(),
           }
-          console.info({trackerInfo})
-          console.info("Tracking data added automagically!")
-        } else {
-          console.info("Multiple entries detected. None added.")
+          info.push("✨ Auto-tracked")
         }
-      // }
+      }
     } catch (e) {
       console.error(e)
     }
-    const properties: Property[] = []
-    properties.push({
-      id: "genres",
-      title: "Genres",
-      tags: ALL_GENRES.filter(v => details.genres.includes(v.id))
-    })
     
     let recommendedPanelMode = ReadingMode.PAGED_MANGA
     if (details.readDirection === "ttb")
@@ -213,6 +209,7 @@ export class Target implements ContentSource {
         ADULT_GENRES.filter((a) => details.genres.includes(a.title)).length >
         1,
       status,
+      info,
       properties,
     }
   }
@@ -390,20 +387,20 @@ export class Target implements ContentSource {
             }),
           ],
         },
-        // {
-        //   // LANGUAGE OPTIONS
-        //   header: "BETA OPTIONS",
-        //   children: [
-        //     UIToggle({
-        //       id: "experimental_trackers",
-        //       title: "Enable Experimental tracker support",
-        //       value: (await this.store.boolean("experimental_trackers")) || false,
-        //       didChange: (value) => {
-        //         return this.store.set("experimental_trackers", value)
-        //       },
-        //     }),
-        //   ],
-        // },
+        {
+        // LANGUAGE OPTIONS
+          header: "BETA OPTIONS",
+          children: [
+            UIToggle({
+              id: "experimental_trackers",
+              title: "Enable Experimental tracker support",
+              value: (await this.store.boolean("experimental_trackers")) ?? false,
+              didChange: (value) => {
+                return this.store.set("experimental_trackers", value)
+              },
+            }),
+          ],
+        },
       ],
     }
   }
