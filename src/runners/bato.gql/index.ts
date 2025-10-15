@@ -3,7 +3,6 @@ import {
   ChapterData,
   Content,
   ContentSource,
-  DeepLinkContext,
   DirectoryConfig,
   DirectoryRequest,
   Form,
@@ -11,8 +10,6 @@ import {
   Property,
   PublicationStatus,
   RunnerInfo,
-  SourceConfig,
-  UIPicker,
   type Highlight
 } from "@suwatte/daisuke"
 import { 
@@ -173,27 +170,12 @@ export class Target implements ContentSource {
           },
         )
         const tdata = JSON.parse(tracker_data.data)
-        console.log("fetched")
         if (tdata.data.Page.media.length === 1){
-          console.log(tdata.data.Page.media)
           trackerInfo = {
             anilist: tdata.data.Page.media[0].id.toString(),
             mangaupdates: tdata.data.Page.media[0].idMal.toString(),
           }
-          info.push("Auto-tracked")
-          // properties.push({
-          //   id:"tracking",
-          //   title: "Tracking:",
-          //   tags: [{
-          //     id: "_tracking",
-          //     title: "True",
-          //   }]
-          // })
-
-          console.info({trackerInfo})
-          // console.info("Tracking data added automagically!")
-        } else {
-          // console.info("Multiple entries detected. None added.")
+          info.push("✨ Auto-tracked")
         }
       }
     } catch (e) {
@@ -213,8 +195,6 @@ export class Target implements ContentSource {
       if (details.uploadStatus.includes("hiatus")) status = PublicationStatus.HIATUS
       if (details.uploadStatus.includes("completed")) status = PublicationStatus.COMPLETED
     }
-
-    console.log(properties)
 
     return {
       title: details.name,
