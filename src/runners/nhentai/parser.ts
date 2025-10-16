@@ -57,7 +57,7 @@ export class Parser {
     if (!title || !cover) throw "Could not parse"
     return {
       title,
-      cover,
+      cover: `https:${cover}`,
       properties,
       chapters: [chapter],
     }
