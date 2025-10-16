@@ -1040,7 +1040,7 @@ class Target {
     info = {
         id: "net.nhentai",
         name: "nHentai",
-        version: 0.11,
+        version: 0.12,
         website: "https://nhentai.net",
         supportedLanguages: ["EN_GB", "JA", "ZH"],
         thumbnail: "nhentai.png",
@@ -1129,7 +1129,7 @@ class Parser {
             throw "Could not parse";
         return {
             title,
-            cover,
+            cover: `https:${cover}`,
             properties,
             chapters: [chapter],
         };
