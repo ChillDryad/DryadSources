@@ -42,7 +42,7 @@ export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "kusa.batogql",
     name: "Bato v3x",
-    version: 0.85,
+    version: 0.87,
     website: "https://bato.si/",
     supportedLanguages: LANG_TAGS.map(l => l.id),
     thumbnail: "bato.png",
@@ -50,7 +50,7 @@ export class Target implements ContentSource {
     rating: CatalogRating.MIXED,
   }
 
-  baseUrl = "https://bato.si"
+  baseUrl = "https://ato.to"
   queryUrl = `${this.baseUrl}/apo/`
   client = new NetworkClient()
 
