@@ -50,7 +50,7 @@ export class Target implements ContentSource {
     rating: CatalogRating.MIXED,
   }
 
-  baseUrl = "https://ato.to"
+  baseUrl = "https://bato.si"
   queryUrl = `${this.baseUrl}/apo/`
   client = new NetworkClient()
 
