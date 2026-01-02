@@ -28,7 +28,7 @@ export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "kusa.mangapark",
     name: "MangaPark",
-    version: 0.4,
+    version: 0.41,
     website: "https://mangapark.io",
     thumbnail: "mangapark.png",
     supportedLanguages: ["EN_US"],
@@ -120,11 +120,19 @@ export class Target implements ContentSource {
         },
       },
     })
+
+    /**
+     *    if (s.indexOf("//s") !== -1 && s.indexOf(".") !== -1) {
+            let p = s.split("//")[1];
+            p = p.substring(p.indexOf("/"));
+            imgs[i].src = host + p;
+        }
+     */
     const pages = JSON.parse(
       data,
       //@ts-expect-error fixxxx
     ).data?.get_chapterNode?.data?.imageFile?.urlList.map((page) => ({
-      url: page,
+      url: `https://mangapark.io/media/${page.split("/media/")[1]}`,
     }))
     return { pages }
   }
