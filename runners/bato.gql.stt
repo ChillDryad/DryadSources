@@ -463,7 +463,7 @@ const trackerVariables = ({ search, start }) => {
         search: search.replace(/(<|\(|\[)?.?official.?(>|\]|\))?/gi, "").trim(),
         start: `${Number(start) + 1}0000`,
     };
-    console.log(vars);
+    // console.log(vars)
     return vars;
 };
 exports.trackerVariables = trackerVariables;
@@ -490,7 +490,7 @@ __exportStar(require("./queries"), exports);
 },{"./queries":4}],4:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.chapter_query = exports.content = exports.directory = void 0;
+exports.pages_query = exports.chapter_query = exports.content = exports.directory = void 0;
 exports.directory = `
 query get_content_searchComic($select: SearchComic_Select) {
   get_content_searchComic(select: $select) {
@@ -557,6 +557,17 @@ query($manga: ID!) {
   }
 }
 `;
+exports.pages_query = `
+query ($manga: ID!){
+  get_content_chapterNode(id: $manga) {
+    data {
+      id,
+      comicId,
+      imageFiles
+    }
+  }
+}
+`;
 
 },{}],5:[function(require,module,exports){
 "use strict";
@@ -577,7 +588,7 @@ const directory_variables = ({ page, size = 25, where = "browse", word = "", exc
             chapCount
         },
     };
-    console.log({ variables });
+    // console.log({variables})
     return variables;
 };
 exports.directory_variables = directory_variables;
@@ -588,8 +599,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Target = void 0;
 const daisuke_1 = require("@suwatte/daisuke");
 const daisuke_2 = require("@suwatte/daisuke");
-const cheerio_1 = require("cheerio");
-const crypto_js_1 = require("crypto-js");
 const gql_1 = require("./gql");
 const variables_1 = require("./gql/variables");
 const constants_1 = require("./constants");
@@ -598,14 +607,14 @@ class Target {
     info = {
         id: "kusa.batogql",
         name: "Bato v3x",
-        version: 0.87,
+        version: 0.88,
         website: "https://bato.si/",
         supportedLanguages: constants_1.LANG_TAGS.map(l => l.id),
         thumbnail: "bato.png",
         minSupportedAppVersion: "5.0",
         rating: daisuke_2.CatalogRating.MIXED,
     };
-    baseUrl = "https://ato.to";
+    baseUrl = "https://bato.si";
     queryUrl = `${this.baseUrl}/apo/`;
     client = new NetworkClient();
     store = ObjectStore;
@@ -779,33 +788,19 @@ class Target {
         return chapters;
     }
     async getChapterData(_contentId, chapterId) {
-        const res = await this.client.get(`${this.baseUrl}/chapter/${chapterId}`);
-        const $ = (0, cheerio_1.load)(res.data);
-        const script = $("script:contains('const batoWord =')")?.html();
-        if (!script)
-            throw new Error("Could not find script with image data.");
-        const imgHttpLisString = script
-            .split("const imgHttps = ")
-            .pop()
-            ?.split(";")?.[0]
-            .trim();
-        if (!imgHttpLisString)
-            throw new Error("Image List Not Found.");
-        const imgHttpList = JSON.parse(imgHttpLisString);
-        const batoWord = script
-            .split("const batoWord = ")
-            .pop()
-            ?.split(";")?.[0]
-            .replace(/"/g, "");
-        const batoPass = script.split("const batoPass = ").pop()?.split(";")?.[0];
-        if (!batoWord || !batoPass || !imgHttpList || imgHttpList.length == 0)
-            throw new Error("Bad State");
-        const evaluatedPass = eval(batoPass).toString();
-        const imgAccListString = crypto_js_1.AES.decrypt(batoWord, evaluatedPass).toString(crypto_js_1.enc.Utf8);
-        const imgAccList = JSON.parse(imgAccListString);
-        return {
-            pages: imgHttpList.map((v, i) => ({ url: `${v}?${imgAccList[i]}` })),
-        };
+        const { data } = await this.client.post(this.queryUrl, {
+            headers: {
+                "content-type": "application/json",
+            },
+            body: {
+                query: gql_1.pages_query,
+                variables: { manga: Number(chapterId) },
+            },
+        });
+        const pages = JSON.parse(data).data.get_content_chapterNode.data.imageFiles.map((page) => {
+            return { url: page.replace("//k", "//n") };
+        });
+        return { pages: pages };
     }
     getFilters() {
         return [
@@ -929,7 +924,7 @@ class Target {
 }
 exports.Target = Target;
 
-},{"./constants":1,"./gql":3,"./gql/AniList":2,"./gql/variables":5,"@suwatte/daisuke":7,"cheerio":undefined,"crypto-js":undefined}],7:[function(require,module,exports){
+},{"./constants":1,"./gql":3,"./gql/AniList":2,"./gql/variables":5,"@suwatte/daisuke":7}],7:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
