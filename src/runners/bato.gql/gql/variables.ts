@@ -35,6 +35,6 @@ export const directory_variables = ({
       chapCount
     },
   }
-  console.log({variables})
+  // console.log({variables})
   return variables
 }

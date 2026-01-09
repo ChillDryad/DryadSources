@@ -64,3 +64,15 @@ query($manga: ID!) {
   }
 }
 `
+
+export const pages_query = `
+query ($manga: ID!){
+  get_content_chapterNode(id: $manga) {
+    data {
+      id,
+      comicId,
+      imageFiles
+    }
+  }
+}
+`

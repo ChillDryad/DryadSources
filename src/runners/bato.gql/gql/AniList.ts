@@ -26,6 +26,6 @@ export const trackerVariables = ({
     search: search.replace(/(<|\(|\[)?.?official.?(>|\]|\))?/gi, "").trim(),
     start: `${Number(start) + 1}0000`,
   }
-  console.log(vars)
+  // console.log(vars)
   return vars
 }
