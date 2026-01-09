@@ -19,10 +19,8 @@ import {
   UIMultiPicker, 
   UIToggle 
 } from "@suwatte/daisuke"
-import { load } from "cheerio"
-import { AES, enc } from "crypto-js"
 
-import { chapter_query, content, directory } from "./gql"
+import { chapter_query, content, directory, pages_query } from "./gql"
 import { directory_variables } from "./gql/variables"
 import { 
   ADULT_GENRES, 
@@ -42,7 +40,7 @@ export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "kusa.batogql",
     name: "Bato v3x",
-    version: 0.87,
+    version: 0.88,
     website: "https://bato.si/",
     supportedLanguages: LANG_TAGS.map(l => l.id),
     thumbnail: "bato.png",
@@ -50,7 +48,7 @@ export class Target implements ContentSource {
     rating: CatalogRating.MIXED,
   }
 
-  baseUrl = "https://ato.to"
+  baseUrl = "https://bato.si"
   queryUrl = `${this.baseUrl}/apo/`
   client = new NetworkClient()
 
@@ -260,36 +258,19 @@ export class Target implements ContentSource {
     _contentId: string,
     chapterId: string,
   ): Promise<ChapterData> {
-    const res = await this.client.get(`${this.baseUrl}/chapter/${chapterId}`)
-    const $ = load(res.data)
-    const script = $("script:contains('const batoWord =')")?.html()
-
-    if (!script) throw new Error("Could not find script with image data.")
-
-    const imgHttpLisString = script
-      .split("const imgHttps = ")
-      .pop()
-      ?.split(";")?.[0]
-      .trim()
-
-    if (!imgHttpLisString) throw new Error("Image List Not Found.")
-
-    const imgHttpList: string[] = JSON.parse(imgHttpLisString)
-    const batoWord = script
-      .split("const batoWord = ")
-      .pop()
-      ?.split(";")?.[0]
-      .replace(/"/g, "")
-    const batoPass = script.split("const batoPass = ").pop()?.split(";")?.[0]
-    if (!batoWord || !batoPass || !imgHttpList || imgHttpList.length == 0)
-      throw new Error("Bad State")
-
-    const evaluatedPass = eval(batoPass).toString()
-    const imgAccListString = AES.decrypt(batoWord, evaluatedPass).toString(enc.Utf8)
-    const imgAccList: string[] = JSON.parse(imgAccListString)
-    return {
-      pages: imgHttpList.map((v, i) => ({ url: `${v}?${imgAccList[i]}` })),
-    } 
+    const { data } = await this.client.post(this.queryUrl, {
+      headers: {
+        "content-type": "application/json",
+      },
+      body: {
+        query: pages_query,
+        variables: { manga: Number(chapterId) },
+      },
+    })
+    const pages = JSON.parse(data).data.get_content_chapterNode.data.imageFiles.map((page:string) => {
+      return { url: page.replace("//k", "//n") }
+    })
+    return { pages: pages }
   }
 
   getFilters() {
