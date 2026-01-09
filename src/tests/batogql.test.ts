@@ -51,8 +51,8 @@ describe("Bato Tests", () => {
   })
 
   test("Reader", async () => {
-    const data = await source.getChapterData("_", "1591864")
-    
+    const data = await source.getChapterData("_", "2644639")
+
     expect(ChapterDataSchema.parse(data)).toEqual(expect.any(Object))
   })
 })
