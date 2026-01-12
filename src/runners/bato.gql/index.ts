@@ -112,7 +112,7 @@ export class Target implements ContentSource {
       }) => ({
         id: item.id,
         title: item.data.name,
-        cover: item.data.urlCoverOri,
+        cover: item.data.urlCoverOri.replace("//k", "//n"),
         isNSFW:
           ADULT_GENRES.filter((a) =>
             item.data.genres.includes(a.title),
