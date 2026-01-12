@@ -40,7 +40,7 @@ export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "kusa.batogql",
     name: "Bato v3x",
-    version: 0.88,
+    version: 0.89,
     website: "https://bato.si/",
     supportedLanguages: LANG_TAGS.map(l => l.id),
     thumbnail: "bato.png",
