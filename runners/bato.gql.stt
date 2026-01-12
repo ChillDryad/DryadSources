@@ -607,7 +607,7 @@ class Target {
     info = {
         id: "kusa.batogql",
         name: "Bato v3x",
-        version: 0.88,
+        version: 0.89,
         website: "https://bato.si/",
         supportedLanguages: constants_1.LANG_TAGS.map(l => l.id),
         thumbnail: "bato.png",
@@ -668,7 +668,7 @@ class Target {
         const results = items.map((item) => ({
             id: item.id,
             title: item.data.name,
-            cover: item.data.urlCoverOri,
+            cover: item.data.urlCoverOri.replace("//k", "//n"),
             isNSFW: constants_1.ADULT_GENRES.filter((a) => item.data.genres.includes(a.title)).length > 1,
         }));
         return {
