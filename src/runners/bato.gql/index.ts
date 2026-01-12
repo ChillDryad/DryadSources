@@ -40,7 +40,7 @@ export class Target implements ContentSource {
   info: RunnerInfo = {
     id: "kusa.batogql",
     name: "Bato v3x",
-    version: 0.88,
+    version: 0.89,
     website: "https://bato.si/",
     supportedLanguages: LANG_TAGS.map(l => l.id),
     thumbnail: "bato.png",
@@ -112,7 +112,7 @@ export class Target implements ContentSource {
       }) => ({
         id: item.id,
         title: item.data.name,
-        cover: item.data.urlCoverOri,
+        cover: item.data.urlCoverOri.replace("//k", "//n"),
         isNSFW:
           ADULT_GENRES.filter((a) =>
             item.data.genres.includes(a.title),
