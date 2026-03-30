@@ -116,7 +116,7 @@ export class Target implements ContentSource, ImageRequestHandler {
 
     if (request.query) {
       queryString += `&keyword=${encodeURIComponent(request.query)}`
-      queryString += `&order[relevance]=desc`
+      queryString += "&order[relevance]=desc"
     } else {
       const sortId = request.sort?.id ?? "chapter_updated_at"
       const sortDir = request.sort?.ascending ? "asc" : "desc"
@@ -129,7 +129,6 @@ export class Target implements ContentSource, ImageRequestHandler {
     const response = await this.client.get(url)
     const data: SearchResponse = JSON.parse(response.data)
 
-    console.log(url)
     return {
       results: data.result.items.map(mangaToHighlight),
       isLastPage:
