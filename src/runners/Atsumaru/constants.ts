@@ -1,0 +1,75 @@
+import { type Tag } from "@suwatte/daisuke"
+
+export const GENRES: Tag[] = [
+  { id: "Ip0", title: "Action" },
+  { id: "oU1", title: "Adult" },
+  { id: "wY2", title: "Adventure" },
+  { id: "6n3", title: "Avant Garde" },
+  { id: "6f4", title: "Award Winning" },
+  { id: "Dw5", title: "Boys Love" },
+  { id: "pr6", title: "Comedy" },
+  { id: "CA7", title: "Doujinshi" },
+  { id: "ME8", title: "Drama" },
+  { id: "Gf9", title: "Ecchi" },
+  { id: "2S10", title: "Erotica" },
+  { id: "yv11", title: "Fantasy" },
+  { id: "Zw12", title: "Gender Bender" },
+  { id: "8613", title: "Girls Love" },
+  { id: "jk14", title: "Gourmet" },
+  { id: "hg15", title: "Harem" },
+  { id: "d416", title: "Hentai" },
+  { id: "qW17", title: "Historical" },
+  { id: "NH18", title: "Horror" },
+  { id: "Uq19", title: "Josei" },
+  { id: "XZ20", title: "Lolicon" },
+  { id: "n421", title: "Mahou Shoujo" },
+  { id: "XO22", title: "Martial Arts" },
+  { id: "Gi23", title: "Mature" },
+  { id: "N824", title: "Mecha" },
+  { id: "Eh25", title: "Music" },
+  { id: "Xz26", title: "Mystery" },
+  { id: "FV27", title: "Psychological" },
+  { id: "Ex28", title: "Romance" },
+  { id: "Zu29", title: "School Life" },
+  { id: "3j30", title: "Sci-Fi" },
+  { id: "pw31", title: "Seinen" },
+  { id: "rv32", title: "Shotacon" },
+  { id: "4W33", title: "Shoujo" },
+  { id: "hM34", title: "Shoujo Ai" },
+  { id: "W935", title: "Shounen" },
+  { id: "DE36", title: "Shounen Ai" },
+  { id: "YX37", title: "Slice of Life" },
+  { id: "ZB38", title: "Smut" },
+  { id: "NC39", title: "Sports" },
+  { id: "hT40", title: "Supernatural" },
+  { id: "WM41", title: "Suspense" },
+  { id: "e742", title: "Thriller" },
+  { id: "tn43", title: "Tragedy" },
+  { id: "7D44", title: "Yaoi" },
+  { id: "po45", title: "Yuri" },
+]
+
+export const SORTS = [
+  { id: "trending", title: "Trending" },
+  { id: "popularity", title: "Popularity" },
+  { id: "topRated", title: "Top Rated" },
+  { id: "createdAt", title: "Recently Added" },
+  { id: "released", title: "Release Date" },
+  { id: "title", title: "Title" },
+]
+
+export const STATUSES: Tag[] = [
+  { id: "Ongoing", title: "Ongoing" },
+  { id: "Completed", title: "Completed" },
+  { id: "Hiatus", title: "Hiatus" },
+  { id: "Canceled", title: "Canceled" },
+]
+
+export const TYPES: Tag[] = [
+  { id: "Manga", title: "Manga" },
+  { id: "Manwha", title: "Manhwa" },
+  { id: "Manhua", title: "Manhua" },
+  { id: "OEL", title: "OEL" },
+]
+
+export const ALL_TYPES = ["Manga", "Manwha", "Manhua", "OEL"]
