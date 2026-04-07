@@ -19,6 +19,7 @@ import {
   ReadingMode,
   SectionStyle,
 } from "@suwatte/daisuke"
+import { generateHash } from "./hash"
 import { DEMOGRAPHICS, GENRES, SORTS, STATUSES, TYPES } from "./constants"
 import {
   type ChapterImagesResponse,
@@ -37,7 +38,7 @@ export class Target implements ContentSource, ImageRequestHandler {
     id: "kusa.comix",
     name: "Comix",
     thumbnail: "comix.png",
-    version: 1.0,
+    version: 1.01,
     website: "https://comix.to",
     supportedLanguages: ["EN_US"],
     rating: CatalogRating.MIXED,
@@ -195,7 +196,9 @@ export class Target implements ContentSource, ImageRequestHandler {
     let hasMore = true
 
     while (hasMore) {
-      const url = `${this.apiUrl}/manga/${contentId}/chapters?order[number]=desc&limit=100&page=${page}`
+      const path = `/manga/${contentId}/chapters`
+      const hashToken = generateHash(path, 0, 1)
+      const url = `${this.apiUrl}${path}?order[number]=desc&limit=100&page=${page}&time=1&_=${hashToken}`
       const response = await this.client.get(url)
       const data: ChapterListResponse = JSON.parse(response.data)
       const { items, pagination } = data.result
