@@ -38,7 +38,7 @@ export class Target implements ContentSource, ImageRequestHandler {
     id: "kusa.comix",
     name: "Comix",
     thumbnail: "comix.png",
-    version: 1.01,
+    version: 1.02,
     website: "https://comix.to",
     supportedLanguages: ["EN_US"],
     rating: CatalogRating.MIXED,
@@ -191,7 +191,7 @@ export class Target implements ContentSource, ImageRequestHandler {
   }
 
   async getChapters(contentId: string): Promise<Chapter[]> {
-    const chapters: Chapter[] = []
+    const raw: Chapter[] = []
     let page = 1
     let hasMore = true
 
@@ -203,15 +203,14 @@ export class Target implements ContentSource, ImageRequestHandler {
       const data: ChapterListResponse = JSON.parse(response.data)
       const { items, pagination } = data.result
 
-      items.forEach((ch, i) => {
-        chapters.push(chapterToChapter(ch, chapters.length + i))
-      })
+      items.forEach((ch) => raw.push(chapterToChapter(ch, 0)))
 
       hasMore = pagination.current_page < pagination.last_page
       page++
     }
 
-    return chapters
+    // API returns newest-first; reverse so oldest = index 0
+    return raw.reverse().map((ch, i) => ({ ...ch, index: i }))
   }
 
   async getChapterData(
