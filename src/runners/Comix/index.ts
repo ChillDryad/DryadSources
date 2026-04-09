@@ -38,7 +38,7 @@ export class Target implements ContentSource, ImageRequestHandler {
     id: "kusa.comix",
     name: "Comix",
     thumbnail: "comix.png",
-    version: 1.02,
+    version: 1.03,
     website: "https://comix.to",
     supportedLanguages: ["EN_US"],
     rating: CatalogRating.MIXED,
@@ -209,8 +209,7 @@ export class Target implements ContentSource, ImageRequestHandler {
       page++
     }
 
-    // API returns newest-first; reverse so oldest = index 0
-    return raw.reverse().map((ch, i) => ({ ...ch, index: i }))
+    return raw.map((ch, i) => ({ ...ch, index: i }))
   }
 
   async getChapterData(
