@@ -32,13 +32,13 @@ import {
 
 export class Target implements ContentSource, ImageRequestHandler {
   baseUrl = "https://comix.to"
-  apiUrl = "https://comix.to/api/v2"
+  apiUrl = "https://comix.to/api/v1"
 
   info: RunnerInfo = {
     id: "kusa.comix",
     name: "Comix",
     thumbnail: "comix.png",
-    version: 1.03,
+    version: 1.04,
     website: "https://comix.to",
     supportedLanguages: ["EN_US"],
     rating: CatalogRating.MIXED,
@@ -78,7 +78,7 @@ export class Target implements ContentSource, ImageRequestHandler {
     const order = orderMap[sectionID]
     if (!order) throw new Error(`Unknown section: ${sectionID}`)
 
-    const url = `${this.apiUrl}/manga?order[${order}]=desc&limit=20&page=1`
+    const url = `${this.apiUrl}/manga?order[${order}]=desc&limit=28&page=1`
     const response = await this.client.get(url)
     const data: SearchResponse = JSON.parse(response.data)
     return {
@@ -96,10 +96,14 @@ export class Target implements ContentSource, ImageRequestHandler {
         included?: string[]
         excluded?: string[]
       }
-      if (included)
-        queryString += "&" + included.map((v) => `genres[]=${v}`).join("&")
-      if (excluded)
-        queryString += "&" + excluded.map((v) => `genres[]=-${v}`).join("&")
+      if (included) {
+        queryString += "&genres_mode=and"
+        queryString += "&" + included.map((v) => `genres_in[]=${v}`).join("&")
+      }
+      if (excluded) {
+        queryString += "&genres_mode=and"
+        queryString += "&" + excluded.map((v) => `genres_ex[]=${v}`).join("&")
+      }
     }
 
     if (status)
@@ -119,12 +123,12 @@ export class Target implements ContentSource, ImageRequestHandler {
       queryString += `&keyword=${encodeURIComponent(request.query)}`
       queryString += "&order[relevance]=desc"
     } else {
-      const sortId = request.sort?.id ?? "chapter_updated_at"
+      const sortId = request.sort?.id ?? "score"
       const sortDir = request.sort?.ascending ? "asc" : "desc"
       queryString += `&order[${sortId}]=${sortDir}`
     }
 
-    queryString += `&limit=50&page=${request.page}`
+    queryString += `&limit=28&page=${request.page}`
 
     const url = `${this.apiUrl}/manga?${queryString.replace(/^&/, "")}`
     const response = await this.client.get(url)
@@ -132,19 +136,24 @@ export class Target implements ContentSource, ImageRequestHandler {
 
     return {
       results: data.result.items.map(mangaToHighlight),
-      isLastPage:
-        data.result.pagination.current_page >= data.result.pagination.last_page,
+      isLastPage: data.result.meta
+        ? data.result.meta.page >= data.result.meta.lastPage
+        : data.result.pagination
+          ? data.result.pagination.current_page >=
+            data.result.pagination.last_page
+          : true,
     }
   }
 
   async getContent(contentId: string): Promise<Content> {
-    const url = `${this.apiUrl}/manga/${contentId}?includes[]=genre&includes[]=author&includes[]=artist&includes[]=theme&includes[]=demographic`
+    const hid = contentId.split("-")[0]
+    const url = `${this.apiUrl}/manga/${hid}?includes[]=genre&includes[]=author&includes[]=artist&includes[]=theme&includes[]=demographic`
     const response = await this.client.get(url)
     const data: SingleMangaResponse = JSON.parse(response.data)
     const manga = data.result
 
     const status = convertStatus(manga.status)
-    const chapters = await this.getChapters(contentId)
+    const chapters = await this.getChapters(hid)
 
     const properties: Property[] = []
 
@@ -179,9 +188,11 @@ export class Target implements ContentSource, ImageRequestHandler {
 
     return {
       title: manga.title,
-      cover: manga.poster.large,
+      cover: manga.poster?.large ?? "",
       summary: manga.synopsis ?? undefined,
-      isNSFW: manga.is_nsfw,
+      isNSFW:
+        manga.content_rating === "erotica" ||
+        manga.content_rating === "pornographic",
       status,
       chapters,
       properties,
@@ -197,15 +208,20 @@ export class Target implements ContentSource, ImageRequestHandler {
 
     while (hasMore) {
       const path = `/manga/${contentId}/chapters`
-      const hashToken = generateHash(path, 0, 1)
-      const url = `${this.apiUrl}${path}?order[number]=desc&limit=100&page=${page}&time=1&_=${hashToken}`
+      const hashToken = generateHash(path)
+      const url = `${this.apiUrl}${path}?order[number]=desc&limit=100&page=${page}&_=${hashToken}`
       const response = await this.client.get(url)
       const data: ChapterListResponse = JSON.parse(response.data)
-      const { items, pagination } = data.result
+      const { items } = data.result
 
       items.forEach((ch) => raw.push(chapterToChapter(ch, 0)))
 
-      hasMore = pagination.current_page < pagination.last_page
+      hasMore = data.result.meta
+        ? data.result.meta.page < data.result.meta.lastPage
+        : data.result.pagination
+          ? data.result.pagination.current_page <
+            data.result.pagination.last_page
+          : false
       page++
     }
 
@@ -216,11 +232,14 @@ export class Target implements ContentSource, ImageRequestHandler {
     _contentId: string,
     chapterId: string,
   ): Promise<ChapterData> {
-    const url = `${this.apiUrl}/chapters/${chapterId}`
+    const chapterIdNum = chapterId.split("-")[0]
+    const path = `/chapters/${chapterIdNum}`
+    const hashToken = generateHash(path)
+    const url = `${this.apiUrl}${path}?_=${hashToken}`
     const response = await this.client.get(url)
     const data: ChapterImagesResponse = JSON.parse(response.data)
     return {
-      pages: data.result.images.map((img) => ({ url: img.url })),
+      pages: data.result.pages.map((img) => ({ url: img.url })),
     }
   }
 
@@ -263,9 +282,9 @@ export class Target implements ContentSource, ImageRequestHandler {
 
 function mangaToHighlight(manga: ComixManga) {
   return {
-    id: manga.hash_id,
+    id: manga.hid,
     title: manga.title,
-    cover: manga.poster.large,
+    cover: manga.poster?.large ?? "",
   }
 }
 
@@ -290,25 +309,84 @@ function chapterToChapter(ch: ComixChapter, index: number): Chapter {
     : `Chapter ${ch.number}`
 
   let providers: { id: string; name: string; links: [] }[] | undefined
-  if (ch.scanlation_group) {
+  if (ch.group) {
     providers = [
       {
-        id: ch.scanlation_group.name,
-        name: ch.scanlation_group.name,
+        id: ch.group.name,
+        name: ch.group.name,
         links: [],
       },
     ]
-  } else if (ch.is_official === 1) {
+  } else if (ch.is_official) {
     providers = [{ id: "official", name: "Official", links: [] }]
   }
 
   return {
-    chapterId: ch.chapter_id.toString(),
+    chapterId: ch.id.toString(),
     number: ch.number,
     title,
     index,
-    date: new Date(ch.updated_at * 1000),
+    date: parseRelativeDate(ch.created_at_formatted),
     language: "EN_US",
     ...(providers && { providers }),
   }
+}
+
+function parseRelativeDate(dateStr: string): Date {
+  if (!dateStr) return new Date(0)
+  const trimmed = dateStr
+    .trim()
+    .toLowerCase()
+    .replace(/\s+ago$/, "")
+  const match = trimmed.match(
+    /^(\d+)\s*(s|m|h|d|w|mo|mos|y|yr|yrs|min|mins|sec|secs|hr|hrs|day|days|week|weeks|month|months|year|years)$/,
+  )
+  if (!match) return new Date(0)
+
+  const amount = parseInt(match[1], 10)
+  const unit = match[2]
+  const date = new Date()
+
+  switch (unit) {
+    case "s":
+    case "sec":
+    case "secs":
+      date.setSeconds(date.getSeconds() - amount)
+      break
+    case "m":
+    case "min":
+    case "mins":
+      date.setMinutes(date.getMinutes() - amount)
+      break
+    case "h":
+    case "hr":
+    case "hrs":
+      date.setHours(date.getHours() - amount)
+      break
+    case "d":
+    case "day":
+    case "days":
+      date.setDate(date.getDate() - amount)
+      break
+    case "w":
+    case "week":
+    case "weeks":
+      date.setDate(date.getDate() - amount * 7)
+      break
+    case "mo":
+    case "mos":
+    case "month":
+    case "months":
+      date.setMonth(date.getMonth() - amount)
+      break
+    case "y":
+    case "yr":
+    case "yrs":
+    case "year":
+    case "years":
+      date.setFullYear(date.getFullYear() - amount)
+      break
+  }
+
+  return date
 }

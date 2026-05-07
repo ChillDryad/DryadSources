@@ -71,12 +71,17 @@ export const GENRES: Tag[] = [
 ]
 
 export const SORTS = [
-  { id: "views_30d", title: "Popular" },
-  { id: "chapter_updated_at", title: "Latest Updated" },
-  { id: "created_at", title: "Created" },
+  { id: "relevance", title: "Best Match" },
+  { id: "chapter_updated_at", title: "Latest update" },
+  { id: "created_at", title: "Recently added" },
   { id: "title", title: "Title" },
-  { id: "views_total", title: "Total Views" },
-  { id: "follows_total", title: "Most Follows" },
+  { id: "year", title: "Year" },
+  { id: "score", title: "Highest rated" },
+  { id: "views_7d", title: "Most viewed · 7 days" },
+  { id: "views_30d", title: "Most viewed · 30 days" },
+  { id: "views_90d", title: "Most viewed · 90 days" },
+  { id: "views_total", title: "Most viewed · all time" },
+  { id: "follows_total", title: "Most followed" },
 ]
 
 export const STATUSES: Tag[] = [
@@ -84,7 +89,6 @@ export const STATUSES: Tag[] = [
   { id: "finished", title: "Finished" },
   { id: "on_hiatus", title: "On Hiatus" },
   { id: "discontinued", title: "Discontinued" },
-  { id: "not_yet_released", title: "Not Yet Released" },
 ]
 
 export const TYPES: Tag[] = [

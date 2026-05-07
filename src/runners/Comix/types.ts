@@ -17,14 +17,14 @@ export type ComixTerm = {
 }
 
 export type ComixManga = {
-  hash_id: string
+  hid: string
   title: string
   alt_titles: string[]
   synopsis: string | null
   type: string
-  poster: ComixPoster
+  poster: ComixPoster | null
   status: string
-  is_nsfw: boolean
+  content_rating: string
   rated_avg: number
   author: ComixTerm[] | null
   artist: ComixTerm[] | null
@@ -34,41 +34,49 @@ export type ComixManga = {
 }
 
 export type ComixScanlationGroup = {
+  id?: number
   name: string
 }
 
 export type ComixChapter = {
-  chapter_id: number
+  id: number
   number: number
   name: string
-  updated_at: number
-  scanlation_group: ComixScanlationGroup | null
-  is_official: number
-  scanlation_group_id: number
+  created_at_formatted: string
   votes: number
+  group: ComixScanlationGroup | null
+  is_official: boolean
 }
 
 export type SingleMangaResponse = {
   result: ComixManga
 }
 
+export type ComixMeta = {
+  page: number
+  lastPage: number
+  hasNext: boolean
+}
+
 export type SearchResponse = {
   result: {
     items: ComixManga[]
-    pagination: ComixPagination
+    meta?: ComixMeta
+    pagination?: ComixPagination
   }
 }
 
 export type ChapterListResponse = {
   result: {
     items: ComixChapter[]
-    pagination: ComixPagination
+    meta?: ComixMeta
+    pagination?: ComixPagination
   }
 }
 
 export type ChapterImagesResponse = {
   result: {
-    chapter_id: number
-    images: { url: string }[]
+    id: number
+    pages: { url: string }[]
   }
 }
