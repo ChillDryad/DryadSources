@@ -28,7 +28,8 @@ function b64decode(s: string): number[] {
   const out: number[] = []
   let buf = 0
   let bits = 0
-  for (const c of s) {
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i]
     if (c === "=") break
     const val = lookup[c]
     if (val === undefined) continue
@@ -217,18 +218,11 @@ function round5(data: number[]): number[] {
   return out
 }
 
-/**
- * @param path     API path, e.g. "/manga/some-hash/chapters"
- * @param bodySize encodeURIComponent(body).length for POST, or 0 for GET
- * @param time     1 for GET chapter requests
- */
-export function generateHash(
-  path: string,
-  bodySize = 0,
-  time: number = 1,
-): string {
-  const baseString = `${path}:${bodySize}:${time}`
-  const encoded = encodeURIComponent(baseString)
+export function generateHash(path: string): string {
+  const encoded = encodeURIComponent(path)
+    .replace(/\+/g, "%20")
+    .replace(/\*/g, "%2A")
+    .replace(/%7E/g, "~")
 
   const initialBytes = Array.from(encoded, (c) => c.charCodeAt(0))
 
