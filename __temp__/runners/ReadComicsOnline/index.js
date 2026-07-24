@@ -1,0 +1,112 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Target = void 0;
+const daisuke_1 = require("@suwatte/daisuke");
+const constants_1 = require("./constants");
+const cheerio_1 = require("cheerio");
+class Target {
+    info = {
+        id: "kusa.readcomicsonline",
+        name: "ReadComicsOnline.ru",
+        version: 0.2,
+        website: constants_1.BASE_URL,
+        thumbnail: "readcomiconline.png",
+        supportedLanguages: ["EN_US"],
+        minSupportedAppVersion: "5.0",
+        rating: daisuke_1.CatalogRating.MIXED,
+    };
+    client = new NetworkClient();
+    async getDirectory(request) {
+        const params = {};
+        let url = "";
+        let results;
+        let response;
+        params.page = request.page;
+        if (request.query) {
+            url = `${constants_1.BASE_URL}/search`;
+            params.query = request.query;
+            response = await this.client.get(url, { params });
+            // @ts-expect-error need better type
+            results = JSON.parse(response.data).suggestions.map((suggestion) => ({
+                id: suggestion.data,
+                cover: `${constants_1.BASE_URL}/${suggestion.data}/cover/cover_250x350`,
+                title: suggestion.value,
+            }));
+        }
+        else {
+            url = `${constants_1.BASE_URL}/filterList`;
+            response = await this.client.get(`${url}?sortBy=${request.sort?.id ?? "name"}&asc=${request.sort?.ascending || false}`);
+            const $ = (0, cheerio_1.load)(response.data);
+            const entries = $(".col-sm-6").toArray();
+            results = entries.map((entry) => {
+                const title = $("h5.media-heading", entry).text();
+                const cover = `https:${$("div.media-left a img", entry).attr("src")}`;
+                const id = $("div.media-left a", entry).attr("href").split("/comic/")[1];
+                return {
+                    title,
+                    cover,
+                    id,
+                };
+            });
+        }
+        return {
+            results,
+            isLastPage: true,
+        };
+    }
+    async getContent(contentId) {
+        const response = await this.client.get(`${constants_1.BASE_URL}/comic/${contentId}`);
+        const $ = (0, cheerio_1.load)(response.data);
+        return {
+            title: $("h2.listmanga-header").first().text().trim(),
+            cover: `https:${$("div.boxed img").attr("src").trim()}`,
+            recommendedPanelMode: 1,
+        };
+    }
+    async getChapters(contentId) {
+        const response = await this.client.get(`${constants_1.BASE_URL}/comic/${contentId}`);
+        const $ = (0, cheerio_1.load)(response.data);
+        const chapterList = $("ul.chapters li").toArray();
+        const chapters = [];
+        for (const chapter in chapterList) {
+            chapters.push({
+                title: $("h5.chapter-title-rtl", chapterList[chapter]).text().trim(),
+                index: Number(chapter),
+                chapterId: $("a", chapterList[chapter])
+                    .attr("href")
+                    .split(`${contentId}/`)[1],
+                number: chapterList.length - Number(chapter),
+                language: "EN_US",
+                date: new Date(),
+                // $("div.action div.date-chapter-title-rtl").text().trim(),
+            });
+        }
+        return chapters;
+    }
+    async getChapterData(contentId, chapterId) {
+        console.log(`${constants_1.BASE_URL}/comic/${contentId}/${chapterId}`);
+        const response = await this.client.get(`${constants_1.BASE_URL}/comic/${contentId}/${chapterId}`);
+        const $ = (0, cheerio_1.load)(response.data);
+        const images = $("div#all img").toArray();
+        const pages = images.map((image) => ({
+            url: $(image).attr("data-src").trim(),
+        }));
+        return { pages };
+    }
+    async getDirectoryConfig() {
+        return {
+            sort: {
+                options: [
+                    { id: "views", title: "Popular" },
+                    { id: "name", title: "Name" },
+                    { id: "last_release", title: "Last Release" },
+                ],
+                canChangeOrder: true,
+                default: {
+                    id: "views",
+                },
+            },
+        };
+    }
+}
+exports.Target = Target;

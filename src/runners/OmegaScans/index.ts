@@ -19,17 +19,18 @@ import {
 } from "@suwatte/daisuke"
 import { load } from "cheerio"
 import { GENRES, SORTS, STATUS } from "./constants"
-import { HeanChapter } from "./types"
+
+const PER_PAGE = 12
 
 export class Target implements ContentSource {
   baseUrl = "https://omegascans.org"
-  apiUrl = this.baseUrl.replace("//", "//api.")
+  apiUrl = this.baseUrl.replace("://", "://api.")
 
   info: RunnerInfo = {
     id: "kusa.omegascans",
     name: "OmegaScans",
     thumbnail: "omega.png",
-    version: 1.3,
+    version: 1.4,
     website: this.baseUrl,
     supportedLanguages: ["EN_US"],
     rating: CatalogRating.NSFW,
@@ -93,12 +94,14 @@ export class Target implements ContentSource {
           break
       }
       const response = await this.client.get(`${this.apiUrl}/query`, { params })
-      const jsonResponse = JSON.parse(response.data).data
-      const highlights = jsonResponse.map((item: Record<string, string>) => ({
-        id: item.id.toString(),
-        title: item.title,
-        cover: item.thumbnail,
-      }))
+      const jsonResponse = JSON.parse(response.data)
+      const highlights = jsonResponse.data.map(
+        (item: Record<string, string>) => ({
+          id: item.series_slug,
+          title: item.title,
+          cover: item.thumbnail,
+        }),
+      )
       return {
         items: highlights,
       }
@@ -117,9 +120,12 @@ export class Target implements ContentSource {
 
     params.page = request.page
     params.query_string = request?.query
-    params.status = request?.filters?.status
-    params.tags_ids = `[${genres.join(",")}]`
+    params.status = request?.filters?.status ?? "All"
+    if (genres.length) params.tags_ids = `[${genres.join(",")}]`
+    params.order = "desc"
     params.orderBy = request?.sort?.id ?? "latest"
+    params.series_type = "Comic"
+    params.perPage = PER_PAGE
     params.adult = true
 
     const response = await this.client.get(`${this.apiUrl}/query`, {
@@ -128,53 +134,32 @@ export class Target implements ContentSource {
     const jsonResponse = JSON.parse(response.data)
     const highlights = jsonResponse.data.map(
       (item: Record<string, string>) => ({
-        id: item.id.toString(),
+        id: item.series_slug,
         title: item.title,
         cover: item.thumbnail,
       }),
     )
     return {
       results: highlights,
-      isLastPage: highlights.length < 12,
+      isLastPage: highlights.length < PER_PAGE,
     }
   }
 
-  async getSeriesSlug(contentId: string) {
-    const seriesSlug = await this.client.get(`${this.apiUrl}/chapter/query`, {
-      params: { page: 1, perPage: 1, series_id: contentId },
-    })
-    const slug = JSON.parse(seriesSlug.data).data?.[0].series.series_slug
-
-    if (slug === undefined) throw `Could not parse ${contentId}`
-    return slug
-  }
-
   async getContent(contentId: string): Promise<Content> {
-    // TODO: remove this when context is enabled.
-    const slug = await this.getSeriesSlug(contentId)
-    const response = await this.client.get(`${this.apiUrl}/series/${slug}`)
+    const response = await this.client.get(`${this.apiUrl}/series/${contentId}`)
 
     const jsonResponse = JSON.parse(response.data)
     const title = jsonResponse.title
     const cover = jsonResponse.thumbnail
     const $ = load(jsonResponse.description)
     const summary = $("p").text()
-    const creators = [jsonResponse.author, jsonResponse.studio]
+    const creators = [jsonResponse.author, jsonResponse.studio].filter(Boolean)
     const status =
       Number(PublicationStatus[jsonResponse.status.toUpperCase()]) ||
       PublicationStatus.ONGOING
     const isNSFW = jsonResponse.adult
-    const chapters = await this.getChapters(jsonResponse.id)
+    const chapters = await this.getChapters(jsonResponse.id.toString())
     const properties: Property[] = []
-    if (jsonResponse.tags.length > 0)
-      properties.push({
-        id: "genres",
-        title: "Genres",
-        tags: jsonResponse.tags.map((tag: Record<string, string>) => ({
-          id: tag.id.toString(),
-          title: tag.name,
-        })),
-      })
     if (creators.length > 0)
       properties.push({
         id: "creators",
@@ -200,30 +185,42 @@ export class Target implements ContentSource {
     }
   }
   async getChapters(contentId: string): Promise<Chapter[]> {
+    const seriesId = /^\d+$/.test(contentId)
+      ? contentId
+      : (
+          JSON.parse(
+            (
+              await this.client.get(`${this.apiUrl}/series/${contentId}`)
+            ).data,
+          ) as { id: number }
+        ).id.toString()
     const response = await this.client.get(`${this.apiUrl}/chapter/query`, {
       params: {
         page: 1,
         perPage: 999,
-        series_id: contentId,
+        series_id: seriesId,
       },
     })
-    const parsedChapters = JSON.parse(response.data)?.data
+    const parsedChapters = JSON.parse(response.data)?.data ?? []
     const chapters: Chapter[] = []
     let i = 0
     while (i < parsedChapters.length) {
       const chapter = parsedChapters[i]
-      if (chapter.price === 0)
+      if (chapter.price === 0) {
+        const nameMatch = chapter.chapter_name?.match(/(\d+(\.\d+)?)/)
+        const titleMatch = chapter.chapter_title?.match(/(\d+(\.\d+)?)/)
+        const parsedNumber = Number(nameMatch?.[1] ?? titleMatch?.[1])
         chapters.push({
           chapterId: chapter.chapter_slug,
           title: chapter.chapter_title || chapter.chapter_name,
-          number:
-            Number(chapter.chapter_name.match(/(\d+(\.\d+)?)/)?.[1]) ??
-            Number(chapter.chapter_title.match(/(\d+(\.\d+)?)/)?.[1]) ??
-            i - parsedChapters.length,
+          number: Number.isFinite(parsedNumber)
+            ? parsedNumber
+            : i - parsedChapters.length,
           index: i,
           language: "EN_US",
           date: new Date(chapter.created_at),
         })
+      }
       i++
     }
 
@@ -233,22 +230,20 @@ export class Target implements ContentSource {
     contentId: string,
     chapterId: string,
   ): Promise<ChapterData> {
-    const slug = await this.getSeriesSlug(contentId)
     const response = await this.client.get(
-      `${this.baseUrl}/series/${slug}/${chapterId}`,
+      `${this.baseUrl}/series/${contentId}/${chapterId}`,
     )
     const $ = load(response.data)
-    const parsedPages = $("div.flex.flex-col>img").toArray()
-    const pages = parsedPages.map((page) => {
-      const url =
-        $(page).attr("data-src")?.trim().length > 1
-          ? $(page).attr("data-src")?.trim()
-          : $(page).attr("src")?.trim()
-      return {
-        url,
-      }
-    })
-    pages.pop()
+    const parsedPages = $("img.block.object-contain").toArray()
+    const pages = parsedPages
+      .map((page) => {
+        const url =
+          $(page).attr("data-src")?.trim() ||
+          $(page).attr("src")?.trim() ||
+          undefined
+        return url ? { url } : null
+      })
+      .filter((p): p is { url: string } => p !== null)
     return { pages }
   }
   async getDirectoryConfig(): Promise<DirectoryConfig> {

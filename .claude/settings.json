@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s -X GET \"https://api.omegascans.org/query?query_string=app&status=All&order=desc&orderBy=latest&series_type=Comic&page=1&perPage=12&tags_ids=%5B%5D&adult=true\" -H \"Accept: application/json\")",
+      "Bash(curl -s -X GET \"https://api.omegascans.org/series/desire-realization-app\" -H \"Accept: application/json\")",
+      "Bash(curl -s -X GET \"https://api.omegascans.org/chapter/query?page=1&perPage=10&series_id=5\" -H \"Accept: application/json\")",
+      "Bash(curl -s -X GET \"https://omegascans.org/series/desire-realization-app/chapter-1\" -H \"Accept: text/html\")",
+      "Bash(npx jest *)"
+    ]
+  }
+}

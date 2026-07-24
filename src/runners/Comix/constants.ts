@@ -1,13 +1,14 @@
 import { type Tag } from "@suwatte/daisuke"
 
 export const GENRES: Tag[] = [
+  { id: "23", title: "Romance" },
+  { id: "11", title: "Drama" },
+  { id: "9", title: "Comedy" },
   { id: "6", title: "Action" },
   { id: "87264", title: "Adult" },
   { id: "7", title: "Adventure" },
   { id: "8", title: "Boys Love" },
-  { id: "9", title: "Comedy" },
   { id: "10", title: "Crime" },
-  { id: "11", title: "Drama" },
   { id: "87265", title: "Ecchi" },
   { id: "12", title: "Fantasy" },
   { id: "13", title: "Girls Love" },
@@ -22,7 +23,6 @@ export const GENRES: Tag[] = [
   { id: "20", title: "Mystery" },
   { id: "21", title: "Philosophical" },
   { id: "22", title: "Psychological" },
-  { id: "23", title: "Romance" },
   { id: "24", title: "Sci-Fi" },
   { id: "25", title: "Slice of Life" },
   { id: "87268", title: "Smut" },
