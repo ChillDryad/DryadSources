@@ -1,0 +1,1008 @@
+"use httpclient";
+var global = globalThis;
+"use strict";
+var SourcePackage = (() => {
+  var __defProp = Object.defineProperty;
+  var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+  var __esm = (fn, res) => function __init() {
+    return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+  };
+  var __commonJS = (cb, mod) => function __require() {
+    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  };
+  var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+
+  // node_modules/esbuild-plugins-node-modules-polyfill/globals/process.js
+  var init_process = __esm({
+    "node_modules/esbuild-plugins-node-modules-polyfill/globals/process.js"() {
+    }
+  });
+
+  // node_modules/esbuild-plugins-node-modules-polyfill/globals/Buffer.js
+  var init_Buffer = __esm({
+    "node_modules/esbuild-plugins-node-modules-polyfill/globals/Buffer.js"() {
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/runtime/index.js
+  var require_runtime = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/runtime/index.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.instantiateSource = exports.buildVariantMetadata = exports.readSourceVariants = exports.readSourceInfo = exports.normalizeSourceEntry = exports.resolveDefaultExport = void 0;
+      var resolveDefaultExport = (sourceModule) => {
+        const value = sourceModule;
+        const resolved = typeof value === "object" && value !== null && "default" in value ? value.default : value;
+        if (typeof resolved !== "function" || !("info" in resolved)) {
+          throw new Error("Default export must be a class with a static 'info' property");
+        }
+        return resolved;
+      };
+      exports.resolveDefaultExport = resolveDefaultExport;
+      exports.normalizeSourceEntry = exports.resolveDefaultExport;
+      var readSourceInfo = (cls) => {
+        const info = cls.info;
+        if (!info || typeof info !== "object" || !info.id) {
+          throw new Error("Source class must have a static 'info' property with at least an 'id'");
+        }
+        return info;
+      };
+      exports.readSourceInfo = readSourceInfo;
+      var readSourceVariants = (cls) => {
+        const variants = cls.variants;
+        if (Array.isArray(variants) && variants.length > 0) {
+          return variants;
+        }
+        return [
+          {
+            id: cls.info.id,
+            name: cls.info.name,
+            languages: cls.info.languages
+          }
+        ];
+      };
+      exports.readSourceVariants = readSourceVariants;
+      var buildVariantMetadata = (info, variant) => {
+        var _a, _b, _c;
+        return {
+          ...info,
+          id: (_a = variant.id) != null ? _a : info.id,
+          name: (_b = variant.name) != null ? _b : info.name,
+          languages: (_c = variant.languages) != null ? _c : info.languages
+        };
+      };
+      exports.buildVariantMetadata = buildVariantMetadata;
+      var instantiateSource = (cls, variant) => {
+        return new cls(variant == null ? void 0 : variant.args);
+      };
+      exports.instantiateSource = instantiateSource;
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/types/networking/builder.js
+  var require_builder = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/types/networking/builder.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.NetworkClientBuilder = void 0;
+      var NetworkClientBuilder = class {
+        constructor() {
+          // Array of functions that transform requests
+          __publicField(this, "requestTransformers", []);
+          // Array of functions that transform responses
+          __publicField(this, "responseTransformers", []);
+          // Object representing HTTP headers, where each key-value pair represents a header
+          __publicField(this, "headers", {});
+          // Array of cookies
+          __publicField(this, "cookies", []);
+          // The maximum time to wait for a request to complete, in milliseconds
+          __publicField(this, "timeout");
+          // The number of requests allowed per second
+          __publicField(this, "requestsPerSecond");
+          // A function that determines whether a status code is considered successful
+          __publicField(this, "statusValidator");
+          // The maximum number of retries for a request
+          __publicField(this, "maxRetries");
+        }
+        /**
+         * Sets the rate limit for the NetworkClient.
+         *
+         * @param requests - The maximum number of requests to make per interval.
+         * @param interval - The length of the rate limiting interval in seconds.
+         * @returns The builder, to allow for method chaining.
+         */
+        setRateLimit(requests, interval) {
+          this.requestsPerSecond = requests / interval;
+          return this;
+        }
+        /**
+         * Adds a request interceptor to the NetworkClient.
+         *
+         * @param transformer - The interceptor to add. This should be a function that takes a request and modifies it in some way.
+         * @returns The builder, to allow for method chaining.
+         */
+        addRequestInterceptor(transformer) {
+          this.requestTransformers.push(transformer);
+          return this;
+        }
+        /**
+         * Adds a response interceptor to the NetworkClient.
+         *
+         * @param transformer - The interceptor to add. This should be a function that takes a response and modifies it in some way.
+         * @returns The builder, to allow for method chaining.
+         */
+        addResponseInterceptor(transformer) {
+          this.responseTransformers.push(transformer);
+          return this;
+        }
+        /**
+         * Sets the authorization token for the NetworkClient.
+         *
+         * @param token - The token to be included in the Authorization header of every request.
+         * @returns The builder, to allow for method chaining.
+         */
+        setAuthorizationToken(token) {
+          return this.addHeader("Authorization", token);
+        }
+        /**
+         * Sets the status validator for the NetworkClient.
+         *
+         * @param validator - A function that takes a status code and returns true if it is considered successful.
+         * @returns The builder, to allow for method chaining.
+         */
+        setStatusValidator(validator) {
+          this.statusValidator = validator;
+          return this;
+        }
+        /**
+         * Sets the timeout for requests made by the NetworkClient.
+         *
+         * @param timeout - The maximum time to wait for a request to complete, in milliseconds.
+         * @returns The builder, to allow for method chaining.
+         */
+        setTimeout(timeout) {
+          this.timeout = timeout;
+          return this;
+        }
+        /**
+         * Sets the maximum number of retries for this request by the NetworkClient.
+         *
+         * @param retries - The maximum number of retries for this request
+         * @returns The builder, to allow for method chaining.
+         */
+        setMaxRetries(retries) {
+          this.maxRetries = retries;
+          return this;
+        }
+        /**
+         * Sets a header for the NetworkClient.
+         *
+         * @param key - The name of the header
+         * @param value - The value of the header
+         * @returns The builder, to allow for method chaining.
+         */
+        addHeader(key, value) {
+          this.headers[key] = value;
+          return this;
+        }
+        /**
+         * Sets a cookie for the NetworkClient.
+         *
+         * @param cookie - The cookie to be included in every request.
+         * @returns The builder, to allow for method chaining.
+         */
+        addCookie(cookie) {
+          this.cookies.push(cookie);
+          return this;
+        }
+        /**
+         * Builds a NetworkClient using the parameters set on the builder.
+         *
+         * @returns A NetworkClient with the configured parameters.
+         */
+        build() {
+          return new NetworkClient(this);
+        }
+      };
+      exports.NetworkClientBuilder = NetworkClientBuilder;
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/types/networking/client.js
+  var require_client = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/types/networking/client.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      Object.defineProperty(exports, "__esModule", { value: true });
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/types/networking/http.js
+  var require_http = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/types/networking/http.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      Object.defineProperty(exports, "__esModule", { value: true });
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/types/networking/request.js
+  var require_request = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/types/networking/request.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      Object.defineProperty(exports, "__esModule", { value: true });
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/types/networking/response.js
+  var require_response = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/types/networking/response.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      Object.defineProperty(exports, "__esModule", { value: true });
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/types/networking/transformer.js
+  var require_transformer = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/types/networking/transformer.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      Object.defineProperty(exports, "__esModule", { value: true });
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/types/networking/index.js
+  var require_networking = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/types/networking/index.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
+        if (k2 === void 0) k2 = k;
+        var desc = Object.getOwnPropertyDescriptor(m, k);
+        if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+          desc = { enumerable: true, get: function() {
+            return m[k];
+          } };
+        }
+        Object.defineProperty(o, k2, desc);
+      }) : (function(o, m, k, k2) {
+        if (k2 === void 0) k2 = k;
+        o[k2] = m[k];
+      }));
+      var __exportStar = exports && exports.__exportStar || function(m, exports2) {
+        for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports2, p)) __createBinding(exports2, m, p);
+      };
+      Object.defineProperty(exports, "__esModule", { value: true });
+      __exportStar(require_builder(), exports);
+      __exportStar(require_client(), exports);
+      __exportStar(require_http(), exports);
+      __exportStar(require_request(), exports);
+      __exportStar(require_response(), exports);
+      __exportStar(require_transformer(), exports);
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/types/native.js
+  var require_native = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/types/native.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      Object.defineProperty(exports, "__esModule", { value: true });
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/types/source/destination.js
+  var require_destination = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/types/source/destination.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.URLDestination = URLDestination;
+      exports.ContentDestination = ContentDestination;
+      exports.ItemPageDestination = ItemPageDestination;
+      exports.ChapterDestination = ChapterDestination;
+      exports.ItemListDestination = ItemListDestination;
+      exports.NoDestination = NoDestination;
+      function URLDestination(props, title = null) {
+        return {
+          url: {
+            props,
+            title
+          }
+        };
+      }
+      function ContentDestination(props, title = null) {
+        return {
+          content: {
+            props,
+            title
+          }
+        };
+      }
+      function ItemPageDestination(props, title = null) {
+        return {
+          page: {
+            props,
+            title
+          }
+        };
+      }
+      function ChapterDestination(props) {
+        return {
+          chapter: {
+            props
+          }
+        };
+      }
+      function ItemListDestination(props, title = null) {
+        return {
+          list: {
+            props,
+            title
+          }
+        };
+      }
+      function NoDestination() {
+        return {
+          empty: {
+            props: {}
+          }
+        };
+      }
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/types/source/chapter.js
+  var require_chapter = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/types/source/chapter.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.ChapterLockedError = exports.ChapterUnavailableError = exports.SOURCE_CHAPTER_TEXT_LIMITS = exports.SourceChapterTextFormat = void 0;
+      var SourceChapterTextFormat;
+      (function(SourceChapterTextFormat2) {
+        SourceChapterTextFormat2["HTML"] = "html";
+        SourceChapterTextFormat2["PLAIN_TEXT"] = "plainText";
+      })(SourceChapterTextFormat || (exports.SourceChapterTextFormat = SourceChapterTextFormat = {}));
+      exports.SOURCE_CHAPTER_TEXT_LIMITS = Object.freeze({
+        bridgePayload: 4 * 1024 * 1024,
+        body: 2 * 1024 * 1024,
+        resources: 512,
+        resourceHref: 2048,
+        resourceURL: 8192,
+        resourceMediaType: 256
+      });
+      var ChapterUnavailableError = class extends Error {
+        constructor(message = "Chapter content is unavailable.") {
+          super(message);
+          this.name = "ChapterUnavailable";
+        }
+      };
+      exports.ChapterUnavailableError = ChapterUnavailableError;
+      var ChapterLockedError = class extends Error {
+        constructor(message = "Chapter content is locked.") {
+          super(message);
+          this.name = "ChapterLocked";
+        }
+      };
+      exports.ChapterLockedError = ChapterLockedError;
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/types/source/configuration.js
+  var require_configuration = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/types/source/configuration.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      Object.defineProperty(exports, "__esModule", { value: true });
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/types/source/content.js
+  var require_content = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/types/source/content.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.ContentRating = exports.TrackStatus = exports.ReadingMode = exports.ContentType = exports.ContentStatus = void 0;
+      var ContentStatus;
+      (function(ContentStatus2) {
+        ContentStatus2[ContentStatus2["UNKNOWN"] = 0] = "UNKNOWN";
+        ContentStatus2[ContentStatus2["ONGOING"] = 1] = "ONGOING";
+        ContentStatus2[ContentStatus2["COMPLETED"] = 2] = "COMPLETED";
+        ContentStatus2[ContentStatus2["CANCELLED"] = 3] = "CANCELLED";
+        ContentStatus2[ContentStatus2["HIATUS"] = 4] = "HIATUS";
+      })(ContentStatus || (exports.ContentStatus = ContentStatus = {}));
+      var ContentType;
+      (function(ContentType2) {
+        ContentType2[ContentType2["MANGA"] = 0] = "MANGA";
+        ContentType2[ContentType2["MANHUA"] = 1] = "MANHUA";
+        ContentType2[ContentType2["MANHWA"] = 2] = "MANHWA";
+        ContentType2[ContentType2["COMIC"] = 3] = "COMIC";
+        ContentType2[ContentType2["NOVEL"] = 4] = "NOVEL";
+      })(ContentType || (exports.ContentType = ContentType = {}));
+      var ReadingMode;
+      (function(ReadingMode2) {
+        ReadingMode2[ReadingMode2["PAGED_MANGA"] = 0] = "PAGED_MANGA";
+        ReadingMode2[ReadingMode2["PAGED_COMIC"] = 1] = "PAGED_COMIC";
+        ReadingMode2[ReadingMode2["PAGED_VERTICAL"] = 2] = "PAGED_VERTICAL";
+        ReadingMode2[ReadingMode2["VERTICAL"] = 3] = "VERTICAL";
+      })(ReadingMode || (exports.ReadingMode = ReadingMode = {}));
+      var TrackStatus;
+      (function(TrackStatus2) {
+        TrackStatus2[TrackStatus2["UNTRACKED"] = 0] = "UNTRACKED";
+        TrackStatus2[TrackStatus2["READING"] = 1] = "READING";
+        TrackStatus2[TrackStatus2["PLANNING"] = 2] = "PLANNING";
+        TrackStatus2[TrackStatus2["COMPLETED"] = 3] = "COMPLETED";
+        TrackStatus2[TrackStatus2["PAUSED"] = 4] = "PAUSED";
+        TrackStatus2[TrackStatus2["DROPPED"] = 5] = "DROPPED";
+        TrackStatus2[TrackStatus2["REPEATING"] = 6] = "REPEATING";
+      })(TrackStatus || (exports.TrackStatus = TrackStatus = {}));
+      var ContentRating;
+      (function(ContentRating2) {
+        ContentRating2[ContentRating2["EVERYONE"] = 0] = "EVERYONE";
+        ContentRating2[ContentRating2["SUGGESTIVE"] = 1] = "SUGGESTIVE";
+        ContentRating2[ContentRating2["MATURE"] = 2] = "MATURE";
+        ContentRating2[ContentRating2["UNKNOWN"] = 3] = "UNKNOWN";
+      })(ContentRating || (exports.ContentRating = ContentRating = {}));
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/types/source/item.js
+  var require_item = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/types/source/item.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      Object.defineProperty(exports, "__esModule", { value: true });
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/types/source/page.js
+  var require_page = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/types/source/page.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.PageSectionStyle = void 0;
+      var PageSectionStyle;
+      (function(PageSectionStyle2) {
+        PageSectionStyle2[PageSectionStyle2["DEFAULT"] = 0] = "DEFAULT";
+        PageSectionStyle2[PageSectionStyle2["DETAIL_VERTICAL"] = 1] = "DETAIL_VERTICAL";
+        PageSectionStyle2[PageSectionStyle2["DETAIL_HORIZONTAL"] = 2] = "DETAIL_HORIZONTAL";
+        PageSectionStyle2[PageSectionStyle2["GALLERY"] = 3] = "GALLERY";
+        PageSectionStyle2[PageSectionStyle2["LIST"] = 4] = "LIST";
+        PageSectionStyle2[PageSectionStyle2["GRID"] = 5] = "GRID";
+        PageSectionStyle2[PageSectionStyle2["TAG_GRID"] = 6] = "TAG_GRID";
+        PageSectionStyle2[PageSectionStyle2["TAG_LIST"] = 7] = "TAG_LIST";
+        PageSectionStyle2[PageSectionStyle2["BANNER"] = 8] = "BANNER";
+        PageSectionStyle2[PageSectionStyle2["HIGHLIGHT"] = 9] = "HIGHLIGHT";
+        PageSectionStyle2[PageSectionStyle2["READABLE"] = 10] = "READABLE";
+        PageSectionStyle2[PageSectionStyle2["MOSAIC"] = 11] = "MOSAIC";
+        PageSectionStyle2[PageSectionStyle2["RANKED"] = 12] = "RANKED";
+        PageSectionStyle2[PageSectionStyle2["STORY_RAIL"] = 13] = "STORY_RAIL";
+        PageSectionStyle2[PageSectionStyle2["EDITORIAL"] = 14] = "EDITORIAL";
+        PageSectionStyle2[PageSectionStyle2["THREE_STACK"] = 15] = "THREE_STACK";
+        PageSectionStyle2[PageSectionStyle2["WINDOWPANE"] = 16] = "WINDOWPANE";
+        PageSectionStyle2[PageSectionStyle2["SIDECAR"] = 17] = "SIDECAR";
+        PageSectionStyle2[PageSectionStyle2["DUET"] = 18] = "DUET";
+        PageSectionStyle2[PageSectionStyle2["TAPESTRY"] = 19] = "TAPESTRY";
+      })(PageSectionStyle || (exports.PageSectionStyle = PageSectionStyle = {}));
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/types/source/delegate.js
+  var require_delegate = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/types/source/delegate.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      Object.defineProperty(exports, "__esModule", { value: true });
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/types/source/tag.js
+  var require_tag = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/types/source/tag.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      Object.defineProperty(exports, "__esModule", { value: true });
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/types/source/updates.js
+  var require_updates = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/types/source/updates.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      Object.defineProperty(exports, "__esModule", { value: true });
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/types/source/source.js
+  var require_source = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/types/source/source.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      Object.defineProperty(exports, "__esModule", { value: true });
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/types/source/filter.js
+  var require_filter = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/types/source/filter.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.ToggleFilter = ToggleFilter;
+      exports.TextFilter = TextFilter;
+      exports.PickerFilter = PickerFilter;
+      exports.SelectFilter = SelectFilter;
+      exports.SearchFilter = SearchFilter;
+      function ToggleFilter() {
+        return {
+          toggle: {
+            props: true
+          }
+        };
+      }
+      function TextFilter() {
+        return {
+          text: {
+            props: true
+          }
+        };
+      }
+      function PickerFilter(props) {
+        return {
+          picker: {
+            props
+          }
+        };
+      }
+      function SelectFilter(options, exclude = false) {
+        return {
+          select: {
+            props: {
+              options,
+              exclude
+            }
+          }
+        };
+      }
+      function SearchFilter(id, title, kind, subtitle) {
+        return {
+          id,
+          title,
+          subtitle,
+          kind
+        };
+      }
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/types/source/form.js
+  var require_form = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/types/source/form.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.UIKeyboardType = void 0;
+      exports.UIToggle = UIToggle;
+      exports.UIDatePicker = UIDatePicker;
+      exports.UIPicker = UIPicker;
+      exports.UISelect = UISelect;
+      exports.UIStepper = UIStepper;
+      exports.UITextField = UITextField;
+      exports.UIWebViewButton = UIWebViewButton;
+      exports.UIOAuthButton = UIOAuthButton;
+      var UIKeyboardType;
+      (function(UIKeyboardType2) {
+        UIKeyboardType2[UIKeyboardType2["ALPHANUMERIC"] = 0] = "ALPHANUMERIC";
+        UIKeyboardType2[UIKeyboardType2["EMAIL"] = 1] = "EMAIL";
+        UIKeyboardType2[UIKeyboardType2["NUMERIC"] = 2] = "NUMERIC";
+        UIKeyboardType2[UIKeyboardType2["NUMERIC_DECIMAL"] = 3] = "NUMERIC_DECIMAL";
+      })(UIKeyboardType || (exports.UIKeyboardType = UIKeyboardType = {}));
+      function UIToggle(props) {
+        return {
+          toggle: { props }
+        };
+      }
+      function UIDatePicker(props) {
+        return {
+          datepicker: { props }
+        };
+      }
+      function UIPicker(props) {
+        return {
+          picker: { props }
+        };
+      }
+      function UISelect(props) {
+        return {
+          select: {
+            props
+          }
+        };
+      }
+      function UIStepper(props) {
+        return {
+          stepper: { props }
+        };
+      }
+      function UITextField(props) {
+        return {
+          textfield: { props }
+        };
+      }
+      function UIWebViewButton(props) {
+        return {
+          webview: {
+            props
+          }
+        };
+      }
+      function UIOAuthButton(props) {
+        return {
+          oauth: {
+            props
+          }
+        };
+      }
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/types/source/image.js
+  var require_image = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/types/source/image.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      Object.defineProperty(exports, "__esModule", { value: true });
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/types/source/index.js
+  var require_source2 = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/types/source/index.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
+        if (k2 === void 0) k2 = k;
+        var desc = Object.getOwnPropertyDescriptor(m, k);
+        if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+          desc = { enumerable: true, get: function() {
+            return m[k];
+          } };
+        }
+        Object.defineProperty(o, k2, desc);
+      }) : (function(o, m, k, k2) {
+        if (k2 === void 0) k2 = k;
+        o[k2] = m[k];
+      }));
+      var __exportStar = exports && exports.__exportStar || function(m, exports2) {
+        for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports2, p)) __createBinding(exports2, m, p);
+      };
+      Object.defineProperty(exports, "__esModule", { value: true });
+      __exportStar(require_destination(), exports);
+      __exportStar(require_chapter(), exports);
+      __exportStar(require_configuration(), exports);
+      __exportStar(require_content(), exports);
+      __exportStar(require_item(), exports);
+      __exportStar(require_page(), exports);
+      __exportStar(require_delegate(), exports);
+      __exportStar(require_tag(), exports);
+      __exportStar(require_updates(), exports);
+      __exportStar(require_source(), exports);
+      __exportStar(require_filter(), exports);
+      __exportStar(require_form(), exports);
+      __exportStar(require_image(), exports);
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/types/store.js
+  var require_store = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/types/store.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      Object.defineProperty(exports, "__esModule", { value: true });
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/types/utils.js
+  var require_utils = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/types/utils.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      Object.defineProperty(exports, "__esModule", { value: true });
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/types/toolchain.js
+  var require_toolchain = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/types/toolchain.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      Object.defineProperty(exports, "__esModule", { value: true });
+    }
+  });
+
+  // node_modules/@suwatte/toolchain/dist/types/index.js
+  var require_types = __commonJS({
+    "node_modules/@suwatte/toolchain/dist/types/index.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
+        if (k2 === void 0) k2 = k;
+        var desc = Object.getOwnPropertyDescriptor(m, k);
+        if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+          desc = { enumerable: true, get: function() {
+            return m[k];
+          } };
+        }
+        Object.defineProperty(o, k2, desc);
+      }) : (function(o, m, k, k2) {
+        if (k2 === void 0) k2 = k;
+        o[k2] = m[k];
+      }));
+      var __exportStar = exports && exports.__exportStar || function(m, exports2) {
+        for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports2, p)) __createBinding(exports2, m, p);
+      };
+      Object.defineProperty(exports, "__esModule", { value: true });
+      __exportStar(require_networking(), exports);
+      __exportStar(require_native(), exports);
+      __exportStar(require_source2(), exports);
+      __exportStar(require_store(), exports);
+      __exportStar(require_utils(), exports);
+      __exportStar(require_toolchain(), exports);
+    }
+  });
+
+  // __temp__/sources/atsumaru-en/index.js
+  var require_atsumaru_en = __commonJS({
+    "__temp__/sources/atsumaru-en/index.js"(exports) {
+      "use strict";
+      init_Buffer();
+      init_process();
+      Object.defineProperty(exports, "__esModule", { value: true });
+      var types_1 = require_types();
+      var Atsumaru = class {
+        constructor() {
+          __publicField(this, "client", new HttpClient({
+            baseUrl: "https://atsu.moe",
+            headers: { Accept: "application/json" }
+            // Omit a local limiter: the current emulator uses an unref'd scheduling
+            // timer for rate-limited requests, which can terminate a Node test before
+            // a queued request starts. The site has no observed throttling response.
+          }));
+        }
+        getConfiguration() {
+          return {
+            imageReferer: "https://atsu.moe/",
+            useClientForImageRequests: true
+          };
+        }
+        async getSearchResults(request, page) {
+          var _a;
+          return this.getBrowsePage(((_a = request.sort) == null ? void 0 : _a.key) === "latest" ? "latest" : "trending", page);
+        }
+        async getItemList(request, page) {
+          const key = request.key === "latest" ? "latest" : "trending";
+          return this.getBrowsePage(key, page);
+        }
+        async getContent(contentId) {
+          var _a, _b, _c, _d;
+          const response = await this.client.get("/api/manga/page", {
+            params: { id: contentId }
+          });
+          ensureOk(response, "Atsumaru content");
+          const data = await response.json();
+          const manga = data.mangaPage;
+          const chapters = await this.getChapters(contentId);
+          return {
+            title: manga.title,
+            coverImage: imageUrl((_a = manga.poster) != null ? _a : manga.image),
+            summary: (_b = manga.synopsis) != null ? _b : void 0,
+            status: contentStatus(manga.status),
+            contentType: contentType(manga.type),
+            rating: types_1.ContentRating.MATURE,
+            chapters,
+            credits: (_c = manga.authors) == null ? void 0 : _c.map((author) => ({ name: author.name })),
+            genres: (_d = manga.tags) == null ? void 0 : _d.map((tag) => ({
+              id: slug(tag.name),
+              title: tag.name
+            })),
+            webUrl: `https://atsu.moe/read/${contentId}`
+          };
+        }
+        async getChapters(contentId) {
+          var _a;
+          const [mangaResponse, chapterResponse] = await Promise.all([
+            this.client.get("/api/manga/page", { params: { id: contentId } }),
+            this.client.get("/api/manga/allChapters", { params: { mangaId: contentId } })
+          ]);
+          ensureOk(mangaResponse, "Atsumaru manga");
+          ensureOk(chapterResponse, "Atsumaru chapters");
+          const manga = (await mangaResponse.json()).mangaPage;
+          const scanlators = new Map(((_a = manga.scanlators) != null ? _a : []).map((scanlator) => [scanlator.id, scanlator.name]));
+          const data = await chapterResponse.json();
+          return data.chapters.map((chapter, index) => {
+            var _a2;
+            return {
+              id: chapter.id,
+              index,
+              number: chapterNumber(chapter.number),
+              title: ((_a2 = chapter.title) == null ? void 0 : _a2.trim()) || `Chapter ${chapter.number}`,
+              language: "en",
+              date: chapterDate(chapter.createdAt),
+              ...chapter.scanlationMangaId && scanlators.has(chapter.scanlationMangaId) ? {
+                providers: [
+                  {
+                    id: chapter.scanlationMangaId,
+                    name: scanlators.get(chapter.scanlationMangaId),
+                    links: []
+                  }
+                ]
+              } : {}
+            };
+          });
+        }
+        async getChapterPages(contentId, chapterId) {
+          const response = await this.client.get("/api/read/chapter", {
+            params: { mangaId: contentId, chapterId }
+          });
+          ensureOk(response, "Atsumaru chapter pages");
+          const data = await response.json();
+          return data.readChapter.pages.map((page) => ({ url: imageUrl(page.image) }));
+        }
+        async getBrowsePage(kind, page) {
+          const endpoint = kind === "latest" ? "recentlyUpdated" : "trending";
+          const response = await this.client.get(`/api/infinite/${endpoint}`, {
+            params: {
+              page: Math.max(page - 1, 0),
+              types: "Manga,Manwha,Manhua,OEL"
+            }
+          });
+          ensureOk(response, `Atsumaru ${kind}`);
+          const data = await response.json();
+          return {
+            items: data.items.map(toItem),
+            isLastPage: data.items.length === 0
+          };
+        }
+      };
+      __publicField(Atsumaru, "info", {
+        id: "en.atsumaru",
+        name: "Atsumaru",
+        version: 1,
+        website: "https://atsu.moe",
+        thumbnail: "atsumaru.png",
+        languages: ["en"],
+        rating: types_1.ContentRating.MATURE,
+        minSupportedAppVersion: "7.0.0"
+      });
+      exports.default = Atsumaru;
+      function ensureOk(response, label) {
+        if (!response.ok)
+          throw new Error(`${label} request failed: HTTP ${response.status}`);
+      }
+      function toItem(manga) {
+        var _a;
+        return {
+          id: manga.id,
+          title: manga.title,
+          coverImage: imageUrl((_a = manga.poster) != null ? _a : manga.image),
+          rating: types_1.ContentRating.MATURE,
+          webUrl: `https://atsu.moe/read/${manga.id}`
+        };
+      }
+      function imageUrl(value) {
+        const path = imagePath(value);
+        if (!path)
+          return "https://atsu.moe/assets/placeholder.png";
+        if (path.startsWith("https://"))
+          return path;
+        if (path.startsWith("http://"))
+          return path.replace(/^http:/, "https:");
+        if (path.startsWith("//"))
+          return `https:${path}`;
+        return `https://atsu.moe/static/${path.replace(/^\/?(static\/)?/, "")}`;
+      }
+      function imagePath(value) {
+        if (typeof value === "string")
+          return value;
+        if (!value || typeof value !== "object")
+          return void 0;
+        const record = value;
+        return [record.lg, record.md, record.sm, record.url, ...Object.values(record)].find((candidate) => typeof candidate === "string");
+      }
+      function chapterNumber(value) {
+        const number = typeof value === "number" ? value : Number.parseFloat(value);
+        return Number.isFinite(number) && number >= 0 ? number : -1;
+      }
+      function chapterDate(value) {
+        if (value == null)
+          return void 0;
+        return new Date(typeof value === "number" ? value * 1e3 : value);
+      }
+      function contentStatus(status) {
+        switch (status == null ? void 0 : status.toLowerCase()) {
+          case "ongoing":
+            return types_1.ContentStatus.ONGOING;
+          case "completed":
+            return types_1.ContentStatus.COMPLETED;
+          case "hiatus":
+            return types_1.ContentStatus.HIATUS;
+          case "canceled":
+          case "cancelled":
+            return types_1.ContentStatus.CANCELLED;
+          default:
+            return types_1.ContentStatus.UNKNOWN;
+        }
+      }
+      function contentType(type) {
+        switch (type == null ? void 0 : type.toLowerCase()) {
+          case "manhua":
+            return types_1.ContentType.MANHUA;
+          case "manwha":
+          case "manhwa":
+            return types_1.ContentType.MANHWA;
+          case "comic":
+            return types_1.ContentType.COMIC;
+          default:
+            return types_1.ContentType.MANGA;
+        }
+      }
+      function slug(value) {
+        return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+      }
+    }
+  });
+
+  // __temp__/wrappers/atsumaru-en.js
+  var require_atsumaru_en2 = __commonJS({
+    "__temp__/wrappers/atsumaru-en.js"(exports) {
+      init_Buffer();
+      init_process();
+      var runtime = require_runtime();
+      var sourceModule = require_atsumaru_en();
+      var cls = runtime.resolveDefaultExport(sourceModule);
+      exports.SourceMetadata = { "id": "en.atsumaru", "name": "Atsumaru", "version": 1, "website": "https://atsu.moe", "thumbnail": "atsumaru.png", "languages": ["en"], "rating": 2, "minSupportedAppVersion": "7.0.0" };
+      exports.SourceConfiguration = null;
+      exports.bootstrap = function bootstrap() {
+        var args = null;
+        return runtime.instantiateSource(cls, args ? { args } : void 0);
+      };
+    }
+  });
+  return require_atsumaru_en2();
+})();
