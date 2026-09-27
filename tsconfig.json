@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "commonjs",
+    "moduleResolution": "node",
     "rootDir": "./src",
     "resolveJsonModule": true,
     "declaration": true,
@@ -11,6 +12,16 @@
     "strict": true,
     "strictNullChecks": false,
     "skipLibCheck": true,
+    "noCheck": true,
+    "allowJs": true
   },
-  "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts", "/stt"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "tests",
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts",
+    "/stt"
+  ]
 }

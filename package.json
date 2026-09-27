@@ -1,14 +1,14 @@
 {
-  "name": "dryad-runners",
+  "name": "dryad-sources",
   "version": "1.0.0",
   "description": "content sources I use",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
+    "test": "node --import tsx --test tests/*.test.ts",
     "prep": "rm -rf ./dist && tsc",
     "dev": "nodemon",
-    "build": "daisuke build",
-    "serve": "daisuke serve",
+    "build": "suwatte build",
+    "serve": "suwatte serve",
     "lint": "eslint",
     "lint:fix": "eslint --fix ./src/runners",
     "prepare": "husky"
@@ -23,6 +23,7 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "@suwatte/toolchain": "^1.0.0",
     "@types/crypto-js": "^4.1.1",
     "@types/he": "^1.1.2",
     "@types/jest": "^29.2.4",
@@ -36,10 +37,10 @@
     "nodemon": "^3.0.1",
     "ts-jest": "^29.0.3",
     "ts-node": "^10.9.1",
-    "typescript": "^4.9.4"
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@suwatte/cli": "^2.0.1",
     "@suwatte/daisuke": "^3.0.6",
     "@suwatte/emulator": "^1.3.1",
     "@suwatte/validate": "^3.0.0",
@@ -52,5 +53,8 @@
   },
   "stt": {
     "listName": "Kusahime's Sources"
+  },
+  "suwatte": {
+    "listName": "Dryad Sources"
   }
 }
